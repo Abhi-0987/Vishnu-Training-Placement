@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cupertino_icons: ^1.0.8
+  intl: ^0.20.2
+  fl_chart: ^0.70.2
+  table_calendar: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +21,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/
+
+fonts:
+    - family: Alata
+      fonts:
+        - asset: fonts/Alata-Regular.ttf
