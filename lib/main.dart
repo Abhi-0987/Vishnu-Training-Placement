@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-
-import 'mark_attendance.dart';
+import 'package:vishnu_training_and_placements/screens/mark_attendance.dart';
+import 'screens/mark_attendence_admin.dart';
 
 void main() {
-  runApp(const MaterialApp(home: MarkAttendancePage(),));
+  runApp(const MaterialApp(home: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
@@ -11,12 +11,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark(),
+      home: const MarkAttendancePage(),
     );
   }
 }
