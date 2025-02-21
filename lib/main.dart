@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'mark_attendance.dart';
+
 void main() {
-  runApp(const MainApp());
+  runApp(const MaterialApp(home: MarkAttendancePage(),));
 }
 
 class MainApp extends StatelessWidget {

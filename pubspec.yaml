@@ -13,7 +13,17 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  pie_chart: ^5.4.0
   flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/
+
+
+  fonts:
+    - family: Alata
+      fonts:
+        - asset: fonts/Alata-Regular.ttf
