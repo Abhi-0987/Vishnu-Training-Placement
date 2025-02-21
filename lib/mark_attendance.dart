@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
 class MarkAttendancePage extends StatefulWidget {
   const MarkAttendancePage({super.key});
@@ -51,17 +52,37 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double height = screenSize.height;
+    final double width = screenSize.width;
+
     return Scaffold(
-      backgroundColor: Colors.black, // Dark theme background
+      extendBodyBehindAppBar: true,
+      appBar: const CustomAppBar(),
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Background with elliptical containers
+          // Gradient Background
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF1A1A1A),
+                  Color(0xFF0A0A0A),
+                ],
+              ),
+            ),
+          ),
+
+          // Top-right decorative circle
           Positioned(
-            top: -100,
-            right: -130,
+            top: -height * 0.12,
+            right: -width * 0.32,
             child: Container(
-              width: 250,
-              height: 250,
+              width: width * 0.6,
+              height: height * 0.3,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Color.fromRGBO(102, 16, 88, 0.1),
@@ -75,12 +96,14 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
               ),
             ),
           ),
+
+          // Bottom-left decorative circle
           Positioned(
-            bottom: -100,
-            left: -130,
+            bottom: -height * 0.12,
+            left: -width * 0.32,
             child: Container(
-              width: 250,
-              height: 250,
+              width: width * 0.6,
+              height: height * 0.3,
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Color.fromRGBO(43, 139, 123, 0.01),
@@ -95,73 +118,35 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
             ),
           ),
 
-          // Glass Layer - Positioned above ellipses but below text, buttons, etc.
+          // Glass Layer
           Positioned.fill(
             child: BackdropFilter(
-              filter:
-              ImageFilter.blur(sigmaX: 20, sigmaY: 20), // Glass blur effect
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
-                color: const Color.fromRGBO(
-                    255, 255, 255, 0.05), // Slight tint for glass
+                color: const Color.fromRGBO(255, 255, 255, 0.05),
               ),
             ),
           ),
 
+          // Main Content
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(20.0),
+              padding: EdgeInsets.all(width * 0.05),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with logo and title
-                  Row(
-                    children: [
-                      Image.asset('assets/logo.png', height: 50),
-                      const SizedBox(width: 60),
-                      const Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Vishnu',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'Alata'),
-                          ),
-                          SizedBox(
-                            width: 7,
-                          ),
-                          Column(
-                            children: [
-                              Text(
-                                'Training and',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontFamily: 'Alata'),
-                              ),
-                              Text(
-                                'Placements',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 40),
+                  SizedBox(height: height * 0.02),
 
                   // Date, Time and Location Card
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    padding: EdgeInsets.all(width * 0.05),
                     decoration: BoxDecoration(
                       color: const Color.fromRGBO(255, 255, 255, 0.1),
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(width * 0.04),
+                      border: Border.all(
+                        color: const Color.fromRGBO(255, 255, 255, 0.1),
+                        width: 1,
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +174,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                             ),
                           ],
                         ),
-                        const SizedBox(height: 15),
+                        const SizedBox(height: 10),
 
                         // Time Row
                         const Row(
