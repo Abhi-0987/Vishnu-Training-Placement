@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
@@ -73,16 +74,8 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                   SizedBox(height: height * 0.02),
 
                   // Date, Time and Location Card
-                  Container(
-                    padding: EdgeInsets.all(width * 0.05),
-                    decoration: BoxDecoration(
-                      color: const Color.fromRGBO(255, 255, 255, 0.1),
-                      borderRadius: BorderRadius.circular(width * 0.04),
-                      border: Border.all(
-                        color: const Color.fromRGBO(255, 255, 255, 0.1),
-                        width: 1,
-                      ),
-                    ),
+                  OpaqueContainer(
+                    width: width,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
