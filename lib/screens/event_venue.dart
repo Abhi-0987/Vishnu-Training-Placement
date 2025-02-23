@@ -1,24 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:vishnu_training_and_placements/widgets/background.dart';
-import 'package:vishnu_training_and_placements/widgets/card.dart';
+import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
+import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
+import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 
-void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: EventVenue(),
-  ));
-}
-
-class EventVenue extends StatefulWidget {
-  const EventVenue({super.key});
+class EventVenueScreen extends StatefulWidget {
+  const EventVenueScreen({super.key});
 
   @override
-  _EventVenueState createState() => _EventVenueState();
+  _EventVenueScreenState createState() => _EventVenueScreenState();
 }
 
-class _EventVenueState extends State<EventVenue> {
+class _EventVenueScreenState extends State<EventVenueScreen> {
   bool itSeminar = false;
   bool elnSeminar = false;
   bool auditorium = false;
@@ -30,101 +24,65 @@ class _EventVenueState extends State<EventVenue> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final Size screenSize = MediaQuery.of(context).size;
+    final double height = screenSize.height;
+    final double width = screenSize.width;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: const CustomAppBar(),
       backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        // surfaceTintColor: Colors.transparent,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Image.asset('assets/logo.png', height: screenHeight * 0.08), // Responsive Image
-                SizedBox(width: screenWidth * 0.01),
-                Text("Vishnu",
-                    style: TextStyle(
-                        fontSize: screenHeight * 0.04,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Alata',
-                        color: Colors.white)),
-                SizedBox(width: screenWidth * 0.02),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Training and",
-                        style: TextStyle(fontSize: screenHeight * 0.02,fontFamily: 'Alata', color: Colors.white)),
-                    Text("Placements",
-                        style: TextStyle(fontSize: screenHeight * 0.02,fontFamily: 'Alata', color: Colors.white)),
-                  ],
-                ),
-              ],
-            ),
-            CircleAvatar(
-              backgroundColor: Colors.blue,
-              radius: screenHeight * 0.02, // Responsive avatar
-              child: Text("A",
-                  style: TextStyle(
-                      fontSize: screenHeight * 0.02, fontWeight: FontWeight.bold,fontFamily: 'Alata', color: Colors.white)),
-            ),
-          ],
-        ),
-      ),
       body: Stack(
         children: [
-          isShowbehindappbar(true), 
-          Background(),
+          ScreensBackground(height: height, width: width),
+          SafeArea(child: 
           Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04), // Responsive padding
+            padding: EdgeInsets.all(width * 0.04), // Responsive padding
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text("Manage Locations",
                       style: TextStyle(
-                          fontSize: screenHeight * 0.02,
+                          fontSize: height * 0.02,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Alata',
                           color: Colors.white)),
-                  SizedBox(height: screenHeight * 0.02),
+                  SizedBox(height: height * 0.02),
                   _buildLocationDropdown((val) {
                     setState(() {
                       selectedLocation = val ?? '';
                     });
                   }),
-                  SizedBox(height: screenHeight * 0.03),
+                  SizedBox(height: height * 0.03),
                   Text("Schedule",
                       style: TextStyle(
-                          fontSize: screenHeight * 0.025, fontWeight: FontWeight.bold,fontFamily: 'Alata', color: Colors.white)),
-                  SizedBox(height: screenHeight * 0.02),
+                          fontSize: height * 0.025, fontWeight: FontWeight.bold,fontFamily: 'Alata', color: Colors.white)),
+                  SizedBox(height: height * 0.02),
                   _buildCalendar(),
-                  SizedBox(height: screenHeight * 0.03),
+                  SizedBox(height: height * 0.03),
                   Text("Set Time",
                       style: TextStyle(
-                          fontSize: screenHeight * 0.025, fontWeight: FontWeight.bold,fontFamily: 'Alata', color: Colors.white)),
-                  SizedBox(height: screenHeight * 0.02),
+                          fontSize: height * 0.025, fontWeight: FontWeight.bold,fontFamily: 'Alata', color: Colors.white)),
+                  SizedBox(height: height * 0.02),
                   _buildTimeSelection(),
-                  SizedBox(height: screenHeight * 0.03),
+                  SizedBox(height: height * 0.03),
                   Center(
                     child: Column(
                       children: [
-                        _buildInfoCard(),
-                        SizedBox(height: screenHeight * 0.02), // Add space
+                        _buildInfoCard(width),
+                        SizedBox(height: height * 0.02), // Add space
                         ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.purple,
                             elevation: 0,
                             padding: EdgeInsets.symmetric(
-                                vertical: screenHeight * 0.02, horizontal: screenWidth * 0.05),
+                                vertical: height * 0.02, horizontal: width * 0.05),
                           ),
                           child: Text("Post Attendance",
                               style: TextStyle(
-                                  fontSize: screenHeight * 0.02, fontFamily: 'Alata',color: Colors.white)),
+                                  fontSize: height * 0.02, fontFamily: 'Alata',color: Colors.white)),
                         ),
                       ],
                     ),
@@ -132,6 +90,7 @@ class _EventVenueState extends State<EventVenue> {
                 ],
               ),
             ),
+          ),
           ),
         ],
       ),
@@ -215,8 +174,9 @@ class _EventVenueState extends State<EventVenue> {
     );
   }
 
-  Widget _buildInfoCard() {
-    return BlurredCard(
+  Widget _buildInfoCard(width) {
+    return OpaqueContainer(
+      width: width,
       child: Padding(
         padding: EdgeInsets.all(10),
         child: Column(
