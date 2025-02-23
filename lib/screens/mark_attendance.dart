@@ -1,6 +1,8 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
+import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
 class MarkAttendancePage extends StatefulWidget {
@@ -16,10 +18,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
   bool isMarked = false;
 
   // Sample attendance data for pie chart
-  Map<String, double> attendanceData = {
-    "Present": 85,
-    "Absent": 15,
-  };
+  Map<String, double> attendanceData = {"Present": 85, "Absent": 15};
 
   @override
   void initState() {
@@ -62,71 +61,8 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Gradient Background
-          Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF1A1A1A),
-                  Color(0xFF0A0A0A),
-                ],
-              ),
-            ),
-          ),
-
-          // Top-right decorative circle
-          Positioned(
-            top: -height * 0.12,
-            right: -width * 0.32,
-            child: Container(
-              width: width * 0.6,
-              height: height * 0.3,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color.fromRGBO(102, 16, 88, 0.1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromRGBO(102, 16, 88, 0.4),
-                    blurRadius: 130,
-                    spreadRadius: 70,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Bottom-left decorative circle
-          Positioned(
-            bottom: -height * 0.12,
-            left: -width * 0.32,
-            child: Container(
-              width: width * 0.6,
-              height: height * 0.3,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Color.fromRGBO(43, 139, 123, 0.01),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromRGBO(43, 139, 123, 0.3),
-                    blurRadius: 150,
-                    spreadRadius: 100,
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Glass Layer
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(
-                color: const Color.fromRGBO(255, 255, 255, 0.05),
-              ),
-            ),
-          ),
+          //Screen Background
+          ScreensBackground(height: height, width: width),
 
           // Main Content
           SafeArea(
@@ -138,16 +74,8 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                   SizedBox(height: height * 0.02),
 
                   // Date, Time and Location Card
-                  Container(
-                    padding: EdgeInsets.all(width * 0.05),
-                    decoration: BoxDecoration(
-                      color: const Color.fromRGBO(255, 255, 255, 0.1),
-                      borderRadius: BorderRadius.circular(width * 0.04),
-                      border: Border.all(
-                        color: const Color.fromRGBO(255, 255, 255, 0.1),
-                        width: 1,
-                      ),
-                    ),
+                  OpaqueContainer(
+                    width: width,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -309,10 +237,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                       children: [
                         const Text(
                           'Total Attendance :',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 16),
                         ),
                         Text(
                           '${attendanceData["Present"]?.toInt()} %',
