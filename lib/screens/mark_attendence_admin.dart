@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart' as xl;
 import 'dart:convert';
 import '../widgets/custom_appbar.dart';
+import '../widgets/screens_background.dart';
 
 class MarkAttendenceAdmin extends StatefulWidget {
   const MarkAttendenceAdmin({super.key});
@@ -25,51 +26,58 @@ class _MarkAttendenceAdminState extends State<MarkAttendenceAdmin> {
       );
 
       if (result != null) {
+        // Clear existing numbers first
+        setState(() {
+          phoneNumbers.clear(); // Clear the list before loading new numbers
+        });
+
         final bytes = result.files.first.bytes!;
         final excel = xl.Excel.decodeBytes(bytes);
 
-        setState(() {
-          phoneNumbers = [];
-          for (var table in excel.tables.keys) {
-            var sheet = excel.tables[table]!;
+        List<String> newPhoneNumbers = []; // Temporary list for new numbers
 
-            // Find the phone_number column index
-            int? phoneColumnIndex;
-            for (var i = 0; i < sheet.rows[0].length; i++) {
-              String? headerValue = sheet.rows[0][i]?.value?.toString();
-              if (headerValue != null) {
-                headerValue = headerValue.toLowerCase().trim();
-                if (headerValue.contains('phone') &&
-                        headerValue.contains('number') ||
-                    headerValue.contains('phonenumber') ||
-                    headerValue == 'phone' ||
-                    headerValue == 'mobile' ||
-                    headerValue == 'contact' ||
-                    headerValue == 'mobile number' ||
-                    headerValue == 'contact number') {
-                  phoneColumnIndex = i;
-                  break;
-                }
-              }
-            }
+        for (var table in excel.tables.keys) {
+          var sheet = excel.tables[table]!;
 
-            // If phone_number column found, extract numbers
-            if (phoneColumnIndex != null) {
-              // Start from index 1 to skip header row
-              for (var i = 1; i < sheet.rows.length; i++) {
-                var row = sheet.rows[i];
-                if (row.isNotEmpty && row[phoneColumnIndex]?.value != null) {
-                  String phone = row[phoneColumnIndex]!.value.toString();
-                  // Remove any spaces and ensure proper format
-                  phone = phone.replaceAll(' ', '');
-                  if (!phone.startsWith('+91')) {
-                    phone = '+91$phone';
-                  }
-                  phoneNumbers.add(phone);
-                }
+          // Find the phone_number column index
+          int? phoneColumnIndex;
+          for (var i = 0; i < sheet.rows[0].length; i++) {
+            String? headerValue = sheet.rows[0][i]?.value?.toString();
+            if (headerValue != null) {
+              headerValue = headerValue.toLowerCase().trim();
+              if (headerValue.contains('phone') &&
+                      headerValue.contains('number') ||
+                  headerValue.contains('phonenumber') ||
+                  headerValue == 'phone' ||
+                  headerValue == 'mobile' ||
+                  headerValue == 'contact' ||
+                  headerValue == 'mobile number' ||
+                  headerValue == 'contact number') {
+                phoneColumnIndex = i;
+                break;
               }
             }
           }
+
+          // If phone_number column found, extract numbers
+          if (phoneColumnIndex != null) {
+            for (var i = 1; i < sheet.rows.length; i++) {
+              var row = sheet.rows[i];
+              if (row.isNotEmpty && row[phoneColumnIndex]?.value != null) {
+                String phone = row[phoneColumnIndex]!.value.toString();
+                phone = phone.replaceAll(' ', '');
+                if (!phone.startsWith('+91')) {
+                  phone = '+91$phone';
+                }
+                newPhoneNumbers.add(phone); // Add to temporary list
+              }
+            }
+          }
+        }
+
+        // Update state with new numbers
+        setState(() {
+          phoneNumbers = newPhoneNumbers;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -132,61 +140,17 @@ class _MarkAttendenceAdminState extends State<MarkAttendenceAdmin> {
 
     return Scaffold(
       backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: const CustomAppBar(),
       body: Stack(
         children: [
-          Positioned(
-            top: -100,
-            right: -130,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF661058).withOpacity(0.1),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF661058).withOpacity(0.4),
-                    blurRadius: 130,
-                    spreadRadius: 70,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: -100,
-            left: -130,
-            child: Container(
-              width: 250,
-              height: 250,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF2B8B7B).withOpacity(0.01),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF2B8B7B).withOpacity(0.3),
-                    blurRadius: 150,
-                    spreadRadius: 100,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-              child: Container(color: Colors.white.withOpacity(0.05)),
-            ),
-          ),
+          ScreensBackground(height: screenSize.height, width: screenSize.width),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const CustomAppBar(),
-                  const SizedBox(height: 40),
-
                   // Main content
                   Expanded(
                     child: SingleChildScrollView(
@@ -233,15 +197,26 @@ class _MarkAttendenceAdminState extends State<MarkAttendenceAdmin> {
                                       ),
                                     ),
                                     onPressed: pickExcelFile,
-                                    icon: const Icon(Icons.upload_file),
-                                    label: const Text(
-                                      "Upload Excel/Sheets File",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontFamily: 'Alata',
-                                      ),
+                                    label: const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Upload Excel/Sheets File",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontFamily: 'Alata',
+                                          ),
+                                        ),
+                                        SizedBox(width: 8),
+                                        Icon(
+                                          Icons.upload_file,
+                                          color: Colors.white,
+                                        ),
+                                      ],
                                     ),
+                                    icon:
+                                        const SizedBox(), // Empty icon since we're using it in Row
                                   ),
                                 ],
                               ),
@@ -338,18 +313,25 @@ class _MarkAttendenceAdminState extends State<MarkAttendenceAdmin> {
                                 ),
                               ),
                               onPressed: sendMessage,
-                              icon: Image.asset(
-                                'assets/whatsapp.png',
-                                height: 30,
+                              label: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Send via WhatsApp",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontFamily: 'Alata',
+                                    ),
+                                  ),
+                                  SizedBox(width: 8),
+                                  Image(
+                                    image: AssetImage('assets/whatsapp.png'),
+                                    height: 30,
+                                  ),
+                                ],
                               ),
-                              label: const Text(
-                                "Send via WhatsApp",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontFamily: 'Alata',
-                                ),
-                              ),
+                              icon: const SizedBox(),
                             ),
                           ),
                         ],

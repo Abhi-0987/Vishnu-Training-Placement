@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/screens/mark_attendance.dart';
 import 'screens/mark_attendence_admin.dart';
+//import 'screens/mark_attendance.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
@@ -11,10 +11,9 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: const MarkAttendancePage(),
+      home: MarkAttendenceAdmin(),
     );
   }
 }
