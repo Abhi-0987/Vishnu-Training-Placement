@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-
-import 'screens/mark_attendance.dart';
+import 'screens/AdminAttendanceScreen.dart';
 
 void main() {
-  runApp(MainApp());
+  runApp(const MaterialApp(home: MainApp()));
 }
+
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: MarkAttendancePage());
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AdminMarkAttendence(),
+    );
   }
 }
