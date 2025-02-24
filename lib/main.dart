@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/mark_attendence_admin.dart';
+import 'screens/AdminAttendanceScreen.dart';
 //import 'screens/mark_attendance.dart';
 
 void main() {
@@ -13,7 +13,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MarkAttendenceAdmin(),
+      home: AdminMarkAttendence(),
     );
   }
 }

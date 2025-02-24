@@ -7,14 +7,14 @@ import 'dart:convert';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
 
-class MarkAttendenceAdmin extends StatefulWidget {
-  const MarkAttendenceAdmin({super.key});
+class AdminMarkAttendence extends StatefulWidget {
+  const AdminMarkAttendence({super.key});
 
   @override
-  State<MarkAttendenceAdmin> createState() => _MarkAttendenceAdminState();
+  State<AdminMarkAttendence> createState() => _AdminMarkAttendenceState();
 }
 
-class _MarkAttendenceAdminState extends State<MarkAttendenceAdmin> {
+class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
   final TextEditingController _messageController = TextEditingController();
   List<String> phoneNumbers = [];
 
