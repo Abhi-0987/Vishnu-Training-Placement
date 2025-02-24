@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'screens/AdminAttendanceScreen.dart';
-//import 'screens/mark_attendance.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
