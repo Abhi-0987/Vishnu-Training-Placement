@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/screens/event_venue.dart';
-import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
 import 'screens/mark_attendance.dart';
 
 void main() {
-  runApp(MainApp());
+  runApp(const MaterialApp(home: MainApp()));
 }
 
 class MainApp extends StatelessWidget {
@@ -13,6 +11,8 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: WelcomeScreen());
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: MarkAttendancePage());
   }
 }
