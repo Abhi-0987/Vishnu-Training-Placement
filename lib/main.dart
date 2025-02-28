@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 
-import 'screens/mark_attendance.dart';
+
+
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
@@ -11,8 +13,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MarkAttendancePage());
+      initialRoute: AppRoutes.splash,
+      routes: AppRoutes.routes,
+    );
+
   }
+
+  
 }
