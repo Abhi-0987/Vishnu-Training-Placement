@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
-import 'package:vishnu_training_and_placements/widgets/custom_appbar_profile.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -23,7 +22,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBarProfile(), // Dark theme background
+      appBar: CustomAppBar(), // Dark theme background
       body: Stack(
         children: [
           // Background with elliptical containers

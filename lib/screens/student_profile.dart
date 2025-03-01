@@ -21,7 +21,7 @@ class StudentProfileScreen extends StatelessWidget {
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: const CustomAppBar(),
+        appBar: const CustomAppBar(isProfileScreen: true),
         backgroundColor: Colors.black,
         body: Stack(
           children: [
