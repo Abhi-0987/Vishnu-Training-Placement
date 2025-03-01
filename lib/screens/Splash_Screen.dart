@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 import 'dart:async';
 
-import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -24,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       // Navigate to HomeScreen after animation
       Future.delayed(const Duration(seconds: 2), () {
-       Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
       });
     });
   }
@@ -40,7 +38,7 @@ class _SplashScreenState extends State<SplashScreen> {
             colors: [
               Color.fromARGB(255, 1, 22, 23),
               Color.fromARGB(255, 26, 26, 26),
-              Color.fromARGB(255, 2, 43, 36)
+              Color.fromARGB(255, 2, 43, 36),
             ],
           ),
         ),
@@ -57,10 +55,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     opacity: 1,
                     child: Transform.rotate(
                       angle: value * 6.28,
-                      child: Transform.scale(
-                        scale: value * 2,
-                        child: child,
-                      ),
+                      child: Transform.scale(scale: value * 2, child: child),
                     ),
                   );
                 },
@@ -74,7 +69,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: const Text(
                   'Vishnu Training and Placements',
                   style: TextStyle(
-                      color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -84,4 +82,3 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
-

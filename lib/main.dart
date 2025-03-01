@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
-
-
-
+//import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/screens/AdminAttendanceScreen.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
@@ -15,11 +13,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.splash,
-      routes: AppRoutes.routes,
+      //initialRoute: AppRoutes.splash,
+      //routes: AppRoutes.routes,
+      home: AdminMarkAttendence(),
     );
-
   }
-
-  
 }
