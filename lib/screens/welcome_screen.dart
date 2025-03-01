@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -192,7 +193,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        // Admin Button Action
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.adminLogin,
+                                        );
                                       },
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
@@ -242,7 +246,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         ),
                                       ),
                                       onPressed: () {
-                                        // Student Button Action
+                                        Navigator.pushNamed(
+                                          context,
+                                          AppRoutes.studentLogin,
+                                        );
                                       },
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,

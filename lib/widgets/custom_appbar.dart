@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const CustomAppBar({super.key});
+class CustomAppBar extends StatelessWidget
+    implements PreferredSizeWidget {
+  const CustomAppBar({
+    super.key,
+    this.showProfileIcon = true,
+    this.isProfileScreen = false,
+  });
+
+  final bool showProfileIcon;
+  final bool isProfileScreen;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 40);
@@ -18,44 +27,68 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       toolbarHeight: height * 0.08,
       title: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset(
-            'assets/logo.png',
-            height: height * 0.06,
-          ),
-          SizedBox(width: width * 0.15),
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Vishnu',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: width * 0.06,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Alata'),
-              ),
-              SizedBox(width: width * 0.02),
-              Column(
+              Image.asset('assets/logo.png', height: height * 0.06),
+              SizedBox(width: width * 0.15),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Training and',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: width * 0.035,
-                        fontFamily: 'Alata'),
-                  ),
-                  Text(
-                    'Placements',
+                    'Vishnu',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: width * 0.035,
+                      fontSize: width * 0.06,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Alata',
                     ),
+                  ),
+                  SizedBox(width: width * 0.02),
+                  Column(
+                    children: [
+                      Text(
+                        'Training and',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.035,
+                          fontFamily: 'Alata',
+                        ),
+                      ),
+                      Text(
+                        'Placements',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: width * 0.035,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ],
           ),
+          if (showProfileIcon)
+            IconButton(
+              icon: CircleAvatar(
+                backgroundColor: Colors.white24,
+                child: Icon(
+                  isProfileScreen ? Icons.settings : Icons.person,
+                  color: Colors.white,
+                ),
+              ),
+              onPressed: () {
+                if (isProfileScreen) {
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRoutes.studentHomeScreen,
+                  );
+                } else {
+                  Navigator.pushNamed(context, AppRoutes.studentProfileScreen);
+                }
+              },
+            ),
         ],
       ),
     );
