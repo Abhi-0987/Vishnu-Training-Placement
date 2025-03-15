@@ -1,11 +1,12 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart' as xl;
 import 'dart:convert';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
+import 'package:get/get.dart';
+import '../controllers/admin_attendance_controller.dart';
 
 class AdminMarkAttendence extends StatefulWidget {
   const AdminMarkAttendence({super.key});
@@ -15,8 +16,16 @@ class AdminMarkAttendence extends StatefulWidget {
 }
 
 class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
+  final AdminAttendanceController controller = Get.put(
+    AdminAttendanceController(),
+  );
   final TextEditingController _messageController = TextEditingController();
-  List<String> phoneNumbers = [];
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    super.dispose();
+  }
 
   Future<void> pickExcelFile() async {
     try {
@@ -28,7 +37,8 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
       if (result != null) {
         // Clear existing numbers first
         setState(() {
-          phoneNumbers.clear(); // Clear the list before loading new numbers
+          controller
+              .clearPhoneNumbers(); // Clear the list before loading new numbers
         });
 
         final bytes = result.files.first.bytes!;
@@ -77,12 +87,12 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
 
         // Update state with new numbers
         setState(() {
-          phoneNumbers = newPhoneNumbers;
+          controller.addPhoneNumbers(newPhoneNumbers);
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text("Loaded ${phoneNumbers.length} phone numbers"),
+            content: Text("Loaded ${newPhoneNumbers.length} phone numbers"),
           ),
         );
       }
@@ -90,47 +100,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error processing file: ${e.toString()}")),
       );
-    }
-  }
-
-  Future<void> sendMessage() async {
-    String message = _messageController.text.trim();
-    if (message.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please enter a message")));
-      return;
-    }
-
-    if (phoneNumbers.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please upload a file with phone numbers first"),
-        ),
-      );
-      return;
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse('YOUR_BACKEND_API_URL/send-message'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"message": message, "phoneNumbers": phoneNumbers}),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Messages sent successfully!")),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to send messages")),
-        );
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
     }
   }
 
@@ -226,62 +195,67 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                           const SizedBox(height: 20),
 
                           // Phone numbers container
-                          Container(
-                            height:
-                                screenSize.height * 0.3, // 30% of screen height
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade800.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
-                                width: 1,
+                          Obx(
+                            () => Container(
+                              height:
+                                  screenSize.height *
+                                  0.3, // 30% of screen height
+                              padding: const EdgeInsets.all(15),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade800.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(15),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.1),
+                                  width: 1,
+                                ),
                               ),
-                            ),
-                            child:
-                                phoneNumbers.isEmpty
-                                    ? const Center(
-                                      child: Text(
-                                        "No phone numbers loaded",
-                                        style: TextStyle(
-                                          color: Colors.white60,
-                                          fontSize: 16,
-                                          fontFamily: 'Alata',
+                              child:
+                                  controller.phoneNumbers.isEmpty
+                                      ? const Center(
+                                        child: Text(
+                                          "No phone numbers loaded",
+                                          style: TextStyle(
+                                            color: Colors.white60,
+                                            fontSize: 16,
+                                            fontFamily: 'Alata',
+                                          ),
                                         ),
-                                      ),
-                                    )
-                                    : ListView.separated(
-                                      itemCount: phoneNumbers.length,
-                                      separatorBuilder:
-                                          (context, index) => const Divider(
-                                            color: Colors.white24,
-                                            height: 1,
-                                          ),
-                                      itemBuilder: (context, index) {
-                                        return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            vertical: 8,
-                                          ),
-                                          child: Row(
-                                            children: [
-                                              const Icon(
-                                                Icons.phone,
-                                                color: Colors.white60,
-                                                size: 18,
-                                              ),
-                                              const SizedBox(width: 10),
-                                              Text(
-                                                phoneNumbers[index],
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 16,
+                                      )
+                                      : ListView.separated(
+                                        itemCount:
+                                            controller.phoneNumbers.length,
+                                        separatorBuilder:
+                                            (context, index) => const Divider(
+                                              color: Colors.white24,
+                                              height: 1,
+                                            ),
+                                        itemBuilder: (context, index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 8,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                const Icon(
+                                                  Icons.phone,
+                                                  color: Colors.white60,
+                                                  size: 18,
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                                const SizedBox(width: 10),
+                                                Text(
+                                                  controller
+                                                      .phoneNumbers[index],
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                            ),
                           ),
 
                           const SizedBox(height: 20),
@@ -289,6 +263,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                           // Message input
                           TextField(
                             controller: _messageController,
+                            onChanged: controller.setMessage,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: Colors.grey,
@@ -304,34 +279,41 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                           // Send button
                           SizedBox(
                             width: screenSize.width,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
-                                  horizontal: 20,
+                            child: Obx(
+                              () => ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                    horizontal: 20,
+                                  ),
                                 ),
-                              ),
-                              onPressed: sendMessage,
-                              label: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Send via WhatsApp",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontFamily: 'Alata',
+                                onPressed:
+                                    controller.isLoading.value
+                                        ? null
+                                        : controller.sendWhatsAppMessages,
+                                label: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      controller.isLoading.value
+                                          ? "Sending..."
+                                          : "Send via WhatsApp",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontFamily: 'Alata',
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 8),
-                                  Image(
-                                    image: AssetImage('assets/whatsapp.png'),
-                                    height: 30,
-                                  ),
-                                ],
+                                    const SizedBox(width: 8),
+                                    const Image(
+                                      image: AssetImage('assets/whatsapp.png'),
+                                      height: 30,
+                                    ),
+                                  ],
+                                ),
+                                icon: const SizedBox(),
                               ),
-                              icon: const SizedBox(),
                             ),
                           ),
                         ],
