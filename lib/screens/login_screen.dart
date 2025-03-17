@@ -1,6 +1,8 @@
 import 'dart:ui';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 
 class StudentLoginScreen extends StatefulWidget {
@@ -12,6 +14,85 @@ class StudentLoginScreen extends StatefulWidget {
 
 class _StudentLoginScreenState extends State<StudentLoginScreen> {
   bool _isPasswordVisible = false;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _login() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Validate input
+      if (_emailController.text.trim().isEmpty || _passwordController.text.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please enter both email and password'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:8080/api/users/login'), // Changed from localhost to 10.0.2.2 for Android emulator
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: json.encode({
+          'email': _emailController.text.trim(),
+          'password': _passwordController.text,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful
+        final token = response.body;
+        // TODO: Store token securely using flutter_secure_storage
+        Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
+      } else {
+        // Login failed
+        String errorMessage;
+        try {
+          final responseData = json.decode(response.body);
+          errorMessage = responseData is String ? responseData : 'Invalid email or password';
+        } catch (e) {
+          errorMessage = 'Invalid email or password';
+        }
+        
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Connection error. Please check your internet connection and try again.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,11 +102,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
 
     return WillPopScope(
       onWillPop: () async {
-
-        Navigator.pop(context);  // This handles the back button/gesture
-
-        return false;  // Prevents default back behavior
-
+        Navigator.pop(context);
+        return false;
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
@@ -197,15 +275,14 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
                                     children: [
-                                      // Email input with fixed domain inside the text box
                                       TextField(
+                                        controller: _emailController,
                                         decoration: InputDecoration(
                                           filled: true,
                                           fillColor: Colors.grey[400]?.withAlpha(
                                             170,
                                           ),
                                           hintText: 'Enter your email',
-                                          suffix: Text('@example.com'),
                                           hintStyle: TextStyle(
                                             color: Colors.black,
                                           ),
@@ -229,8 +306,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                         ],
                                       ),
       
-                                      // Password input
                                       TextField(
+                                        controller: _passwordController,
                                         obscureText: !_isPasswordVisible,
                                         decoration: InputDecoration(
                                           suffixIcon: IconButton(
@@ -240,13 +317,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                                   : Icons.visibility_off,
                                               color: Colors.black,
                                             ),
-                                            onPressed: ()
-                                             {{
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRoutes. studentHomeScreen,
-                                        );
-                                      }
+                                            onPressed: () {
                                               setState(() {
                                                 _isPasswordVisible =
                                                     !_isPasswordVisible; // Toggle password visibility
@@ -275,54 +346,29 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                           ),
                                         ),
                                       ),
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(
-                                            100,
+                                      ElevatedButton(
+                                        onPressed: _isLoading ? null : _login,
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.blue,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: width * 0.2,
+                                            vertical: height * 0.02,
                                           ),
-                                          gradient: const LinearGradient(
-                                            begin: Alignment.topCenter,
-                                            end: Alignment.bottomCenter,
-                                            colors: [
-                                              Colors.orangeAccent,
-                                              Colors.pinkAccent,
-                                            ],
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                           ),
                                         ),
-                                        padding: EdgeInsets.all(width * 0.006),
-                                        child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.black
-                                                .withAlpha(220),
-                                            elevation: 0,
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                100,
+                                        child: _isLoading
+                                            ? CircularProgressIndicator(color: Colors.white)
+                                            : Text(
+                                                'Login',
+                                                style: TextStyle(
+                                                  fontSize: width * 0.045,
+                                                  color: Colors.white,
+                                                ),
                                               ),
-                                            ),
-                                            padding: EdgeInsets.symmetric(
-                                              horizontal: width * 0.1,
-                                              vertical: height * 0.013,
-                                            ),
-                                          ),
-                                          onPressed: () {
-                                            {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRoutes. studentHomeScreen,
-                                        );
-                                      }
-                                            // Rogister Button Action
-                                          },
-                                          child: Text(
-                                            'Register',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: width * 0.04,
-                                              fontFamily: 'Alata',
-                                            ),
-                                          ),
-                                        ),
                                       ),
                                     ],
                                   ),
