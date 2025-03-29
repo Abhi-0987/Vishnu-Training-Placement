@@ -21,8 +21,8 @@ class AppRoutes {
   static final routes = {
     splash: (context) => const SplashScreen(),
     welcome: (context) => const WelcomeScreen(),
-    adminLogin: (context) => const StudentLoginScreen(),
-    studentLogin: (context) => const StudentLoginScreen(),
+    adminLogin: (context) => const StudentLoginScreen(isAdmin: true),
+    studentLogin: (context) => const StudentLoginScreen(isAdmin:false),
     markAttendanceAdmin: (context) => const AdminMarkAttendence (),
     markAttendanceStudent: (context) => const MarkAttendancePage(),
     studentHomeScreen: (context) => StudentHomeScreen(),
