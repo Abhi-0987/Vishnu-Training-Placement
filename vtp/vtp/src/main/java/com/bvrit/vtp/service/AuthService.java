@@ -2,6 +2,7 @@ package com.bvrit.vtp.service;
 
 import com.bvrit.vtp.dao.StudentRepo;
 import com.bvrit.vtp.dao.AdminRepo;
+import com.bvrit.vtp.dto.TokenResponse;
 import com.bvrit.vtp.model.Admin;
 import com.bvrit.vtp.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,34 +12,40 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
-    @Autowired
-    private AdminRepo adminRepository;
+    @Autowired private StudentRepo studentRepo;
+    @Autowired private AdminRepo adminRepo;
+    @Autowired private JwtService jwtService;
 
-    @Autowired // ✅ Fix: Add missing Autowired for StudentRepo
-    private StudentRepo studentRepository;
-
-    // ✅ Fix: Change return type to String
-    public String authenticate(String email, String password) {
-        Optional<Admin> admin = adminRepository.findByEmail(email);
-        if (admin.isPresent() && admin.get().getPassword().equals(password)) {
-            return "Admin"; // ✅ Admin found, return role
+    public TokenResponse adminlogin(String email, String password) {
+        Optional<Admin> adminOpt = adminRepo.findByEmail(email);
+        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
+            String access = jwtService.generateToken(email, "Admin", false);
+            String refresh = jwtService.generateToken(email, "Admin", true);
+            return new TokenResponse(access, refresh, "Admin");
         }
 
-        Optional<Student> student = studentRepository.findByEmail(email);
-        if (student.isPresent() && student.get().getPassword().equals(password)) {
-            return "Student"; // ✅ Student found, return role
-        }
-
-        return "Invalid"; // ❌ No valid user found
+        throw new RuntimeException("Invalid credentials");
     }
 
-    public void updatePassword(String email, String newPassword) {
-        Optional<Student> student = studentRepository.findByEmail(email);
-        if (student.isPresent()) {
-            Student updatedStudent = student.get();
-            updatedStudent.setPassword(newPassword); // ✅ Hashing
-            studentRepository.save(updatedStudent);
-            return;
+    public TokenResponse studentlogin(String email, String password) {
+        Optional<Student> studentOpt = studentRepo.findByEmail(email);
+        if (studentOpt.isPresent() && studentOpt.get().getPassword().equals(password)) {
+            String access = jwtService.generateToken(email, "Student", false);
+            String refresh = jwtService.generateToken(email, "Student", true);
+            return new TokenResponse(access, refresh, "Student");
         }
+
+        throw new RuntimeException("Invalid credentials");
+    }
+
+    public TokenResponse refresh(String refreshToken) {
+        if (jwtService.validateToken(refreshToken)) {
+            String email = jwtService.getEmail(refreshToken);
+            String role = jwtService.getRole(refreshToken);
+            String newAccess = jwtService.generateToken(email, role, false);
+            String newRefresh = jwtService.generateToken(email, role, true);
+            return new TokenResponse(newAccess, newRefresh, role);
+        }
+        throw new RuntimeException("Invalid refresh token");
     }
 }

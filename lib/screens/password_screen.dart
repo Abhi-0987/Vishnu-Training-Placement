@@ -12,7 +12,8 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   bool _isLoading = false;
 
   Future<void> changePassword() async {
@@ -44,10 +45,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": email,
-        "newPassword": newPassword,
-      }),
+      body: jsonEncode({"email": email, "newPassword": newPassword}),
     );
 
     setState(() => _isLoading = false);
@@ -68,7 +66,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   void showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -107,9 +107,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isLoading ? null : changePassword,
-              child: _isLoading
-                  ? CircularProgressIndicator(color: Colors.white)
-                  : Text("Update Password"),
+              child:
+                  _isLoading
+                      ? CircularProgressIndicator(color: Colors.white)
+                      : Text("Update Password"),
             ),
           ],
         ),
