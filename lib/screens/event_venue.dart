@@ -19,7 +19,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
   DateTime selectedDate = DateTime.now();
   DateTime focusedDate = DateTime.now();
-  String selectedTime = "9:30 AM - 12:30 PM";
+  String selectedTime = "9:30 - 11:15";  // Updated default time
   String selectedLocation = '';
 
   @override
@@ -80,7 +80,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                             padding: EdgeInsets.symmetric(
                                 vertical: height * 0.02, horizontal: width * 0.05),
                           ),
-                          child: Text("Post Attendance",
+                          child: Text("Schedule Class",
                               style: TextStyle(
                                   fontSize: height * 0.02, fontFamily: 'Alata',color: Colors.white)),
                         ),
@@ -138,6 +138,33 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         firstDay: DateTime.utc(2020, 01, 01),
         lastDay: DateTime.utc(2040, 12, 31),
         availableCalendarFormats: const {CalendarFormat.month: 'Month'},
+        // Add this to disable past dates
+        enabledDayPredicate: (day) {
+          // Allow only today and future dates
+          return !day.isBefore(DateTime.now().subtract(Duration(days: 1)));
+        },
+        // Add calendar style customization
+        calendarStyle: CalendarStyle(
+          // Selected day customization - violet color
+          selectedDecoration: BoxDecoration(
+            color: Colors.purple,
+            shape: BoxShape.circle,
+          ),
+          selectedTextStyle: TextStyle(color: Colors.white),
+          // Today's day customization
+          todayDecoration: BoxDecoration(
+            color: Colors.purple.withOpacity(0.3),
+            shape: BoxShape.circle,
+          ),
+          todayTextStyle: TextStyle(color: Colors.black),
+          // Disabled days (past dates)
+          disabledTextStyle: TextStyle(color: Colors.grey.shade400),
+        ),
+        headerStyle: HeaderStyle(
+          formatButtonVisible: false,
+          titleCentered: true,
+          titleTextStyle: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -146,30 +173,51 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   }
 
   Widget _buildTimeSelection() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        _buildTimeButton("9:30 AM - 12:30 PM"),
-        _buildTimeButton("1:30 PM - 3:30 PM"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildTimeButton("9:30 - 11:15"),
+            SizedBox(width: 10),
+            _buildTimeButton("11:30 - 1:15"),
+          ],
+        ),
+        SizedBox(height: 10),
+        Row(
+          children: [
+            _buildTimeButton("2:20 - 3:40"),
+            Expanded(child: Container()),
+          ],
+        ),
       ],
     );
   }
 
   Widget _buildTimeButton(String time) {
     bool isSelected = selectedTime == time;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedTime = time;
-        });
-      },
-      child: Container(
-        padding: EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.purple : Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(10),
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            selectedTime = time;
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.purple : Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            time, 
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black, 
+              fontSize: 16
+            ),
+          ),
         ),
-        child: Text(time, style: TextStyle(color: Colors.black, fontSize: 16)),
       ),
     );
   }
