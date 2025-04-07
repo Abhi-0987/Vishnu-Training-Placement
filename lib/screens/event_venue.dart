@@ -78,11 +78,11 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                             backgroundColor: Colors.purple,
                             elevation: 0,
                             padding: EdgeInsets.symmetric(
-                                vertical: height * 0.02, horizontal: width * 0.05),
+                                vertical: height * 0.015, horizontal: width * 0.04),
                           ),
                           child: Text("Schedule Class",
                               style: TextStyle(
-                                  fontSize: height * 0.02, fontFamily: 'Alata',color: Colors.white)),
+                                  fontSize: height * 0.025, fontFamily: 'Alata',color: Colors.white)),
                         ),
                       ],
                     ),
