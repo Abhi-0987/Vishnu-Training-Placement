@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
+import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -15,14 +16,30 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 5), () {
-      setState(() {
-        _showText = true;
-      });
 
-      // Navigate to HomeScreen after animation
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+    Timer(const Duration(seconds: 5), () {
+      setState(() => _showText = true);
+
+      Future.delayed(const Duration(seconds: 2), () async {
+        final prefs = await SharedPreferences.getInstance();
+        final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+        if (isLoggedIn) {
+          final role = prefs.getString('role');
+          if (role == 'student') {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.studentHomeScreen,
+            );
+          } else {
+            Navigator.pushReplacementNamed(
+              context,
+              AppRoutes.studentHomeScreen,
+            );
+          }
+        } else {
+          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
+        }
       });
     });
   }
@@ -46,7 +63,6 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo scaling and rotating
               TweenAnimationBuilder(
                 tween: Tween<double>(begin: 0, end: 1),
                 duration: const Duration(seconds: 3),
@@ -62,7 +78,6 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Image.asset('assets/logo.png', width: 100),
               ),
               const SizedBox(height: 40),
-              // Fading text
               AnimatedOpacity(
                 opacity: _showText ? 1 : 0,
                 duration: const Duration(seconds: 2),

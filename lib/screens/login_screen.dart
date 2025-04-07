@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
@@ -44,10 +45,27 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      if (data["status"] == "success") {
+      final prefs = await SharedPreferences.getInstance();
+
+      if (data["role"] == "Student") {
+        prefs.setBool('isLoggedIn', true);
+        prefs.setString('role', 'student');
+        prefs.setString('token', data['accessToken']);
+        prefs.setString('refreshToken', data['refreshToken']);
+
         Navigator.pushNamed(
           context,
           AppRoutes.studentHomeScreen,
+        ); // Navigate on success
+      } else if (data["role"] == "Admin") {
+        prefs.setBool('isLoggedIn', true);
+        prefs.setString('role', 'admin');
+        prefs.setString('token', data['accessToken']);
+        prefs.setString('refreshToken', data['refreshToken']);
+
+        Navigator.pushNamed(
+          context,
+          AppRoutes.event_venue,
         ); // Navigate on success
       } else {
         showError("Invalid Credentials");
@@ -260,7 +278,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                             fillColor: Colors.grey[400]
                                                 ?.withAlpha(170),
                                             hintText: 'Enter your email',
-                                            suffix: Text('@example.com'),
                                             hintStyle: TextStyle(
                                               color: Colors.black,
                                             ),
