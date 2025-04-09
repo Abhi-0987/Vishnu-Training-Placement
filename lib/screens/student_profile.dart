@@ -14,10 +14,11 @@ class StudentProfileScreen extends StatelessWidget {
     final double height = screenSize.height;
     final double width = screenSize.width;
 
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
-        return false;
+      return PopScope(
+      canPop: false,
+        onPopInvoked: (didPop) {
+        if (didPop) return;
+          Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
       },
       child: Scaffold(
         extendBodyBehindAppBar: true,
