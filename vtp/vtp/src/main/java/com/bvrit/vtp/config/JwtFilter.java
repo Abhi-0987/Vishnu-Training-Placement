@@ -1,5 +1,6 @@
 package com.bvrit.vtp.config;
 
+import com.bvrit.vtp.dao.BlacklistedTokenRepo;
 import com.bvrit.vtp.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,6 +21,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtService service;
+    @Autowired
+    private BlacklistedTokenRepo blacklistedTokenRepo;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -29,6 +32,13 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
+
+            if (blacklistedTokenRepo.findByToken(token).isPresent()) {
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                res.getWriter().write("Token is blacklisted");
+                return;
+            }
+
             if (service.validateToken(token)) {
                 String email = service.getEmail(token);
                 UsernamePasswordAuthenticationToken authToken =
