@@ -18,5 +18,8 @@ public class Student {
 
     @Column(unique = true,nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private boolean login = false;
 }
 
