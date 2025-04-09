@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/services/token_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       Future.delayed(const Duration(seconds: 2), () async {
         final prefs = await SharedPreferences.getInstance();
-        final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+        final isLoggedIn = await TokenService().checkAndRefreshToken();
 
         if (isLoggedIn) {
           final role = prefs.getString('role');
