@@ -2,11 +2,12 @@ package com.bvrit.vtp.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "venues")
 @Getter
+@NoArgsConstructor
 public class Venues {
     
     @Id
@@ -24,5 +25,5 @@ public class Venues {
     
     @Column(unique = true, nullable = false)
     private Double longitude;
-    
+
 }
