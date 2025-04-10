@@ -29,22 +29,41 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   // Method to fetch venues from the backend
   Future<void> fetchVenues() async {
     try {
-      final fetchedVenues = await _venueService.fetchVenues();
       setState(() {
-        venues = fetchedVenues;
-        isLoading = false;
-        
-        // Print venue details for debugging
-        print('Venues fetched from database:');
-        for (var venue in venues) {
-          print('Block: ${venue.blockName}, Room: ${venue.roomNumber}, Location: (${venue.latitude}, ${venue.longitude})');
-        }
+        isLoading = true;
       });
+      
+      final fetchedVenues = await _venueService.fetchVenues();
+      
+      if (mounted) {
+        setState(() {
+          venues = fetchedVenues;
+          isLoading = false;
+          
+          // Print venue details for debugging
+          print('Venues fetched from database: ${venues.length} venues found');
+          for (var venue in venues) {
+            print('Block: ${venue.blockName}, Room: ${venue.roomNumber}, Location: (${venue.latitude}, ${venue.longitude})');
+          }
+        });
+      }
     } catch (e) {
       print('Error in fetchVenues: $e');
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+          // You can set an error message here if you want to display it to the user
+        });
+        
+        // Optional: Show a snackbar with the error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load venues: $e'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
     }
   }
 
@@ -148,9 +167,27 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           color: Colors.grey[900],
           borderRadius: BorderRadius.circular(8.0),
         ),
-        child: Text(
-          "No venues available",
-          style: TextStyle(color: Colors.white),
+        child: Column(
+          children: [
+            Text(
+              "Could not load venues. Please check your connection to the server.",
+              style: TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  isLoading = true;
+                });
+                fetchVenues();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple,
+              ),
+              child: Text("Retry", style: TextStyle(color: Colors.white)),
+            ),
+          ],
         ),
       );
     }
@@ -170,7 +207,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         // Print selected venue details
         if (value != null) {
           final selectedVenue = venues.firstWhere(
-            (venue) => venue.blockName == value,
+            (venue) => "${venue.blockName} - Room ${venue.roomNumber}" == value,
             orElse: () => Venue(id: 0, blockName: '', roomNumber: '', latitude: 0, longitude: 0),
           );
           
@@ -186,9 +223,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       dropdownColor: Colors.black,
       items: venues.map((venue) {
         return DropdownMenuItem<String>(
-          value: venue.blockName,
+          value: "${venue.blockName} - Room ${venue.roomNumber}",
           child: Text(
-            "${venue.blockName} (${venue.roomNumber})",
+            "${venue.blockName} - Room ${venue.roomNumber}",
             style: TextStyle(color: Colors.white),
           ),
         );

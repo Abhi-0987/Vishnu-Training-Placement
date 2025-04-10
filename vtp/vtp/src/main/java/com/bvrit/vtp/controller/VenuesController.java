@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/venues")
+@RequestMapping("/api")
 public class VenuesController {
     
     private final VenuesService venuesService;
@@ -21,7 +21,7 @@ public class VenuesController {
         this.venuesService = venuesService;
     }
     
-    @GetMapping
+    @GetMapping("/venues")
     public ResponseEntity<List<VenueDTO>> getAllVenues() {
         List<VenueDTO> venues = venuesService.getAllVenues();
         return ResponseEntity.ok(venues);
