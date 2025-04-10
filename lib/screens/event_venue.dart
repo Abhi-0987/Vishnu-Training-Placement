@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
+import 'package:vishnu_training_and_placements/services/venue_service.dart';
 
 class EventVenueScreen extends StatefulWidget {
   const EventVenueScreen({super.key});
@@ -13,6 +14,40 @@ class EventVenueScreen extends StatefulWidget {
 }
 
 class _EventVenueScreenState extends State<EventVenueScreen> {
+  // Add venue service and venues list
+  final VenueService _venueService = VenueService();
+  List<Venue> venues = [];
+  bool isLoading = true;
+
+  // Add initState to fetch venues when screen loads
+  @override
+  void initState() {
+    super.initState();
+    fetchVenues();
+  }
+
+  // Method to fetch venues from the backend
+  Future<void> fetchVenues() async {
+    try {
+      final fetchedVenues = await _venueService.fetchVenues();
+      setState(() {
+        venues = fetchedVenues;
+        isLoading = false;
+        
+        // Print venue details for debugging
+        print('Venues fetched from database:');
+        for (var venue in venues) {
+          print('Block: ${venue.blockName}, Room: ${venue.roomNumber}, Location: (${venue.latitude}, ${venue.longitude})');
+        }
+      });
+    } catch (e) {
+      print('Error in fetchVenues: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   bool itSeminar = false;
   bool elnSeminar = false;
   bool auditorium = false;
@@ -98,6 +133,28 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   }
 
   Widget _buildLocationDropdown(Function(String?) onChanged) {
+    if (isLoading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: Colors.purple,
+        ),
+      );
+    }
+    
+    if (venues.isEmpty) {
+      return Container(
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.grey[900],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Text(
+          "No venues available",
+          style: TextStyle(color: Colors.white),
+        ),
+      );
+    }
+    
     return DropdownButtonFormField<String>(
       decoration: InputDecoration(
         filled: true,
@@ -108,14 +165,34 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         ),
       ),
       hint: Text("Choose your location", style: TextStyle(color: Colors.white)),
-      onChanged: onChanged,
+      onChanged: (value) {
+        onChanged(value);
+        // Print selected venue details
+        if (value != null) {
+          final selectedVenue = venues.firstWhere(
+            (venue) => venue.blockName == value,
+            orElse: () => Venue(id: 0, blockName: '', roomNumber: '', latitude: 0, longitude: 0),
+          );
+          
+          if (selectedVenue.id != 0) {
+            print('Selected venue details:');
+            print('Block: ${selectedVenue.blockName}');
+            print('Room: ${selectedVenue.roomNumber}');
+            print('Coordinates: (${selectedVenue.latitude}, ${selectedVenue.longitude})');
+          }
+        }
+      },
       style: const TextStyle(color: Colors.white),
       dropdownColor: Colors.black,
-      items: [
-        DropdownMenuItem<String>(value: 'IT Seminar Hall', child: Text("IT Seminar Hall", style: TextStyle(color: Colors.white))),
-        DropdownMenuItem<String>(value: 'ELN Seminar', child: Text("ELN Seminar", style: TextStyle(color: Colors.white))),
-        DropdownMenuItem<String>(value: 'Auditorium', child: Text("Auditorium", style: TextStyle(color: Colors.white))),
-      ],
+      items: venues.map((venue) {
+        return DropdownMenuItem<String>(
+          value: venue.blockName,
+          child: Text(
+            "${venue.blockName} (${venue.roomNumber})",
+            style: TextStyle(color: Colors.white),
+          ),
+        );
+      }).toList(),
     );
   }
 
