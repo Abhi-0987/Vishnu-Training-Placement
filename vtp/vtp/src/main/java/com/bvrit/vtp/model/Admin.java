@@ -18,5 +18,8 @@ public class Admin {
 
     @Column(nullable = false)
     private String password;
+
+    @Column(unique = true,nullable = false)
+    private boolean login = false;
 }
 

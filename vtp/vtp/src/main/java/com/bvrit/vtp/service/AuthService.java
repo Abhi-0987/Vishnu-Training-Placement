@@ -9,7 +9,7 @@ import com.bvrit.vtp.model.BlacklistedToken;
 import com.bvrit.vtp.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Date;
 import java.util.Optional;
 
@@ -20,27 +20,53 @@ public class AuthService {
     @Autowired private AdminRepo adminRepo;
     @Autowired private JwtService jwtService;
     @Autowired private BlacklistedTokenRepo blacklistedTokenRepo;
-
-    public TokenResponse adminlogin(String email, String password) {
+    @Autowired private PasswordEncoder passwordEncoder;
+    public TokenResponse adminlogin(String email, String rawPassword) {
         Optional<Admin> adminOpt = adminRepo.findByEmail(email);
-        if (adminOpt.isPresent() && adminOpt.get().getPassword().equals(password)) {
-            String access = jwtService.generateToken(email, "Admin", false);
-            String refresh = jwtService.generateToken(email, "Admin", true);
-            return new TokenResponse(access, refresh, "Admin");
+        if (adminOpt.isPresent()) {
+            Admin admin = adminOpt.get();
+
+            if (!admin.isLogin()) {
+                // Default password check
+                if (rawPassword.equals(admin.getPassword())) {
+                    return generateTokenResponse(email, "Admin");
+                }
+            } else {
+                // Encoded password check
+                if (passwordEncoder.matches(rawPassword, admin.getPassword())) {
+                    return generateTokenResponse(email, "Admin");
+                }
+            }
         }
 
         throw new RuntimeException("Invalid credentials");
     }
 
-    public TokenResponse studentlogin(String email, String password) {
+    public TokenResponse studentlogin(String email, String rawPassword) {
         Optional<Student> studentOpt = studentRepo.findByEmail(email);
-        if (studentOpt.isPresent() && studentOpt.get().getPassword().equals(password)) {
-            String access = jwtService.generateToken(email, "Student", false);
-            String refresh = jwtService.generateToken(email, "Student", true);
-            return new TokenResponse(access, refresh, "Student");
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+
+            if (!student.isLogin()) {
+                // Default password check
+                if (rawPassword.equals(student.getPassword())) {
+                    return generateTokenResponse(email, "Student");
+                }
+            } else {
+                // Encoded password check
+                if (passwordEncoder.matches(rawPassword, student.getPassword())) {
+                    return generateTokenResponse(email, "Student");
+                }
+            }
         }
 
         throw new RuntimeException("Invalid credentials");
+    }
+
+    private TokenResponse generateTokenResponse(String email, String role) {
+        String access = jwtService.generateToken(email, role, false);
+        String refresh = jwtService.generateToken(email, role, true);
+        return new TokenResponse(access, refresh, role);
     }
 
     public TokenResponse refresh(String refreshToken) {

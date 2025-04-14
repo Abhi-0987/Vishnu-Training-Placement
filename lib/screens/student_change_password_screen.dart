@@ -4,105 +4,81 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
-import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 
-class StudentLoginScreen extends StatefulWidget {
-  final bool isAdmin;
-  const StudentLoginScreen({super.key, required this.isAdmin});
+class ChangePasswordScreen extends StatefulWidget {
+  const ChangePasswordScreen({super.key});
 
   @override
-  _StudentLoginScreenState createState() => _StudentLoginScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
-class _StudentLoginScreenState extends State<StudentLoginScreen> {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   bool _isPasswordVisible = false;
-  bool _isLoading = false; // Show loading indicator
+  bool _isLoading = false;
   
-  Future<void> login() async {
-     final password = passwordController.text.trim();
-  final email = emailController.text.trim();
-
-  if (email.isEmpty || password.isEmpty) {
-    showError("Email and password cannot be empty.");
-    return;
+  bool isValidPassword(String password) {
+    final passwordRegex = RegExp(
+      r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
+    );
+    return passwordRegex.hasMatch(password);
   }
-    setState(() {
-      _isLoading = true; // Start loading
-    });
 
-    final url = Uri.parse(
-      'http://localhost:8080/api/auth/${widget.isAdmin ? 'admin/login' : 'student/login'}',
-    ); 
+  void _changePassword(String email) async {
+    final newPassword = newPasswordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
+
+    if (newPassword.isEmpty || confirmPassword.isEmpty) {
+      _showSnackBar("Password fields cannot be empty.");
+      return;
+    }
+
+    if (!isValidPassword(newPassword)) {
+      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
+      return;
+    }
+
+    if (newPassword != confirmPassword) {
+      _showSnackBar("Passwords do not match");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
     final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
+      Uri.parse('http://localhost:8080/api/auth/student/change-password'),
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        "email": emailController.text.trim(),
-        "password": passwordController.text.trim(),
+        'email': email,
+        'newPassword': newPassword,
       }),
     );
 
-    setState(() {
-      _isLoading = false; 
-    });
+    setState(() => _isLoading = false);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
+      _showSnackBar("Password changed successfully");
 
-      if (data["role"] == "Student") {
-        prefs.setBool('isAdmin', false);
-        prefs.setBool('isLoggedIn', true);
-        prefs.setString('role', 'student');
-        prefs.setString('token', data['accessToken']);
-        prefs.setString('refreshToken', data['refreshToken']);
-      if (data["login"] == false || data["status"] == "CHANGE_PASSWORD_REQUIRED"){ 
-        Navigator.pushNamed(
-          context,
-          AppRoutes.changePasswordScreen,
-          arguments: {"email": email},
-        );
-      
-      } else {
-        Navigator.pushNamed(
-          context,
-          AppRoutes.studentHomeScreen,
-        );
-      }  // Navigate on success
-      } else if (data["role"] == "Admin") {
-        prefs.setBool('isAdmin', true);
-        prefs.setBool('isLoggedIn', true);
-        prefs.setString('role', 'admin');
-        prefs.setString('token', data['accessToken']);
-        prefs.setString('refreshToken', data['refreshToken']);
-        prefs.setString('adminEmail', email);
-        Navigator.pushNamed(
-          context,
-          AppRoutes.studentHomeScreen,
-        ); // Navigate on success
-      } else {
-        showError("Invalid Credentials");
-      }
+      // Redirect to login or home screen
+      Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
     } else {
-      showError("Server Error. Try again.");
+      _showSnackBar("Error changing password");
     }
   }
 
-  void showError(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  @override
+@override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double height = screenSize.height;
     final double width = screenSize.width;
-
+    final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final String email = args["email"];
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -228,7 +204,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                     SizedBox(height: height * 0.17),
 
                     Text(
-                      'Please Complete',
+                      'Change your',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: width * 0.04,
@@ -237,7 +213,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                       ),
                     ),
                     Text(
-                      'Authentication',
+                      'Password',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: width * 0.08,
@@ -245,7 +221,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                         fontFamily: 'Alata',
                       ),
                     ),
-
                     SizedBox(height: height * 0.05),
 
                     Stack(
@@ -286,40 +261,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceAround,
                                       children: [
-                                        // Email input with fixed domain inside the text box
-                                        TextField(
-                                          controller: emailController,
-                                          decoration: InputDecoration(
-                                            filled: true,
-                                            fillColor: Colors.grey[400]
-                                                ?.withAlpha(170),
-                                            hintText: 'Enter your email',
-                                            hintStyle: TextStyle(
-                                              color: Colors.black,
-                                            ),
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(10.0),
-                                              borderSide: BorderSide(
-                                                color: Colors.black,
-                                              ),
-                                            ),
-                                            contentPadding:
-                                                EdgeInsets.symmetric(
-                                                  vertical: height * 0.023,
-                                                  horizontal: width * 0.01,
-                                                ),
-                                          ),
-                                          inputFormatters: [
-                                            LengthLimitingTextInputFormatter(
-                                              40,
-                                            ), // Limit input length
-                                          ],
-                                        ),
-
                                         // Password input
                                         TextField(
-                                          controller: passwordController,
+                                          controller: newPasswordController,
                                           obscureText: !_isPasswordVisible,
                                           decoration: InputDecoration(
                                             suffixIcon: IconButton(
@@ -340,6 +284,46 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                             fillColor: Colors.grey[400]
                                                 ?.withAlpha(170),
                                             hintText: 'Enter password',
+                                            hintStyle: TextStyle(
+                                              color: Colors.black,
+                                            ),
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10.0),
+                                              borderSide: BorderSide(
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                  vertical: height * 0.023,
+                                                  horizontal: width * 0.01,
+                                                ),
+                                          ),
+                                        ),
+                                        // Password input
+                                        TextField(
+                                          controller: confirmPasswordController,
+                                          obscureText: !_isPasswordVisible,
+                                          decoration: InputDecoration(
+                                            suffixIcon: IconButton(
+                                              icon: Icon(
+                                                _isPasswordVisible
+                                                    ? Icons.visibility
+                                                    : Icons.visibility_off,
+                                                color: Colors.black,
+                                              ),
+                                              onPressed: () {
+                                                setState(() {
+                                                  _isPasswordVisible =
+                                                      !_isPasswordVisible; // Toggle password visibility
+                                                });
+                                              },
+                                            ),
+                                            filled: true,
+                                            fillColor: Colors.grey[400]
+                                                ?.withAlpha(170),
+                                            hintText: 'Confirm password',
                                             hintStyle: TextStyle(
                                               color: Colors.black,
                                             ),
@@ -388,8 +372,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                                 vertical: height * 0.013,
                                               ),
                                             ),
-                                            onPressed:
-                                                _isLoading ? null : login,
+                                            onPressed: () => _changePassword(email),
                                             child: Text(
                                               'Login',
                                               style: TextStyle(
@@ -440,3 +423,4 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
     );
   }
 }
+
