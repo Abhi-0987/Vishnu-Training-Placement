@@ -8,7 +8,6 @@ import com.bvrit.vtp.model.Admin;
 import com.bvrit.vtp.model.Student;
 import com.bvrit.vtp.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,12 +25,6 @@ public class AuthController {
     @Autowired private StudentRepo studentRepository;
     @Autowired private AdminRepo adminRepository;
     @Autowired private PasswordEncoder passwordEncoder;
-
-    @Value("${app.default.admin-password:admin@123}")
-    private String defaultAdminPassword;
-
-    @Value("${app.default.student-password:bvrit}")
-    private String defaultStudentPassword;
 
     @PostMapping(value = "/admin/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> adminlogin(@RequestBody Map<String, String> credentials) {
@@ -55,21 +48,12 @@ public class AuthController {
         Admin admin = optionalAdmin.get();
         boolean loginFlag = admin.isLogin();
 
-        if (!loginFlag && password.equals(defaultAdminPassword)) {
-            return ResponseEntity.ok(Map.of(
-                    "accessToken", tokenResponse.getAccessToken(),
-                    "refreshToken", tokenResponse.getRefreshToken(),
-                    "role", "Admin",
-                    "login", loginFlag,
-                    "status", "CHANGE_PASSWORD_REQUIRED"
-            ));
-        }
-
         return ResponseEntity.ok(Map.of(
                 "accessToken", tokenResponse.getAccessToken(),
                 "refreshToken", tokenResponse.getRefreshToken(),
                 "role", "Admin",
-                "login", loginFlag
+                "login", loginFlag,
+                "status", loginFlag ? "LOGGED_IN" : "CHANGE_PASSWORD_REQUIRED"
         ));
     }
 
@@ -95,21 +79,12 @@ public class AuthController {
         Student student = optionalStudent.get();
         boolean loginFlag = student.isLogin();
 
-        if (!loginFlag && password.equals(defaultStudentPassword)) {
-            return ResponseEntity.ok(Map.of(
-                    "accessToken", tokenResponse.getAccessToken(),
-                    "refreshToken", tokenResponse.getRefreshToken(),
-                    "role", "Student",
-                    "login", loginFlag,
-                    "status", "CHANGE_PASSWORD_REQUIRED"
-            ));
-        }
-
         return ResponseEntity.ok(Map.of(
                 "accessToken", tokenResponse.getAccessToken(),
                 "refreshToken", tokenResponse.getRefreshToken(),
                 "role", "Student",
-                "login", loginFlag
+                "login", loginFlag,
+                "status", loginFlag ? "LOGGED_IN" : "CHANGE_PASSWORD_REQUIRED"
         ));
     }
 
@@ -150,4 +125,3 @@ public class AuthController {
         return ResponseEntity.ok(authService.refresh(tokenMap.get("refreshToken")));
     }
 }
-
