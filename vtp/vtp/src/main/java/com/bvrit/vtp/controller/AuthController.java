@@ -118,7 +118,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Admin password updated successfully"));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenResponse> refresh(@RequestBody Map<String, String> tokenMap) {
         return ResponseEntity.ok(authService.refresh(tokenMap.get("refreshToken")));
     }

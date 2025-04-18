@@ -13,10 +13,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.splash,
-      routes: AppRoutes.routes,
-
+      //initialRoute: AppRoutes.splash,
+      //routes: AppRoutes.routes,
       // home: StudentLoginScreen(isAdmin: false),
+      home: EventVenueScreen(),
     );
   }
 }
