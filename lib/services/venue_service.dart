@@ -38,7 +38,7 @@ class VenueService {
     try {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final token = "xx";
+      final token = 'xx';
       //prefs.getString('token') ?? '';
 
       final apiUrl = '$baseUrl/api/venues';
@@ -59,25 +59,11 @@ class VenueService {
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
 
-      // Handle different status codes
-      switch (response.statusCode) {
-        case 200:
-          List<dynamic> venuesJson = jsonDecode(response.body);
-          return venuesJson.map((json) => Venue.fromJson(json)).toList();
-        case 401:
-          throw Exception('Unauthorized: Your token is invalid or expired');
-        case 403:
-          throw Exception(
-            'Forbidden: You do not have permission to access this resource',
-          );
-        case 404:
-          throw Exception('Not Found: The venues endpoint does not exist');
-        case 500:
-          throw Exception('Server Error: Something went wrong on the server');
-        default:
-          throw Exception(
-            'Failed to load venues: Status code ${response.statusCode}, Response: ${response.body}',
-          );
+      if (response.statusCode == 200) {
+        List<dynamic> venuesJson = jsonDecode(response.body);
+        return venuesJson.map((json) => Venue.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load venues: ${response.body}');
       }
     } catch (e) {
       print('Error details: $e');

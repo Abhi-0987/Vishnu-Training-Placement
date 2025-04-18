@@ -14,14 +14,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class VenuesController {
-    
+
     private final VenuesService venuesService;
-    
+
     @Autowired
     public VenuesController(VenuesService venuesService) {
         this.venuesService = venuesService;
     }
-    
+
     @GetMapping(value = "/venues", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<VenueDTO>> getAllVenues() {
         List<VenueDTO> venues = venuesService.getAllVenues();

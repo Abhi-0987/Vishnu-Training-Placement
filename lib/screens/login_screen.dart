@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vishnu_training_and_placements/services/auth_service.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   final bool isAdmin;
@@ -27,41 +27,37 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       _isLoading = true; // Start loading
     });
 
-    final url = Uri.parse(
-      'http://localhost:8080/api/auth/${widget.isAdmin ? 'admin/login' : 'student/login'}',
-    ); // Spring Boot URL
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": emailController.text.trim(),
-        "password": passwordController.text.trim(),
-      }),
+    final response = await AuthService().login(
+      emailController.text.trim(),
+      passwordController.text.trim(),
+      widget.isAdmin,
     );
-
-    setState(() {
-      _isLoading = false; // Stop loading
-    });
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final prefs = await SharedPreferences.getInstance();
 
       if (data["role"] == "Student") {
-        prefs.setBool('isLoggedIn', true);
         prefs.setString('role', 'student');
         prefs.setString('token', data['accessToken']);
         prefs.setString('refreshToken', data['refreshToken']);
+
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
 
         Navigator.pushNamed(
           context,
           AppRoutes.studentHomeScreen,
         ); // Navigate on success
       } else if (data["role"] == "Admin") {
-        prefs.setBool('isLoggedIn', true);
         prefs.setString('role', 'admin');
         prefs.setString('token', data['accessToken']);
         prefs.setString('refreshToken', data['refreshToken']);
+
+        setState(() {
+          _isLoading = false; // Stop loading
+        });
 
         Navigator.pushNamed(
           context,
