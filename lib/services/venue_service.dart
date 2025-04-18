@@ -32,20 +32,13 @@ class Venue {
 class VenueService {
   // For web or desktop applications, localhost works
   // You might need to adjust this URL based on where your backend is running
-  String get baseUrl {
-    if (kIsWeb) {
-      // For web, we need to use the exact URL where the backend is hosted
-      return 'http://localhost:8080'; // Change this if your backend is on a different URL
-    }
-    return 'http://localhost:8080';
-  }
+  String baseUrl = "http://localhost:8080";
 
   Future<List<Venue>> fetchVenues() async {
     try {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final token =
-          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhQGJ2cml0LmFjLmluIiwicm9sZSI6IlN0dWRlbnQiLCJpYXQiOjE3NDQyMDc2NDYsImV4cCI6MTc0NDI5NDA0Nn0.h31OSY5CKlin_yOr6FTv_R1Pj4NhHI6JhFDO8rJx2uw';
+      final token = "xx";
       //prefs.getString('token') ?? '';
 
       final apiUrl = '$baseUrl/api/venues';
@@ -55,15 +48,13 @@ class VenueService {
       );
 
       // Don't add CORS headers from the client side - they need to come from the server
-      final response = await http
-          .get(
-            Uri.parse(apiUrl),
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer $token',
-            },
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.get(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
       print('Response status: ${response.statusCode}');
       print('Response body: ${response.body}');
@@ -105,23 +96,6 @@ class VenueService {
       } else {
         throw Exception('Unknown error occurred: $e');
       }
-    }
-  }
-
-  // You can add a method to check if the token is valid
-  Future<bool> isTokenValid(String token) async {
-    try {
-      final response = await http
-          .get(
-            Uri.parse('$baseUrl/api/auth/validate'),
-            headers: {'Authorization': 'Bearer $token'},
-          )
-          .timeout(const Duration(seconds: 10));
-
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Token validation error: $e');
-      return false;
     }
   }
 }

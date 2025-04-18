@@ -25,7 +25,7 @@ public class AuthController {
         return ResponseEntity.ok(authService.studentlogin(credentials.get("email"), credentials.get("password")));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenResponse> refresh(@RequestBody Map<String, String> tokenMap) {
         return ResponseEntity.ok(authService.refresh(tokenMap.get("refreshToken")));
     }

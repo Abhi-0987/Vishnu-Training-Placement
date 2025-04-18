@@ -26,12 +26,6 @@ public class VenuesService {
     public List<VenueDTO> getAllVenues() {
         List<Venues> venues = venuesRepository.findAll();
 
-        for (Venues venue : venues) {
-            logger.info("Venue: id={}, blockName={}, roomNumber={}, latitude={}, longitude={}",
-                    venue.getId(), venue.getBlockName(), venue.getRoomNumber(), 
-                    venue.getLatitude(), venue.getLongitude());
-        }
-        
         // Convert entities to DTOs
         return venues.stream()
                 .map(this::convertToDTO)
