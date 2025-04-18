@@ -52,8 +52,7 @@ public class AuthController {
                 "accessToken", tokenResponse.getAccessToken(),
                 "refreshToken", tokenResponse.getRefreshToken(),
                 "role", "Admin",
-                "login", loginFlag,
-                "status", loginFlag ? "LOGGED_IN" : "CHANGE_PASSWORD_REQUIRED"
+                "login", loginFlag
         ));
     }
 
@@ -83,8 +82,7 @@ public class AuthController {
                 "accessToken", tokenResponse.getAccessToken(),
                 "refreshToken", tokenResponse.getRefreshToken(),
                 "role", "Student",
-                "login", loginFlag,
-                "status", loginFlag ? "LOGGED_IN" : "CHANGE_PASSWORD_REQUIRED"
+                "login", loginFlag
         ));
     }
 

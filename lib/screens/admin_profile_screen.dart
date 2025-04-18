@@ -30,7 +30,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   Future<void> loadEmail() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      adminEmail = prefs.getString('adminEmail') ?? 'admin@example.com';
+      adminEmail = prefs.getString('adminEmail');
     });
   }
 

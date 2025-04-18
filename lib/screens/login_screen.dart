@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/roots/app_roots.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vishnu_training_and_placements/services/auth_service.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   final bool isAdmin;
@@ -33,63 +33,61 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       _isLoading = true; // Start loading
     });
 
-    final url = Uri.parse(
-      'http://localhost:8080/api/auth/${widget.isAdmin ? 'admin/login' : 'student/login'}',
-    ); 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": emailController.text.trim(),
-        "password": passwordController.text.trim(),
-      }),
-    );
+    try {
+      final response = await AuthService().login(email, password, widget.isAdmin);
+        
+      setState(() {
+        _isLoading = false; 
+      });
 
-    setState(() {
-      _isLoading = false; 
-    });
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final prefs = await SharedPreferences.getInstance();
-
-      if (data["role"] == "Student") {
-        prefs.setBool('isAdmin', false);
-        prefs.setBool('isLoggedIn', true);
-        prefs.setString('role', 'student');
-        prefs.setString('token', data['accessToken']);
-        prefs.setString('refreshToken', data['refreshToken']);
-      if (data["login"] == false || data["status"] == "CHANGE_PASSWORD_REQUIRED"){ 
-        Navigator.pushNamed(
-          context,
-          AppRoutes.changePasswordScreen,
-          arguments: {"email": email},
-        );
-      
+        if (data["role"] == "Student") {
+          prefs.setBool('isAdmin', false);
+          prefs.setBool('isLoggedIn', true);
+          prefs.setString('role', 'student');
+          prefs.setString('token', data['accessToken']);
+          prefs.setString('refreshToken', data['refreshToken']);
+          prefs.setString('studentEmail', email);
+        if (data["login"] == false){ 
+          Navigator.pushNamed(
+            context,
+            AppRoutes.changePasswordScreen,
+            arguments: {"email": email},
+          );
+        
+        } else {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.studentHomeScreen,
+          );
+        }  // Navigate on success
+        } else if (data["role"] == "Admin") {
+          prefs.setBool('isAdmin', true);
+          prefs.setBool('isLoggedIn', true);
+          prefs.setString('role', 'admin');
+          prefs.setString('token', data['accessToken']);
+          prefs.setString('refreshToken', data['refreshToken']);
+          prefs.setString('adminEmail', email);
+          Navigator.pushNamed(
+            context,
+            AppRoutes.studentHomeScreen,
+          ); // Navigate on success
+        } else {
+          showError("Invalid Credentials");
+        }
       } else {
-        Navigator.pushNamed(
-          context,
-          AppRoutes.studentHomeScreen,
-        );
-      }  // Navigate on success
-      } else if (data["role"] == "Admin") {
-        prefs.setBool('isAdmin', true);
-        prefs.setBool('isLoggedIn', true);
-        prefs.setString('role', 'admin');
-        prefs.setString('token', data['accessToken']);
-        prefs.setString('refreshToken', data['refreshToken']);
-        prefs.setString('adminEmail', email);
-        Navigator.pushNamed(
-          context,
-          AppRoutes.studentHomeScreen,
-        ); // Navigate on success
-      } else {
-        showError("Invalid Credentials");
+        showError("Server Error. Try again.");
       }
-    } else {
-      showError("Server Error. Try again.");
-    }
+    }catch (e) {
+    setState(() {
+      _isLoading = false;
+    });
+    showError("Something went wrong. Try again later.");
   }
+}
 
   void showError(String message) {
     ScaffoldMessenger.of(
