@@ -8,7 +8,7 @@ class ApiServices {
   static Future<Map<String, dynamic>> saveSchedule(Map<String, dynamic> scheduleData) async {
     try {
       final token =
-          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjIxMkBidnJpdC5hYy5pbiIsInJvbGUiOiJTdHVkZW50IiwiaWF0IjoxNzQ0OTEwNjM2LCJleHAiOjE3NDU1MTU0MzZ9.lsFgLNZpsw-utVjSSTbVgggBQPYxfa24qlSaSYScpHA';
+          '';
       final response = await http.post(
         Uri.parse('$baseUrl/schedules'),
         headers: {
