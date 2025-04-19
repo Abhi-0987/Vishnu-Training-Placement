@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class AuthService {
-  static const String baseUrl = 'http://localhost:8080';
+  static const String baseUrl = AppConstants.backendUrl;
   Future<http.Response> login(
     String email,
     String password,

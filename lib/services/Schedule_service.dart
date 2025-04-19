@@ -1,10 +1,10 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class ScheduleServices {
-  static const String baseUrl =
-      'http://localhost:8080/api'; // Update if using real server
+  static const String baseUrl = AppConstants.backendUrl;
 
   // Method to save schedule
   static Future<Map<String, dynamic>> saveSchedule(
@@ -13,11 +13,9 @@ class ScheduleServices {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      // final token =
-      //     '';
 
       final response = await http.post(
-        Uri.parse('$baseUrl/schedules'),
+        Uri.parse('$baseUrl/api/schedules'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -58,7 +56,7 @@ class ScheduleServices {
     try {
       final response = await http.get(
         Uri.parse(
-          '$baseUrl/schedules/check-availability?location=$location&date=$date&timeSlot=$timeSlot',
+          '$baseUrl/api/schedules/check-availability?location=$location&date=$date&timeSlot=$timeSlot',
         ),
       );
 

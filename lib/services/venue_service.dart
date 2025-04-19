@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class Venue {
   final int id;
@@ -30,21 +30,15 @@ class Venue {
 }
 
 class VenueService {
-  // For web or desktop applications, localhost works
-  // You might need to adjust this URL based on where your backend is running
-  String baseUrl = "http://localhost:8080";
+  String baseUrl = AppConstants.backendUrl;
 
   Future<List<Venue>> fetchVenues() async {
     try {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-      
+
       final apiUrl = '$baseUrl/api/venues';
-      print('Fetching venues from: $apiUrl');
-      print(
-        'Using token: ${token.isNotEmpty ? 'Yes (token available)' : 'No (token not found)'}',
-      );
 
       // Don't add CORS headers from the client side - they need to come from the server
       final response = await http.get(
@@ -55,9 +49,6 @@ class VenueService {
         },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         List<dynamic> venuesJson = jsonDecode(response.body);
         return venuesJson.map((json) => Venue.fromJson(json)).toList();
@@ -65,8 +56,6 @@ class VenueService {
         throw Exception('Failed to load venues: ${response.body}');
       }
     } catch (e) {
-      print('Error details: $e');
-
       // Check for specific error types
       if (e is http.ClientException) {
         throw Exception(

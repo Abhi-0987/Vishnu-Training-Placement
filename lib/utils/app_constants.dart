@@ -1,3 +1,3 @@
 class AppConstants {
-  static const String spring_endpoint = 'http://localhost:8080';
+  static const String backendUrl = 'http://localhost:8080';
 }
