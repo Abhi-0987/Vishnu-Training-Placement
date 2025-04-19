@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/services/token_service.dart';
 
 class SplashScreen extends StatefulWidget {

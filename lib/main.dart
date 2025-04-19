@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/event_venue.dart';
 
 void main() {

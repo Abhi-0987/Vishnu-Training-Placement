@@ -1,6 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';

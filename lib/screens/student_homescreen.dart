@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -67,13 +67,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                           style: TextStyle(fontSize: 300, fontFamily: 'Alata'),
                           image: 'assets/attendance.png',
                         ),
-                        onTap: () 
-                                 {
-                                        Navigator.pushNamed(
-                                          context,
-                                          AppRoutes. markAttendanceStudent,
-                                        );
-                                      },
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.markAttendanceStudent,
+                          );
+                        },
                       ),
                       const SizedBox(height: 40),
                       GestureDetector(
