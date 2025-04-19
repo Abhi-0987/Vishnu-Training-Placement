@@ -39,7 +39,7 @@ class VenueService {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
-
+      
       final apiUrl = '$baseUrl/api/venues';
       print('Fetching venues from: $apiUrl');
       print(
