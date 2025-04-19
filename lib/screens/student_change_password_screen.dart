@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:lottie/lottie.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -15,10 +15,11 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
-  
+
   bool isValidPassword(String password) {
     final passwordRegex = RegExp(
       r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
@@ -36,7 +37,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     }
 
     if (!isValidPassword(newPassword)) {
-      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
+      _showSnackBar(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
+      );
       return;
     }
 
@@ -50,10 +53,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     final response = await http.post(
       Uri.parse('http://localhost:8080/api/auth/student/change-password'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'newPassword': newPassword,
-      }),
+      body: jsonEncode({'email': email, 'newPassword': newPassword}),
     );
 
     setState(() => _isLoading = false);
@@ -69,15 +69,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double height = screenSize.height;
     final double width = screenSize.width;
-    final Map<String, dynamic> args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final Map<String, dynamic> args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
     final String email = args["email"];
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -372,7 +375,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                 vertical: height * 0.013,
                                               ),
                                             ),
-                                            onPressed: () => _changePassword(email),
+                                            onPressed:
+                                                () => _changePassword(email),
                                             child: Text(
                                               'Login',
                                               style: TextStyle(
@@ -423,4 +427,3 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     );
   }
 }
-

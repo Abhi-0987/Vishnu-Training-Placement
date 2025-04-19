@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:vishnu_training_and_placements/models/venue_model.dart';
+import 'package:vishnu_training_and_placements/services/schedule_service.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/services/venue_service.dart';
-import 'package:vishnu_training_and_placements/services/api_service.dart';
 
 class EventVenueScreen extends StatefulWidget {
   const EventVenueScreen({super.key});
@@ -40,7 +41,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
           print('Venues fetched from database: ${venues.length} venues found');
           for (var venue in venues) {
-            print('Block: ${venue.blockName}, Room: ${venue.roomNumber}, Location: (${venue.latitude}, ${venue.longitude})');
+            print(
+              'Block: ${venue.blockName}, Room: ${venue.roomNumber}, Location: (${venue.latitude}, ${venue.longitude})',
+            );
           }
         });
       }
@@ -62,7 +65,21 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     }
   }
 
-  List<String> branches = ['CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT', 'AI & DS', 'BME', 'PHE', 'CHEM', 'CSM','CSD','CSBS'];
+  List<String> branches = [
+    'CSE',
+    'ECE',
+    'EEE',
+    'MECH',
+    'CIVIL',
+    'IT',
+    'AI & DS',
+    'BME',
+    'PHE',
+    'CHEM',
+    'CSM',
+    'CSD',
+    'CSBS',
+  ];
   List<String> selectedBranches = [];
 
   DateTime selectedDate = DateTime.now();
@@ -105,7 +122,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
     try {
       // Ensure we're sending proper JSON data
-      final result = await ApiServices.saveSchedule(scheduleData);
+      final result = await ScheduleServices.saveSchedule(scheduleData);
 
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -153,12 +170,15 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Manage Locations",
-                        style: TextStyle(
-                            fontSize: height * 0.02,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Alata',
-                            color: Colors.white)),
+                    Text(
+                      "Manage Locations",
+                      style: TextStyle(
+                        fontSize: height * 0.02,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alata',
+                        color: Colors.white,
+                      ),
+                    ),
                     SizedBox(height: height * 0.02),
                     _buildLocationDropdown((val) {
                       setState(() {
@@ -166,31 +186,40 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                       });
                     }),
                     SizedBox(height: height * 0.03),
-                    Text("Schedule",
-                        style: TextStyle(
-                            fontSize: height * 0.025,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Alata',
-                            color: Colors.white)),
+                    Text(
+                      "Schedule",
+                      style: TextStyle(
+                        fontSize: height * 0.025,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alata',
+                        color: Colors.white,
+                      ),
+                    ),
                     SizedBox(height: height * 0.02),
                     _buildCalendar(),
                     SizedBox(height: height * 0.03),
-                    Text("Set Time",
-                        style: TextStyle(
-                            fontSize: height * 0.025,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Alata',
-                            color: Colors.white)),
+                    Text(
+                      "Set Time",
+                      style: TextStyle(
+                        fontSize: height * 0.025,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alata',
+                        color: Colors.white,
+                      ),
+                    ),
                     SizedBox(height: height * 0.02),
                     _buildTimeSelection(),
                     SizedBox(height: height * 0.03),
                     // Add heading for branch selection
-                    Text("Select Branches",
-                        style: TextStyle(
-                            fontSize: height * 0.025,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Alata',
-                            color: Colors.white)),
+                    Text(
+                      "Select Branches",
+                      style: TextStyle(
+                        fontSize: height * 0.025,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alata',
+                        color: Colors.white,
+                      ),
+                    ),
                     SizedBox(height: height * 0.02),
                     _buildBranchSelector(),
                     SizedBox(height: height * 0.03),
@@ -205,13 +234,18 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                               backgroundColor: Colors.purple,
                               elevation: 0,
                               padding: EdgeInsets.symmetric(
-                                  vertical: height * 0.015, horizontal: width * 0.04),
+                                vertical: height * 0.015,
+                                horizontal: width * 0.04,
+                              ),
                             ),
-                            child: Text("Schedule Class",
-                                style: TextStyle(
-                                    fontSize: height * 0.025,
-                                    fontFamily: 'Alata',
-                                    color: Colors.white)),
+                            child: Text(
+                              "Schedule Class",
+                              style: TextStyle(
+                                fontSize: height * 0.025,
+                                fontFamily: 'Alata',
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -228,11 +262,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
   Widget _buildLocationDropdown(Function(String?) onChanged) {
     if (isLoading) {
-      return Center(
-        child: CircularProgressIndicator(
-          color: Colors.purple,
-        ),
-      );
+      return Center(child: CircularProgressIndicator(color: Colors.purple));
     }
 
     if (venues.isEmpty) {
@@ -252,9 +282,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: fetchVenues,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.purple,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
               child: Text("Retry", style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -277,28 +305,38 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         if (value != null) {
           final selectedVenue = venues.firstWhere(
             (venue) => "${venue.blockName} - Room ${venue.roomNumber}" == value,
-            orElse: () => Venue(id: 0, blockName: '', roomNumber: '', latitude: 0, longitude: 0),
+            orElse:
+                () => Venue(
+                  id: 0,
+                  blockName: '',
+                  roomNumber: '',
+                  latitude: 0,
+                  longitude: 0,
+                ),
           );
 
           if (selectedVenue.id != 0) {
             print('Selected venue details:');
             print('Block: ${selectedVenue.blockName}');
             print('Room: ${selectedVenue.roomNumber}');
-            print('Coordinates: (${selectedVenue.latitude}, ${selectedVenue.longitude})');
+            print(
+              'Coordinates: (${selectedVenue.latitude}, ${selectedVenue.longitude})',
+            );
           }
         }
       },
       style: const TextStyle(color: Colors.white),
       dropdownColor: Colors.black,
-      items: venues.map((venue) {
-        return DropdownMenuItem<String>(
-          value: "${venue.blockName} - Room ${venue.roomNumber}",
-          child: Text(
-            "${venue.blockName} - Room ${venue.roomNumber}",
-            style: TextStyle(color: Colors.white),
-          ),
-        );
-      }).toList(),
+      items:
+          venues.map((venue) {
+            return DropdownMenuItem<String>(
+              value: "${venue.blockName} - Room ${venue.roomNumber}",
+              child: Text(
+                "${venue.blockName} - Room ${venue.roomNumber}",
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }).toList(),
     );
   }
 
@@ -400,25 +438,29 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     return Wrap(
       spacing: 10, // Increased horizontal spacing between chips
       runSpacing: 10, // Added vertical spacing between rows of chips
-      children: branches.map((branch) {
-        final isSelected = selectedBranches.contains(branch);
-        return FilterChip(
-          label: Text(branch, style: TextStyle(color: Colors.white)),
-          selected: isSelected,
-          backgroundColor: Colors.grey[800],
-          selectedColor: Colors.purple,
-          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Added padding inside chips
-          onSelected: (bool selected) {
-            setState(() {
-              if (selected) {
-                selectedBranches.add(branch);
-              } else {
-                selectedBranches.remove(branch);
-              }
-            });
-          },
-        );
-      }).toList(),
+      children:
+          branches.map((branch) {
+            final isSelected = selectedBranches.contains(branch);
+            return FilterChip(
+              label: Text(branch, style: TextStyle(color: Colors.white)),
+              selected: isSelected,
+              backgroundColor: Colors.grey[800],
+              selectedColor: Colors.purple,
+              padding: EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ), // Added padding inside chips
+              onSelected: (bool selected) {
+                setState(() {
+                  if (selected) {
+                    selectedBranches.add(branch);
+                  } else {
+                    selectedBranches.remove(branch);
+                  }
+                });
+              },
+            );
+          }).toList(),
     );
   }
 
@@ -430,29 +472,41 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text("Location: $selectedLocation",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Alata',
-                    fontSize: 18)),
+            Text(
+              "Location: $selectedLocation",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Alata',
+                fontSize: 18,
+              ),
+            ),
             Divider(color: Colors.white),
-            Text("Date: ${DateFormat('MMM dd, yyyy').format(selectedDate)}",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Alata',
-                    fontSize: 18)),
+            Text(
+              "Date: ${DateFormat('MMM dd, yyyy').format(selectedDate)}",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Alata',
+                fontSize: 18,
+              ),
+            ),
             Divider(color: Colors.white),
-            Text("Time: $selectedTime",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Alata',
-                    fontSize: 18)),
+            Text(
+              "Time: $selectedTime",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Alata',
+                fontSize: 18,
+              ),
+            ),
             Divider(color: Colors.white),
-            Text("Branches: ${selectedBranches.isEmpty ? 'None selected' : selectedBranches.join(', ')}",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Alata',
-                    fontSize: 18)),
+            Text(
+              "Branches: ${selectedBranches.isEmpty ? 'None selected' : selectedBranches.join(', ')}",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Alata',
+                fontSize: 18,
+              ),
+            ),
           ],
         ),
       ),

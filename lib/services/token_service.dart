@@ -1,9 +1,10 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class TokenService {
-  static const String baseUrl = "http://localhost:8080";
+  static const String baseUrl = AppConstants.backendUrl;
 
   Future<bool> checkAndRefreshToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -58,7 +59,7 @@ class TokenService {
         return true;
       }
     } catch (e) {
-      print('Refresh failed: $e');
+      throw Exception("Refresh Failed: $e");
     }
 
     return false;

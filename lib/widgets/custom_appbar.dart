@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class CustomAppBar extends StatelessWidget
-    implements PreferredSizeWidget {
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     super.key,
     this.showProfileIcon = true,
@@ -20,10 +19,7 @@ class CustomAppBar extends StatelessWidget
     final isAdmin = prefs.getBool('isAdmin') ?? false;
 
     if (isProfileScreen) {
-      Navigator.pushReplacementNamed(
-        context,
-        AppRoutes.studentHomeScreen,
-      );
+      Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
     } else {
       Navigator.pushNamed(
         context,
@@ -31,6 +27,7 @@ class CustomAppBar extends StatelessWidget
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -94,7 +91,7 @@ class CustomAppBar extends StatelessWidget
                   color: Colors.white,
                 ),
               ),
-               onPressed: () => _handleProfileIconTap(context), 
+              onPressed: () => _handleProfileIconTap(context),
             ),
         ],
       ),

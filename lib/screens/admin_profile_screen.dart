@@ -3,9 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
-
 
 class AdminProfileScreen extends StatefulWidget {
   const AdminProfileScreen({super.key});
@@ -16,7 +15,8 @@ class AdminProfileScreen extends StatefulWidget {
 
 class _AdminProfileScreenState extends State<AdminProfileScreen> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false;
   String? adminEmail;
@@ -51,7 +51,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     }
 
     if (!isValidPassword(newPassword)) {
-      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
+      _showSnackBar(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
+      );
       return;
     }
 
@@ -65,10 +67,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     final response = await http.post(
       Uri.parse('http://localhost:8080/api/auth/admin/change-password'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': adminEmail,
-        'newPassword': newPassword,
-      }),
+      body: jsonEncode({'email': adminEmail, 'newPassword': newPassword}),
     );
     setState(() => _isLoading = false);
 
@@ -81,10 +80,12 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
-   void _showPasswordChangeDialog() {
+  void _showPasswordChangeDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -98,16 +99,27 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
-                      icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
                       onPressed: () {
-                        setState(() => _isPasswordVisible = !_isPasswordVisible);
+                        setState(
+                          () => _isPasswordVisible = !_isPasswordVisible,
+                        );
                       },
                     ),
                     filled: true,
                     fillColor: Colors.grey[300],
                     hintText: 'Enter new password',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -116,16 +128,27 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   obscureText: !_isPasswordVisible,
                   decoration: InputDecoration(
                     suffixIcon: IconButton(
-                      icon: Icon(_isPasswordVisible ? Icons.visibility : Icons.visibility_off),
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                      ),
                       onPressed: () {
-                        setState(() => _isPasswordVisible = !_isPasswordVisible);
+                        setState(
+                          () => _isPasswordVisible = !_isPasswordVisible,
+                        );
                       },
                     ),
                     filled: true,
                     fillColor: Colors.grey[300],
                     hintText: 'Confirm new password',
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10.0)),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 30),
@@ -136,10 +159,18 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purpleAccent,
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
                   ),
-                  child: const Text("Change Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    "Change Password",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
@@ -165,7 +196,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: const CustomAppBar(isProfileScreen: true),
-          backgroundColor: Colors.transparent,
+        backgroundColor: Colors.transparent,
         body: Stack(
           children: [
             // ScreensBackground effect
@@ -186,7 +217,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                 height: height * 0.3,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Color.fromARGB(154, 164, 86, 22), blurRadius: 130, spreadRadius: 70)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(154, 164, 86, 22),
+                      blurRadius: 130,
+                      spreadRadius: 70,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -198,14 +235,22 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                 height: height * 0.3,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  boxShadow: [BoxShadow(color: Color.fromARGB(141, 102, 16, 88), blurRadius: 150, spreadRadius: 100)],
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color.fromARGB(141, 102, 16, 88),
+                      blurRadius: 150,
+                      spreadRadius: 100,
+                    ),
+                  ],
                 ),
               ),
             ),
             Positioned.fill(
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(color: const Color.fromRGBO(255, 255, 255, 0.05)),
+                child: Container(
+                  color: const Color.fromRGBO(255, 255, 255, 0.05),
+                ),
               ),
             ),
 
@@ -235,10 +280,21 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                         onPressed: _showPasswordChangeDialog,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purpleAccent,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
-                        child: const Text("Change Password", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          "Change Password",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -263,13 +319,30 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
         padding: EdgeInsets.all(width * 0.04),
         child: Row(
           children: [
-            CircleAvatar(radius: width * 0.10, backgroundImage: const AssetImage('assets/profile.png')),
+            CircleAvatar(
+              radius: width * 0.10,
+              backgroundImage: const AssetImage('assets/profile.png'),
+            ),
             SizedBox(width: width * 0.04),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: const [
-                Text("admin@bvrit.ac.in", style: TextStyle(fontSize: 16, fontFamily: 'Alata', color: Colors.white)),
-                Text("admin", style: TextStyle(fontSize: 16, fontFamily: 'Alata', color: Colors.white)),
+                Text(
+                  "admin@bvrit.ac.in",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Alata',
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  "admin",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontFamily: 'Alata',
+                    color: Colors.white,
+                  ),
+                ),
               ],
             ),
           ],

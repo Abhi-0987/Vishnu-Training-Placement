@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vishnu_training_and_placements/roots/app_roots.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:vishnu_training_and_placements/services/auth_service.dart';
@@ -12,7 +12,7 @@ class StudentLoginScreen extends StatefulWidget {
   const StudentLoginScreen({super.key, required this.isAdmin});
 
   @override
-  _StudentLoginScreenState createState() => _StudentLoginScreenState();
+  State<StudentLoginScreen> createState() => _StudentLoginScreenState();
 }
 
 class _StudentLoginScreenState extends State<StudentLoginScreen> {
@@ -20,24 +20,28 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   final TextEditingController passwordController = TextEditingController();
   bool _isPasswordVisible = false;
   bool _isLoading = false; // Show loading indicator
-  
-  Future<void> login() async {
-     final password = passwordController.text.trim();
-  final email = emailController.text.trim();
 
-  if (email.isEmpty || password.isEmpty) {
-    showError("Email and password cannot be empty.");
-    return;
-  }
+  Future<void> login() async {
+    final password = passwordController.text.trim();
+    final email = emailController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      showError("Email and password cannot be empty.");
+      return;
+    }
     setState(() {
       _isLoading = true; // Start loading
     });
 
     try {
-      final response = await AuthService().login(email, password, widget.isAdmin);
-        
+      final response = await AuthService().login(
+        email,
+        password,
+        widget.isAdmin,
+      );
+
       setState(() {
-        _isLoading = false; 
+        _isLoading = false;
       });
 
       if (response.statusCode == 200) {
@@ -51,19 +55,17 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('studentEmail', email);
-        if (data["login"] == false){ 
-          Navigator.pushNamed(
-            context,
-            AppRoutes.changePasswordScreen,
-            arguments: {"email": email},
-          );
-        
-        } else {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.studentHomeScreen,
-          );
-        }  // Navigate on success
+          if (mounted) {
+            if (data["login"] == false) {
+              Navigator.pushNamed(
+                context,
+                AppRoutes.changePasswordScreen,
+                arguments: {"email": email},
+              );
+            } else {
+              Navigator.pushNamed(context, AppRoutes.studentHomeScreen);
+            }
+          } // Navigate on success
         } else if (data["role"] == "Admin") {
           prefs.setBool('isAdmin', true);
           prefs.setBool('isLoggedIn', true);
@@ -71,23 +73,22 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('adminEmail', email);
-          Navigator.pushNamed(
-            context,
-            AppRoutes.studentHomeScreen,
-          ); // Navigate on success
+          if (mounted) {
+            Navigator.pushNamed(context, AppRoutes.studentHomeScreen);
+          } // Navigate on success
         } else {
           showError("Invalid Credentials");
         }
       } else {
         showError("Server Error. Try again.");
       }
-    }catch (e) {
-    setState(() {
-      _isLoading = false;
-    });
-    showError("Something went wrong. Try again later.");
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      showError("Something went wrong. Try again later.");
+    }
   }
-}
 
   void showError(String message) {
     ScaffoldMessenger.of(
