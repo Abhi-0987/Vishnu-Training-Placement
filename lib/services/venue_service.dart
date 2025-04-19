@@ -1,33 +1,8 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vishnu_training_and_placements/models/venue_model.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
-
-class Venue {
-  final int id;
-  final String blockName;
-  final String roomNumber;
-  final double latitude;
-  final double longitude;
-
-  Venue({
-    required this.id,
-    required this.blockName,
-    required this.roomNumber,
-    required this.latitude,
-    required this.longitude,
-  });
-
-  factory Venue.fromJson(Map<String, dynamic> json) {
-    return Venue(
-      id: json['id'],
-      blockName: json['blockName'],
-      roomNumber: json['roomNumber'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-    );
-  }
-}
 
 class VenueService {
   String baseUrl = AppConstants.backendUrl;

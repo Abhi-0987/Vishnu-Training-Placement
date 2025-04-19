@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:vishnu_training_and_placements/models/venue_model.dart';
 import 'package:vishnu_training_and_placements/services/schedule_service.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
