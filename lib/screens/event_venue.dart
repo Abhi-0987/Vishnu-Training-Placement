@@ -94,6 +94,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final blockName = parts.isNotEmpty ? parts[0] : '';
     final roomNo = parts.length > 1 ? parts[1] : '';
 
+    // Format the data as a proper JSON object
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
@@ -103,6 +104,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     };
 
     try {
+      // Ensure we're sending proper JSON data
       final result = await ApiServices.saveSchedule(scheduleData);
 
       if (result['success']) {

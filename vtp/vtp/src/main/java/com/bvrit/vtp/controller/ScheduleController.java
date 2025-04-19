@@ -6,6 +6,7 @@ import com.bvrit.vtp.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/schedules")
+@RequestMapping("/api")
 public class ScheduleController {
 
     @Autowired
@@ -28,19 +29,7 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.getAllSchedules());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Schedule> getScheduleById(@PathVariable Long id) {
-        return scheduleService.getScheduleById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @GetMapping("/location/{location}")
-    public ResponseEntity<List<Schedule>> getSchedulesByLocation(@PathVariable String location) {
-        return ResponseEntity.ok(scheduleService.getSchedulesByLocation(location));
-    }
-
-    @PostMapping
+    @PostMapping(value = "/schedules", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
         try {
             // Parse date and time to check availability
