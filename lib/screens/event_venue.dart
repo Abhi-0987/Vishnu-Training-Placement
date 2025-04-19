@@ -396,7 +396,8 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
   Widget _buildBranchSelector() {
     return Wrap(
-      spacing: 8,
+      spacing: 10, // Increased horizontal spacing between chips
+      runSpacing: 10, // Added vertical spacing between rows of chips
       children: branches.map((branch) {
         final isSelected = selectedBranches.contains(branch);
         return FilterChip(
@@ -404,6 +405,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           selected: isSelected,
           backgroundColor: Colors.grey[800],
           selectedColor: Colors.purple,
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4), // Added padding inside chips
           onSelected: (bool selected) {
             setState(() {
               if (selected) {
