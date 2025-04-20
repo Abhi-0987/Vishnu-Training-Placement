@@ -74,7 +74,9 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('adminEmail', email);
           if (mounted) {
-            Navigator.pushNamed(context, AppRoutes.studentHomeScreen);
+            Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
+          } else {
+            Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
           } // Navigate on success
         } else {
           showError("Invalid Credentials");
