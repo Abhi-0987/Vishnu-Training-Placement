@@ -1,4 +1,5 @@
 import 'package:vishnu_training_and_placements/screens/AdminAttendanceScreen.dart';
+import 'package:vishnu_training_and_placements/screens/admin_homescreen.dart';
 import 'package:vishnu_training_and_placements/screens/admin_profile_screen.dart';
 import 'package:vishnu_training_and_placements/screens/event_venue.dart';
 import 'package:vishnu_training_and_placements/screens/login_screen.dart';
@@ -22,6 +23,8 @@ class AppRoutes {
   static const String adminProfileScreen = '/profile-screen-admin';
   static const String event_venue = '/event-venue-screen';
   static const String changePasswordScreen = '/change-password-screen';
+  static const String adminHomeScreen = '/home-screen-admin';
+  // Get route path based on route name
 
   // Define route map
   static final routes = {
@@ -32,6 +35,7 @@ class AppRoutes {
     markAttendanceAdmin: (context) => const AdminMarkAttendence(),
     markAttendanceStudent: (context) => const MarkAttendancePage(),
     studentHomeScreen: (context) => StudentHomeScreen(),
+    adminHomeScreen: (context) => AdminHomeScreen(),
     studentProfileScreen: (context) => const StudentProfileScreen(),
     adminProfileScreen: (context) => const AdminProfileScreen(),
     event_venue: (context) => const EventVenueScreen(),
