@@ -8,11 +8,14 @@ class ScheduleServices {
 
   // Method to save schedule
   static Future<Map<String, dynamic>> saveSchedule(
-    Map<String, dynamic> scheduleData,
+    Map<String, dynamic> scheduleData, // Ensure this map contains a 'branches': ['CSE', 'IT'] list
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      // Use actual token retrieval, the hardcoded one is just for example
+      final token = prefs.getString('token') ?? 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjIxMkBidnJpdC5hYy5pbiIsInJvbGUiOiJTdHVkZW50IiwiaWF0IjoxNzQ0OTEwNjM2LCJleHAiOjE3NDU1MTU0MzZ9.lsFgLNZpsw-utVjSSTbVgggBQPYxfa24qlSaSYScpHA';
+
+      print('Sending schedule data: ${jsonEncode(scheduleData)}'); // Add logging
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/schedules'),
@@ -20,7 +23,7 @@ class ScheduleServices {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(scheduleData),
+        body: jsonEncode(scheduleData), // scheduleData should include the 'branches' list
       );
 
       final contentType = response.headers['content-type'];
@@ -43,6 +46,7 @@ class ScheduleServices {
         };
       }
     } catch (e) {
+      print('Error saving schedule: $e'); // Add logging
       return {'success': false, 'error': 'Network error: ${e.toString()}'};
     }
   }
@@ -81,6 +85,56 @@ class ScheduleServices {
       }
     } catch (e) {
       return {'success': false, 'error': 'Network error: ${e.toString()}'};
+    }
+  }
+  
+  // Method to fetch schedules by branch
+  static Future<List<dynamic>> fetchSchedulesByBranch(String branch) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/schedules/branch/$branch'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      if (response.statusCode == 200) {
+        // Make sure we're properly parsing the JSON response
+        final List<dynamic> jsonResponse = jsonDecode(response.body);
+        return jsonResponse;
+      } else {
+        throw Exception('Failed to load schedules: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
+    }
+  }
+  
+  // Add this method to your ScheduleServices class
+  static Future<List<dynamic>> getAllSchedules() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+      
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/schedules'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+      
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body) as List<dynamic>;
+      } else {
+        throw Exception('Failed to load schedules: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error: ${e.toString()}');
     }
   }
 }

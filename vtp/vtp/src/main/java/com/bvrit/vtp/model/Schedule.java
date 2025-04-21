@@ -26,6 +26,7 @@ public class Schedule {
     
     private String location;
     
+    @Column(name = "room_no")
     private String roomNo;
     
     private LocalDate date;
@@ -34,8 +35,4 @@ public class Schedule {
     
     @Column(name = "student_branch")
     private String studentBranch;
-    
-    // You can add additional fields as needed, such as:
-    // private String purpose;
-    // private Integer capacity;
 }
