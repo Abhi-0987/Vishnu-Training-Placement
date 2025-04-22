@@ -101,8 +101,19 @@ public class WhatsAppController {
     }
 
     @PostMapping(value = "/send", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> sendMessage(@RequestBody Map<String, String> request) {
+    public ResponseEntity<?> sendMessage(@RequestBody Map<String, String> request, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Check authorization
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                logger.error("Missing or invalid authorization header");
+                return ResponseEntity.status(403).body(Collections.singletonMap(
+                        "error", "Authorization required"
+                ));
+            }
+            
+            // Extract token - in a real app, you would validate this token
+            String token = authHeader.substring(7);
+            
             String whatsappNumber = twilioConfig.getWhatsappNumber();
             if (whatsappNumber.isEmpty()) {
                 logger.error("WhatsApp number not configured");

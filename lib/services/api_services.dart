@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
@@ -51,12 +52,19 @@ class ApiService {
     try {
       print("Starting bulk message send to ${phoneNumbers.length} numbers");
 
+      // Get token from shared preferences or use a hardcoded token for testing
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
       for (var phoneNumber in phoneNumbers) {
         try {
           print("Sending message to: $phoneNumber");
           final response = await http.post(
             Uri.parse('$baseUrl/api/whatsapp/send'),
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token', // Add authorization header
+            },
             body: jsonEncode({
               'phone': phoneNumber,
               'message': message,

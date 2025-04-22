@@ -18,7 +18,12 @@ public class WhatsAppService {
 
     private static final String TWILIO_WHATSAPP_NUMBER = "whatsapp:+14155238886"; // Replace with your Twilio WhatsApp number
 
-    public List<String> sendWhatsAppMessages(String messageContent, MultipartFile excelFile) {
+    public List<String> sendWhatsAppMessages(String messageContent, MultipartFile excelFile, String authToken) {
+        // Validate token here if needed
+        if (authToken == null || authToken.isEmpty()) {
+            throw new RuntimeException("Authorization token is required");
+        }
+        
         List<String> results = new ArrayList<>();
         List<String> phoneNumbers = readPhoneNumbersFromExcel(excelFile);
 
