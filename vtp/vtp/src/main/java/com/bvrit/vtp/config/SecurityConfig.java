@@ -40,8 +40,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/schedules/**").permitAll() // Allow access to schedules endpoint
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()) // This now applies to /api/schedules/** as well
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

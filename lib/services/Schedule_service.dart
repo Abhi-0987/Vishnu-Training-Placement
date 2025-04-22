@@ -13,7 +13,7 @@ class ScheduleServices {
     try {
       final prefs = await SharedPreferences.getInstance();
       // Use actual token retrieval, the hardcoded one is just for example
-      final token = prefs.getString('token') ?? 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjIxMkBidnJpdC5hYy5pbiIsInJvbGUiOiJTdHVkZW50IiwiaWF0IjoxNzQ0OTEwNjM2LCJleHAiOjE3NDU1MTU0MzZ9.lsFgLNZpsw-utVjSSTbVgggBQPYxfa24qlSaSYScpHA';
+      final token = prefs.getString('token') ?? '';
 
       print('Sending schedule data: ${jsonEncode(scheduleData)}'); // Add logging
 
@@ -92,8 +92,12 @@ class ScheduleServices {
   static Future<List<dynamic>> fetchSchedulesByBranch(String branch) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      // Using hardcoded token for testing as explained by user
+      final token = prefs.getString('token') ?? ''; 
       
+      // Optional: Check if the token is empty (shouldn't happen with hardcoded fallback)
+      // if (token.isEmpty) { ... }
+
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/branch/$branch'),
         headers: {
@@ -118,22 +122,29 @@ class ScheduleServices {
   static Future<List<dynamic>> getAllSchedules() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      // Use the SAME hardcoded token here for testing consistency
+      final token = prefs.getString('token') ?? ''; 
       
+      // Optional: Check if the token is empty (shouldn't happen with hardcoded fallback)
+      // if (token.isEmpty) { ... }
+
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token', // Send the token
         },
       );
       
       if (response.statusCode == 200) {
         return jsonDecode(response.body) as List<dynamic>;
       } else {
+        // Provide more specific error info if possible
+        print('Error fetching all schedules: ${response.statusCode} ${response.body}'); 
         throw Exception('Failed to load schedules: ${response.statusCode}');
       }
     } catch (e) {
+      print('Network error in getAllSchedules: $e'); // Add specific logging
       throw Exception('Network error: ${e.toString()}');
     }
   }
