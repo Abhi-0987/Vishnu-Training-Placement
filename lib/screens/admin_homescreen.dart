@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -20,7 +21,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final double height = screenSize.height;
     final double width = screenSize.width;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstants.textBlack,
       extendBodyBehindAppBar: true,
       appBar: CustomAppBar(), // Dark theme background
       body: Stack(
@@ -41,7 +42,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           'Hello..!!',
                           style: TextStyle(
                             fontSize: 28,
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                             fontFamily: 'Alata',
                           ),
                         ),
@@ -49,7 +50,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           'Name of Admin',
                           style: TextStyle(
                             fontSize: 28,
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                             fontFamily: 'Alata',
                           ),
                         ),
@@ -149,7 +150,10 @@ class CustomCard extends StatelessWidget {
               children: [
                 Text(
                   text,
-                  style: const TextStyle(color: Colors.white, fontSize: 25),
+                  style: const TextStyle(
+                    color: AppConstants.textWhite,
+                    fontSize: 25,
+                  ),
                 ),
                 if (image != null)
                   Image.asset(

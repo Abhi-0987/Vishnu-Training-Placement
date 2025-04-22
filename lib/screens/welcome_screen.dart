@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -178,15 +179,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         borderRadius: BorderRadius.circular(18),
                                         gradient: const LinearGradient(
                                           colors: [
-                                            Colors.pinkAccent,
-                                            Colors.orangeAccent,
+                                            AppConstants.primaryColor,
+                                            AppConstants.secondaryColor,
                                           ],
                                         ),
                                       ),
                                       padding: const EdgeInsets.all(3),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
+                                          backgroundColor:
+                                              AppConstants.textBlack,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
@@ -231,8 +233,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         borderRadius: BorderRadius.circular(18),
                                         gradient: const LinearGradient(
                                           colors: [
-                                            Colors.pinkAccent,
-                                            Colors.orangeAccent,
+                                            AppConstants.primaryColor,
+                                            AppConstants.secondaryColor,
                                           ],
                                         ),
                                       ),

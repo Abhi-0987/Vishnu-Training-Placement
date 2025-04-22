@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/services/token_service.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -82,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: const Text(
                   'Vishnu Training and Placements',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),

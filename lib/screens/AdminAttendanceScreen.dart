@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart' as xl;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/services/api_services.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
 import 'package:get/get.dart';
@@ -437,7 +438,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     final Size screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstants.textBlack,
       extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(),
       body: Stack(
@@ -458,7 +459,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                           const Text(
                             "Absentees",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppConstants.textWhite,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Alata',
@@ -479,7 +480,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                   const Text(
                                     "Upload Attendance Sheet",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: AppConstants.textWhite,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Alata',
@@ -491,7 +492,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                     children: [
                                       ElevatedButton.icon(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.purple,
+                                          backgroundColor: AppConstants.backgroundColor,
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 12,
                                             horizontal: 20,
@@ -510,7 +511,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                             Text(
                                               "Upload Excel File",
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: 16,
                                                 fontFamily: 'Alata',
                                               ),
@@ -633,10 +634,10 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                   0.3, // 30% of screen height
                               padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade800.withOpacity(0.3),
+                                color: Colors.grey.shade800,
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: AppConstants.textWhite,
                                   width: 1,
                                 ),
                               ),
@@ -677,7 +678,8 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                   controller
                                                       .phoneNumbers[index],
                                                   style: const TextStyle(
-                                                    color: Colors.white,
+                                                    color:
+                                                        AppConstants.textWhite,
                                                     fontSize: 16,
                                                   ),
                                                 ),
@@ -713,7 +715,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                             child: Obx(
                               () => ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
+                                  backgroundColor: AppConstants.backgroundColor,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 12,
                                     horizontal: 20,
@@ -862,7 +864,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                           ? "Sending..."
                                           : "Send via WhatsApp",
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppConstants.textWhite,
                                         fontSize: 16,
                                         fontFamily: 'Alata',
                                       ),
@@ -885,6 +887,19 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: AppConstants.backgroundColor,
+        selectedItemColor: AppConstants.textWhite,
+        unselectedItemColor: Colors.white60,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+            label: "Account",
           ),
         ],
       ),

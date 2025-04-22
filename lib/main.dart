@@ -11,11 +11,11 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.splash,
-      routes: AppRoutes.routes,
-      // home: StudentLoginScreen(isAdmin: false),
-      // home: AdminMarkAttendence(),
+      // debugShowCheckedModeBanner: false,
+      // initialRoute: AppRoutes.splash,
+      // routes: AppRoutes.routes,
+      // home: ChangePasswordScreen(),
+      // home: AdminProfileScreen(),
     );
   }
 }

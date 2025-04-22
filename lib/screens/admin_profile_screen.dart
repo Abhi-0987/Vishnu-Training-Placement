@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
 class AdminProfileScreen extends StatefulWidget {
@@ -17,8 +18,10 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
+  final TextEditingController studentEmailController = TextEditingController();
   bool _isPasswordVisible = false;
   String? adminEmail;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -38,6 +41,32 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#\$&*~]).{8,}$',
     );
     return passwordRegex.hasMatch(password);
+  }
+
+  void _resetStudentPassword() async {
+    final email = studentEmailController.text.trim();
+
+    if (email.isEmpty) {
+      _showSnackBar("Email field cannot be empty.");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    final response = await http.post(
+      Uri.parse('http://localhost:8080/api/auth/student/reset-password'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    setState(() => _isLoading = false);
+
+    if (response.statusCode == 200) {
+      _showSnackBar("Student password reset successfully.");
+      studentEmailController.clear();
+    } else {
+      _showSnackBar("Failed to reset student password.");
+    }
   }
 
   void _changePassword() async {
@@ -69,7 +98,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
     if (response.statusCode == 200) {
       _showSnackBar("Password changed successfully");
-      Navigator.pop(context); // Go back to AdminProfile or previous screen
+      Navigator.pop(context);
     } else {
       _showSnackBar("Error changing password");
     }
@@ -79,6 +108,64 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _showStudentPasswordResetDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Reset Student Password"),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: studentEmailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(
+                    hintText: 'Enter student email',
+                    filled: true,
+                    fillColor: Colors.grey[300],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 20,
+                      horizontal: 16,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    _resetStudentPassword();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppConstants.backgroundColor,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    "Reset Password",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppConstants.textWhite,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   void _showPasswordChangeDialog() {
@@ -154,7 +241,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                     _changePassword();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purpleAccent,
+                    backgroundColor: AppConstants.backgroundColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 16,
@@ -165,9 +252,14 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   ),
                   child: const Text(
                     "Change Password",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppConstants.textWhite,
+                    ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -195,7 +287,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
         backgroundColor: Colors.transparent,
         body: Stack(
           children: [
-            // ScreensBackground effect
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -249,8 +340,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                 ),
               ),
             ),
-
-            // Foreground
             SafeArea(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: width * 0.04),
@@ -264,7 +353,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                           fontSize: width * 0.06,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Alata',
-                          color: Colors.white,
+                          color: AppConstants.textWhite,
                         ),
                       ),
                     ),
@@ -272,28 +361,86 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                     _buildProfileCard(width, height),
                     SizedBox(height: height * 0.02),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: _showPasswordChangeDialog,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purpleAccent,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                            vertical: 16,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppConstants.secondaryColor,
+                              AppConstants.primaryColor,
+                            ],
                           ),
                         ),
-                        child: const Text(
-                          "Change Password",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                        padding: EdgeInsets.all(width * 0.001),
+                        child: ElevatedButton(
+                          onPressed:
+                              _isLoading ? null : _showPasswordChangeDialog,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black.withAlpha(220),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.18,
+                              vertical: height * 0.013,
+                            ),
+                          ),
+                          child: Text(
+                            'Change Password',
+                            style: TextStyle(
+                              color: AppConstants.textWhite,
+                              fontSize: width * 0.04,
+                              fontFamily: 'Alata',
+                            ),
                           ),
                         ),
                       ),
                     ),
                     const SizedBox(height: 20),
+                    Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppConstants.secondaryColor,
+                              AppConstants.primaryColor,
+                            ],
+                          ),
+                        ),
+                        padding: EdgeInsets.all(width * 0.001),
+                        child: ElevatedButton(
+                          onPressed:
+                              _isLoading
+                                  ? null
+                                  : _showStudentPasswordResetDialog,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppConstants.textBlack,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.1,
+                              vertical: height * 0.013,
+                            ),
+                          ),
+                          child: Text(
+                            'Change Student Password',
+                            style: TextStyle(
+                              color: AppConstants.textWhite,
+                              fontSize: width * 0.04,
+                              fontFamily: 'Alata',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -328,7 +475,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontFamily: 'Alata',
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                   ),
                 ),
                 Text(
@@ -336,7 +483,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   style: TextStyle(
                     fontSize: 16,
                     fontFamily: 'Alata',
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                   ),
                 ),
               ],

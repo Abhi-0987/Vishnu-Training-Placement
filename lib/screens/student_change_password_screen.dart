@@ -105,7 +105,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                 Text(
                   'Vishnu',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                     fontSize: width * 0.09,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Alata',
@@ -117,7 +117,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Text(
                       'Training and',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.05,
                         fontFamily: 'Alata',
                       ),
@@ -125,7 +125,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Text(
                       'Placements',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.05,
                       ),
                     ),
@@ -216,7 +216,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Text(
                       'Change your',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.04,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Alata',
@@ -225,7 +225,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     Text(
                       'Password',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.08,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Alata',
@@ -263,7 +263,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                         width * 0.04,
                                       ),
                                       border: Border.all(
-                                        color: Colors.white,
+                                        color: AppConstants.textWhite,
                                         width: 1,
                                       ),
                                     ),
@@ -295,13 +295,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                 ?.withAlpha(170),
                                             hintText: 'Enter password',
                                             hintStyle: TextStyle(
-                                              color: Colors.black,
+                                              color: AppConstants.textBlack,
                                             ),
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(10.0),
                                               borderSide: BorderSide(
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                             ),
                                             contentPadding:
@@ -321,7 +321,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                 _isPasswordVisible
                                                     ? Icons.visibility
                                                     : Icons.visibility_off,
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                               onPressed: () {
                                                 setState(() {
@@ -335,13 +335,13 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                 ?.withAlpha(170),
                                             hintText: 'Confirm password',
                                             hintStyle: TextStyle(
-                                              color: Colors.black,
+                                              color: AppConstants.textBlack,
                                             ),
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(10.0),
                                               borderSide: BorderSide(
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                             ),
                                             contentPadding:
@@ -360,8 +360,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                Colors.orangeAccent,
-                                                Colors.pinkAccent,
+                                                AppConstants.primaryColor,
+                                                AppConstants.secondaryColor,
                                               ],
                                             ),
                                           ),
@@ -370,7 +370,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                           ),
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.black
+                                              backgroundColor: AppConstants
+                                                  .textBlack
                                                   .withAlpha(220),
                                               elevation: 0,
                                               shape: RoundedRectangleBorder(
@@ -387,7 +388,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                             child: Text(
                                               'Login',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: width * 0.04,
                                                 fontFamily: 'Alata',
                                               ),
@@ -412,7 +413,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         Text(
                           'Need help with login?',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                             fontSize: width * 0.045,
                           ),
                         ),
@@ -420,7 +421,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         Text(
                           'Contact Administrator',
                           style: TextStyle(
-                            color: Colors.purple,
+                            color: AppConstants.primaryColor,
                             fontSize: width * 0.045,
                           ),
                         ),
