@@ -115,10 +115,13 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
-      "date": selectedDate.toIso8601String().split('T')[0],
-      "time": selectedTime,
-      "studentBranch": selectedBranches.join(','),
+      "date": selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
+      "time": selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
+      "branches": selectedBranches, // <-- Corrected: Use key "branches" and pass the List<String>
     };
+
+    // Add a print statement here to verify the map before sending
+    print('Constructed scheduleData: $scheduleData');
 
     try {
       // Ensure we're sending proper JSON data
