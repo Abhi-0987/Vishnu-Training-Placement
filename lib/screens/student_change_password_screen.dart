@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -13,6 +15,7 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final baseUrl = AppConstants.backendUrl;
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController =
       TextEditingController();
@@ -29,6 +32,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   void _changePassword(String email) async {
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
 
     if (newPassword.isEmpty || confirmPassword.isEmpty) {
       _showSnackBar("Password fields cannot be empty.");
@@ -50,8 +55,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     setState(() => _isLoading = true);
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/api/auth/student/change-password'),
-      headers: {'Content-Type': 'application/json'},
+      Uri.parse('$baseUrl/api/student/change-password'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
       body: jsonEncode({'email': email, 'newPassword': newPassword}),
     );
 
