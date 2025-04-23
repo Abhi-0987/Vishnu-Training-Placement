@@ -2,7 +2,7 @@ package com.bvrit.vtp.service;
 
 
 import com.bvrit.vtp.model.Contact;
-import com.bvrit.vtp.repository.ContactRepository;
+import com.bvrit.vtp.dao.ContactRepository;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;

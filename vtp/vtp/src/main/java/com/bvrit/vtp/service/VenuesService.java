@@ -2,7 +2,7 @@ package com.bvrit.vtp.service;
 
 import com.bvrit.vtp.dto.VenueDTO;
 import com.bvrit.vtp.model.Venues;
-import com.bvrit.vtp.repository.VenuesRepository;
+import com.bvrit.vtp.dao.VenuesRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

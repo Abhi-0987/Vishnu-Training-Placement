@@ -2,7 +2,7 @@ package com.bvrit.vtp.controller;
 
 
 import com.bvrit.vtp.model.Contact;
-import com.bvrit.vtp.repository.ContactRepository;
+import com.bvrit.vtp.dao.ContactRepository;
 import com.bvrit.vtp.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
