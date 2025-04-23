@@ -52,7 +52,6 @@ class ApiService {
     try {
       print("Starting bulk message send to ${phoneNumbers.length} numbers");
 
-      // Get token from shared preferences or use a hardcoded token for testing
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
 
