@@ -18,7 +18,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
   bool _isPasswordVisible = false;
-  bool _isLoading = false;
   String? adminEmail;
 
   @override
@@ -62,14 +61,11 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       return;
     }
 
-    setState(() => _isLoading = true);
-
     final response = await http.post(
       Uri.parse('http://localhost:8080/api/auth/admin/change-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': adminEmail, 'newPassword': newPassword}),
     );
-    setState(() => _isLoading = false);
 
     if (response.statusCode == 200) {
       _showSnackBar("Password changed successfully");

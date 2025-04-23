@@ -21,7 +21,7 @@ class AppRoutes {
   static const String studentHomeScreen = '/home-screen-student';
   static const String studentProfileScreen = '/profile-screen-student';
   static const String adminProfileScreen = '/profile-screen-admin';
-  static const String event_venue = '/event-venue-screen';
+  static const String eventVenue = '/event-venue-screen';
   static const String changePasswordScreen = '/change-password-screen';
   static const String adminHomeScreen = '/home-screen-admin';
   // Get route path based on route name
@@ -38,7 +38,7 @@ class AppRoutes {
     adminHomeScreen: (context) => AdminHomeScreen(),
     studentProfileScreen: (context) => const StudentProfileScreen(),
     adminProfileScreen: (context) => const AdminProfileScreen(),
-    event_venue: (context) => const EventVenueScreen(),
+    eventVenue: (context) => const EventVenueScreen(),
     changePasswordScreen: (_) => const ChangePasswordScreen(),
   };
 }
