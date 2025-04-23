@@ -33,10 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
               AppRoutes.studentHomeScreen,
             );
           } else {
-            Navigator.pushReplacementNamed(
-              context,
-              AppRoutes.studentHomeScreen,
-            );
+            Navigator.pushReplacementNamed(context, AppRoutes.adminHomeScreen);
           }
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.welcome);
