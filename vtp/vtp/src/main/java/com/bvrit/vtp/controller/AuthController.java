@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 public class AuthController {
 
     @Autowired private AuthService authService;
@@ -26,7 +26,7 @@ public class AuthController {
     @Autowired private AdminRepo adminRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
-    @PostMapping(value = "/admin/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/admin/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> adminlogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
@@ -56,7 +56,7 @@ public class AuthController {
         ));
     }
 
-    @PostMapping(value = "/student/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/student/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> studentlogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
@@ -118,7 +118,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Admin password updated successfully"));
     }
 
-    @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenResponse> refresh(@RequestBody Map<String, String> tokenMap) {
         return ResponseEntity.ok(authService.refresh(tokenMap.get("refreshToken")));
     }
