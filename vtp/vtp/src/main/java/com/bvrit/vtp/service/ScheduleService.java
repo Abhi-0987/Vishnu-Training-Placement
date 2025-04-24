@@ -22,6 +22,29 @@ public class ScheduleService {
     @Autowired
     private ScheduleRepository scheduleRepository;
 
+<<<<<<< HEAD
+=======
+    @Autowired
+    private StudentDetailsRepo studentDetailsRepository;
+
+    @Autowired
+    private StudentAttendanceRepo studentAttendanceRepository;
+    // Method to mark attendance as present
+    public boolean markAttendancePresent(String email, LocalDate date) {
+        Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findByEmailAndDate(email, date);
+
+        if (attendanceOpt.isPresent()) {
+            StudentAttendance attendance = attendanceOpt.get();
+            attendance.setPresent(true);  // marking as present
+            studentAttendanceRepository.save(attendance);
+            return true;
+        } else {
+            return false; // attendance not found
+        }
+    }
+
+    // Method to get all schedules
+>>>>>>> c76c87a (updated mark attendance status functionality)
     public List<Schedule> getAllSchedules() {
         return scheduleRepository.findAll();
     }
