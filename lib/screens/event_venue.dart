@@ -88,24 +88,45 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   String selectedLocation = '';
 
   Future<void> _scheduleClass() async {
+    // --- Validation Checks ---
     if (selectedLocation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select a location.'),
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      return; // Stop execution if location is not selected
     }
+
+    // Check if a date is selected (though TableCalendar usually ensures this)
+    // You might adjust this check based on how `selectedDate` could become null
+    // For now, we assume it's always initialized. If it could be null:
+    // if (selectedDate == null) { ... }
+
+    // Check if a time slot is selected (it has a default, but good to check)
+    if (selectedTime.isEmpty) { // Or check against a specific "not selected" value if applicable
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a time slot.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return; // Stop execution if time is not selected
+    }
+
+
     if (selectedBranches.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select at least one branch.'),
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      return; // Stop execution if no branches are selected
     }
+    // --- End Validation Checks ---
+
 
     final parts = selectedLocation.split(' - Room ');
     final blockName = parts.isNotEmpty ? parts[0] : '';
@@ -117,7 +138,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       "roomNo": roomNo,
       "date": selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
       "time": selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
-      "branches": selectedBranches, // <-- Corrected: Use key "branches" and pass the List<String>
+      "branches": selectedBranches, // Pass the List<String>
     };
 
     // Add a print statement here to verify the map before sending
@@ -127,13 +148,24 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       // Ensure we're sending proper JSON data
       final result = await ScheduleServices.saveSchedule(scheduleData);
 
+      // Check context before showing SnackBar
+      if (!mounted) return;
+
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Schedule created successfully!'),
             backgroundColor: Colors.green,
           ),
         );
+        // Optionally clear fields or navigate away after success
+        // setState(() {
+        //   selectedLocation = '';
+        //   selectedBranches = [];
+        //   selectedDate = DateTime.now();
+        //   focusedDate = DateTime.now();
+        //   selectedTime = "9:30 - 11:15";
+        // });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -144,6 +176,8 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       }
     } catch (e) {
       print('Schedule error: $e');
+      // Check context before showing SnackBar
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Unexpected error: $e'),
