@@ -31,6 +31,8 @@ public class ScheduleService {
     private StudentAttendanceRepo studentAttendanceRepository;
     // Method to mark attendance as present
     public boolean markAttendancePresent(String email, LocalDate date) {
+        System.out.println("Checking attendance for email: " + email + ", date: " + date);
+
         Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findByEmailAndDate(email, date);
 
         if (attendanceOpt.isPresent()) {
@@ -39,6 +41,7 @@ public class ScheduleService {
             studentAttendanceRepository.save(attendance);
             return true;
         } else {
+            System.out.println("No attendance record found for " + email + " on " + date);
             return false; // attendance not found
         }
     }
