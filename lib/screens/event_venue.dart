@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
 import 'package:vishnu_training_and_placements/services/schedule_service.dart';
-import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
@@ -89,39 +88,61 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   String selectedLocation = '';
 
   Future<void> _scheduleClass() async {
+    // --- Validation Checks ---
     if (selectedLocation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select a location.'),
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      return; // Stop execution if location is not selected
     }
+
+    // Check if a date is selected (though TableCalendar usually ensures this)
+    // You might adjust this check based on how `selectedDate` could become null
+    // For now, we assume it's always initialized. If it could be null:
+    // if (selectedDate == null) { ... }
+
+    // Check if a time slot is selected (it has a default, but good to check)
+    if (selectedTime.isEmpty) { // Or check against a specific "not selected" value if applicable
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select a time slot.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return; // Stop execution if time is not selected
+    }
+
+
     if (selectedBranches.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please select at least one branch.'),
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      return; // Stop execution if no branches are selected
     }
+    // --- End Validation Checks ---
+
 
     final parts = selectedLocation.split(' - Room ');
     final blockName = parts.isNotEmpty ? parts[0] : '';
     final roomNo = parts.length > 1 ? parts[1] : '';
 
     // Format the data as a proper JSON object
+    // Join the selected branches into a comma-separated string
+    String branchesString = selectedBranches.join(',');
+
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
-      "date":
-          selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
-      "time":
-          selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
-      "branches":
-          selectedBranches, // <-- Corrected: Use key "branches" and pass the List<String>
+      "date": selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
+      "time": selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
+      // Correct the key to "studentBranch" and use the joined string
+      "studentBranch": branchesString, 
     };
 
     // Add a print statement here to verify the map before sending
@@ -131,13 +152,24 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       // Ensure we're sending proper JSON data
       final result = await ScheduleServices.saveSchedule(scheduleData);
 
+      // Check context before showing SnackBar
+      if (!mounted) return;
+
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Schedule created successfully!'),
             backgroundColor: Colors.green,
           ),
         );
+        // Optionally clear fields or navigate away after success
+        // setState(() {
+        //   selectedLocation = '';
+        //   selectedBranches = [];
+        //   selectedDate = DateTime.now();
+        //   focusedDate = DateTime.now();
+        //   selectedTime = "9:30 - 11:15";
+        // });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -148,6 +180,8 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       }
     } catch (e) {
       print('Schedule error: $e');
+      // Check context before showing SnackBar
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Unexpected error: $e'),
@@ -166,7 +200,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(),
-      backgroundColor: AppConstants.textBlack,
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
           ScreensBackground(height: height, width: width),
@@ -183,7 +217,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                         fontSize: height * 0.02,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Alata',
-                        color: AppConstants.textWhite,
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(height: height * 0.02),
@@ -199,7 +233,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                         fontSize: height * 0.025,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Alata',
-                        color: AppConstants.textWhite,
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(height: height * 0.02),
@@ -211,7 +245,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                         fontSize: height * 0.025,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Alata',
-                        color: AppConstants.textWhite,
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(height: height * 0.02),
@@ -224,7 +258,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                         fontSize: height * 0.025,
                         fontWeight: FontWeight.bold,
                         fontFamily: 'Alata',
-                        color: AppConstants.textWhite,
+                        color: Colors.white,
                       ),
                     ),
                     SizedBox(height: height * 0.02),
@@ -238,7 +272,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                           ElevatedButton(
                             onPressed: _scheduleClass,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppConstants.primaryColor,
+                              backgroundColor: Colors.purple,
                               elevation: 0,
                               padding: EdgeInsets.symmetric(
                                 vertical: height * 0.015,
@@ -250,7 +284,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                               style: TextStyle(
                                 fontSize: height * 0.025,
                                 fontFamily: 'Alata',
-                                color: AppConstants.textWhite,
+                                color: Colors.white,
                               ),
                             ),
                           ),
@@ -269,9 +303,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
   Widget _buildLocationDropdown(Function(String?) onChanged) {
     if (isLoading) {
-      return Center(
-        child: CircularProgressIndicator(color: AppConstants.gradient_1),
-      );
+      return Center(child: CircularProgressIndicator(color: Colors.purple));
     }
 
     if (venues.isEmpty) {
@@ -285,19 +317,14 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           children: [
             Text(
               "Could not load venues. Please check your connection to the server.",
-              style: TextStyle(color: AppConstants.textWhite),
+              style: TextStyle(color: Colors.white),
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 10),
             ElevatedButton(
               onPressed: fetchVenues,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.primaryColor,
-              ),
-              child: Text(
-                "Retry",
-                style: TextStyle(color: AppConstants.textWhite),
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+              child: Text("Retry", style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -313,10 +340,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           borderSide: BorderSide.none,
         ),
       ),
-      hint: Text(
-        "Choose your location",
-        style: TextStyle(color: AppConstants.textWhite),
-      ),
+      hint: Text("Choose your location", style: TextStyle(color: Colors.white)),
       onChanged: (value) {
         onChanged(value);
         if (value != null) {
@@ -342,15 +366,15 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           }
         }
       },
-      style: const TextStyle(color: AppConstants.textWhite),
-      dropdownColor: AppConstants.textBlack,
+      style: const TextStyle(color: Colors.white),
+      dropdownColor: Colors.black,
       items:
           venues.map((venue) {
             return DropdownMenuItem<String>(
               value: "${venue.blockName} - Room ${venue.roomNumber}",
               child: Text(
                 "${venue.blockName} - Room ${venue.roomNumber}",
-                style: TextStyle(color: AppConstants.textWhite),
+                style: TextStyle(color: Colors.white),
               ),
             );
           }).toList(),
@@ -361,7 +385,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     return Container(
       padding: EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: AppConstants.textWhite,
+        color: Colors.grey.shade200,
         borderRadius: BorderRadius.circular(20),
       ),
       child: TableCalendar(
@@ -381,16 +405,16 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         },
         calendarStyle: CalendarStyle(
           selectedDecoration: BoxDecoration(
-            color: AppConstants.primaryColor,
+            color: Colors.purple,
             shape: BoxShape.circle,
           ),
           selectedTextStyle: TextStyle(color: Colors.white),
           todayDecoration: BoxDecoration(
-            color: AppConstants.primaryColor,
+            color: Colors.purple.withOpacity(0.3),
             shape: BoxShape.circle,
           ),
-          todayTextStyle: TextStyle(color: AppConstants.textBlack),
-          disabledTextStyle: TextStyle(color: AppConstants.textWhite),
+          todayTextStyle: TextStyle(color: Colors.black),
+          disabledTextStyle: TextStyle(color: Colors.grey.shade400),
         ),
         headerStyle: HeaderStyle(
           formatButtonVisible: false,
@@ -435,14 +459,14 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppConstants.primaryColor : Colors.grey[800],
+            color: isSelected ? Colors.purple : Colors.grey[800],
             borderRadius: BorderRadius.circular(8.0),
           ),
           alignment: Alignment.center,
           child: Text(
             time,
             style: TextStyle(
-              color: AppConstants.textWhite,
+              color: Colors.white,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -459,13 +483,10 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           branches.map((branch) {
             final isSelected = selectedBranches.contains(branch);
             return FilterChip(
-              label: Text(
-                branch,
-                style: TextStyle(color: AppConstants.textWhite),
-              ),
+              label: Text(branch, style: TextStyle(color: Colors.white)),
               selected: isSelected,
               backgroundColor: Colors.grey[800],
-              selectedColor: AppConstants.primaryColor,
+              selectedColor: Colors.purple,
               padding: EdgeInsets.symmetric(
                 horizontal: 8,
                 vertical: 4,
@@ -495,34 +516,34 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             Text(
               "Location: $selectedLocation",
               style: TextStyle(
-                color: AppConstants.textWhite,
+                color: Colors.white,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
             ),
-            Divider(color: AppConstants.textWhite),
+            Divider(color: Colors.white),
             Text(
               "Date: ${DateFormat('MMM dd, yyyy').format(selectedDate)}",
               style: TextStyle(
-                color: AppConstants.textWhite,
+                color: Colors.white,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
             ),
-            Divider(color: AppConstants.textWhite),
+            Divider(color: Colors.white),
             Text(
               "Time: $selectedTime",
               style: TextStyle(
-                color: AppConstants.textWhite,
+                color: Colors.white,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
             ),
-            Divider(color: AppConstants.textWhite),
+            Divider(color: Colors.white),
             Text(
               "Branches: ${selectedBranches.isEmpty ? 'None selected' : selectedBranches.join(', ')}",
               style: TextStyle(
-                color: AppConstants.textWhite,
+                color: Colors.white,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
