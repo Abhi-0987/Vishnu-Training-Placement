@@ -8,6 +8,7 @@ import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
 import 'package:vishnu_training_and_placements/screens/student_change_password_screen.dart';
 import 'package:vishnu_training_and_placements/screens/student_homescreen.dart';
 import 'package:vishnu_training_and_placements/screens/student_profile.dart';
+import 'package:vishnu_training_and_placements/screens/schedules_screen.dart';
 import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
 class AppRoutes {
@@ -24,6 +25,7 @@ class AppRoutes {
   static const String eventVenue = '/event-venue-screen';
   static const String changePasswordScreen = '/change-password-screen';
   static const String adminHomeScreen = '/home-screen-admin';
+  static const String schedulesScreen ='/schedules-screen';
   // Get route path based on route name
 
   // Define route map
@@ -39,6 +41,7 @@ class AppRoutes {
     studentProfileScreen: (context) => const StudentProfileScreen(),
     adminProfileScreen: (context) => const AdminProfileScreen(),
     eventVenue: (context) => const EventVenueScreen(),
+    schedulesScreen: (context) => const SchedulesScreen(),
     changePasswordScreen: (_) => const ChangePasswordScreen(),
   };
 }

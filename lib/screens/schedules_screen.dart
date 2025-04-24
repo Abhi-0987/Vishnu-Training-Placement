@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vishnu_training_and_placements/services/branch_service.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -7,14 +8,14 @@ import 'package:vishnu_training_and_placements/models/schedule_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 
-class StudentSchedulesScreen extends StatefulWidget {
-  const StudentSchedulesScreen({super.key});
+class SchedulesScreen extends StatefulWidget {
+  const SchedulesScreen({super.key});
 
   @override
-  _StudentSchedulesScreenState createState() => _StudentSchedulesScreenState();
+  _SchedulesScreenState createState() => _SchedulesScreenState();
 }
 
-class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
+class _SchedulesScreenState extends State<SchedulesScreen> {
   List<Schedule> schedules = [];
   List<Schedule> filteredSchedules = [];
   bool isLoading = true;
@@ -22,32 +23,58 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
   String errorMessage = '';
   List<String> allBranches = ['CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT','CSD', 'CSM','PHE','BME','AI & DS','CHEM','CSBS'];
   String selectedBranch = 'All';
+  bool isAdmin = false;
 
   @override
   void initState() {
     super.initState();
-    _getUserBranch();
+    getUserBranch();
+    _loadUserData();
   }
 
-  Future<void> _getUserBranch() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
+  Future<void> _loadUserData() async {
+  final prefs = await SharedPreferences.getInstance();
+
+  setState(() {
+    isAdmin = prefs.getBool('isAdmin') ?? false;
+  });
+
+    _fetchSchedules(); 
+  }
+
+  Future<void> getUserBranch() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('studentEmail'); 
+
+    if (email == null || email.isEmpty) {
+      return;
+    }
+
+    final branch = await StudentService.getBranchByEmail(email);
+
+    if (branch != null) {
+      await prefs.setString('branch', branch);
+
       setState(() {
-        userBranch = prefs.getString('branch') ?? 'CSE'; // Default to CSE if not found
-        selectedBranch = userBranch!; // Set selected branch to user's branch initially
+        userBranch = branch;
+        selectedBranch = branch;
       });
-      _fetchSchedules();
-    } catch (e) {
+
+    } else {
       setState(() {
-        errorMessage = 'Failed to get user branch: $e';
-        isLoading = false;
+        errorMessage = 'Branch not found for email: $email';
+      });
+    }
+  } catch (e) {
+    setState(() {
+        errorMessage = 'Failed to fetch branch: $e';
       });
     }
   }
 
+
   Future<void> _fetchSchedules() async {
-    // Remove the userBranch check as we will fetch all schedules now
-    // if (userBranch == null) return; 
     
     try {
       setState(() {
@@ -55,7 +82,6 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
         errorMessage = '';
       });
 
-      // Fetch ALL schedules instead of just by user's branch
       final schedulesData = await ScheduleServices.getAllSchedules(); 
       
       // Update the print statement
@@ -76,7 +102,19 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
         }).toList();
 
         setState(() {
-          schedules = parsedSchedules;
+          if (isAdmin) {
+            schedules = parsedSchedules;
+          } else {
+            final now = DateTime.now();
+            final today = DateTime(now.year, now.month, now.day);
+
+            schedules = parsedSchedules.where((schedule) {
+              final scheduleDate = DateTime.tryParse(schedule.date);
+              final isFutureOrToday = scheduleDate != null && (scheduleDate.isAfter(today) || scheduleDate.isAtSameMomentAs(today) && _isTimeAfterNow(schedule.time, now));
+              final isBranchMatch = schedule.studentBranch.contains(userBranch ?? '');
+              return isFutureOrToday && isBranchMatch;
+            }).toList();
+          }
           schedules.sort((a, b) {
             // Safely parse dates, handle potential FormatException
             try {
@@ -100,7 +138,6 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
           isLoading = false;
         });
       } catch (e) {
-        // Catch errors specifically from the mapping/parsing process
         setState(() {
           errorMessage = 'Failed to parse schedule data: $e';
           isLoading = false;
@@ -108,7 +145,6 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
       }
 
     } catch (e) {
-      // Catch errors from the API call itself
       setState(() {
         errorMessage = 'Failed to load schedules: $e';
         isLoading = false;
@@ -126,24 +162,36 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
     }
   }
 
+bool _isTimeAfterNow(String timeStr, DateTime now) {
+  try {
+    final timeParts = timeStr.split(':');
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+
+    final scheduleTime = DateTime(now.year, now.month, now.day, hour, minute);
+
+    return scheduleTime.isAfter(now);
+  } catch (e) {
+    print('Error parsing time: $timeStr');
+    return false;
+  }
+}
+
   String _formatDate(String dateStr) { // Input should now be "YYYY-MM-DD"
     try {
-      final date = DateTime.tryParse(dateStr); // tryParse handles "YYYY-MM-DD"
+      final date = DateTime.tryParse(dateStr); 
       if (date != null) {
-        return DateFormat('MMM dd, yyyy').format(date); // e.g., "Jan 20, 2024"
+        return DateFormat('MMM dd, yyyy').format(date); 
       } else {
-        print('Warning: Could not parse date for formatting: $dateStr');
-        return dateStr; // Fallback
+        return dateStr; 
       }
     } catch (e) {
-      print('Error formatting date $dateStr: $e');
-      return dateStr; // Fallback
+      return dateStr; 
     }
   }
 
   String _formatTime(String timeStr) { // Input should now be "HH:mm"
     try {
-      // Parse the "HH:mm" string
       int hour = int.parse(timeStr.split(':')[0]);
       int minute = int.parse(timeStr.split(':')[1]);
       final time = TimeOfDay(hour: hour, minute: minute);
@@ -151,11 +199,10 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
       // Format to AM/PM
       final now = DateTime.now();
       final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-      return DateFormat('h:mm a').format(dt); // e.g., "9:30 AM"
+      return DateFormat('h:mm a').format(dt); 
 
     } catch (e) {
-      print('Error formatting time $timeStr: $e');
-      return timeStr; // Fallback
+      return timeStr;
     }
   }
 
@@ -189,8 +236,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     ),
                   ),
                   SizedBox(height: height * 0.02),
-                  
-                  // Branch selection chips
+                  if (isAdmin)
                   SizedBox(
                     height: height * 0.05,
                     child: ListView(
@@ -237,7 +283,6 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                       ],
                     ),
                   ),
-                  
                   SizedBox(height: height * 0.02),
                   if (isLoading)
                     Expanded(

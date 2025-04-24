@@ -79,10 +79,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           image: 'assets/your-schedules.png',
                         ),
                         onTap: () {
-                          /*Navigator.pushNamed(
+                          Navigator.pushNamed(
                             context,
-                            AppRoutes.markAttendanceAdmin,
-                          );*/
+                            AppRoutes.schedulesScreen,
+                          );
                         },
                       ),
                       const SizedBox(height: 40),
