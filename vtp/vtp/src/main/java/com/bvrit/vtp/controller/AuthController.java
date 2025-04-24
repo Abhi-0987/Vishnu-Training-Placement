@@ -60,11 +60,27 @@ public class AuthController {
     public ResponseEntity<?> studentlogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
+        String deviceId = credentials.get("deviceId");
 
         Optional<Student> optionalStudent = studentRepository.findByEmail(email);
         if (optionalStudent.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid email or password"));
+        }
+
+        Student student = optionalStudent.get();
+        String studentDeviceId = student.getDeviceId();
+
+        if(studentDeviceId!=null && !studentDeviceId.equals(deviceId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "You are trying to login to new device. Please contact admin"));
+        }
+
+        // Check if a different student already has this deviceId
+        Optional<Student> deviceOwner = studentRepository.findByDeviceId(deviceId);
+        if (deviceOwner.isPresent() && !deviceOwner.get().getEmail().equals(email)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "This device is already linked to another account"));
         }
 
         TokenResponse tokenResponse;
@@ -75,7 +91,8 @@ public class AuthController {
                     .body(Map.of("error", "Invalid credentials"));
         }
 
-        Student student = optionalStudent.get();
+        student.setDeviceId(deviceId);
+        studentRepository.save(student);
         boolean loginFlag = student.isLogin();
 
         return ResponseEntity.ok(Map.of(
@@ -85,6 +102,7 @@ public class AuthController {
                 "login", loginFlag
         ));
     }
+
 
     @PostMapping("/student/change-password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
