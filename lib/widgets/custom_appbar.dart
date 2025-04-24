@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vishnu_training_and_placements/screens/Splash_Screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
@@ -44,7 +45,18 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Row(
             children: [
-              Image.asset('assets/logo.png', height: height * 0.06),
+              GestureDetector(
+                onTap: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  prefs.clear();
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => SplashScreen()),
+                    (routes) => false,
+                  );
+                },
+                child: Image.asset('assets/logo.png', height: height * 0.06),
+              ),
               SizedBox(width: width * 0.15),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
