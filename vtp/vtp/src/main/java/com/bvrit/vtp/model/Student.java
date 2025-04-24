@@ -16,10 +16,13 @@ public class Student {
     @Column(unique = true,nullable = false)
     private String email;
 
-    @Column(unique = true,nullable = false)
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
     private boolean login = false;
+
+    @Column(unique = true)
+    private String deviceId;
 }
 

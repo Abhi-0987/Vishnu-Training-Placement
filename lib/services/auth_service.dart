@@ -8,6 +8,7 @@ class AuthService {
   Future<http.Response> login(
     String email,
     String password,
+    String deviceId,
     bool isAdmin,
   ) async {
     final url = Uri.parse(
@@ -17,7 +18,11 @@ class AuthService {
     final response = await http.post(
       url,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"email": email, "password": password}),
+      body: jsonEncode({
+        "email": email,
+        "password": password,
+        "deviceId": deviceId,
+      }),
     );
 
     return response;
