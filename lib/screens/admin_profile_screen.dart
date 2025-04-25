@@ -420,13 +420,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                                   ? null
                                   : _showStudentPasswordResetDialog,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppConstants.textBlack,
+                            backgroundColor: Colors.black.withAlpha(220),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(100),
                             ),
                             padding: EdgeInsets.symmetric(
-                              horizontal: width * 0.1,
+                              horizontal: width * 0.115,
                               vertical: height * 0.013,
                             ),
                           ),

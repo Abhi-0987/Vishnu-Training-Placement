@@ -281,7 +281,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                                 _isPasswordVisible
                                                     ? Icons.visibility
                                                     : Icons.visibility_off,
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                               onPressed: () {
                                                 setState(() {

@@ -249,7 +249,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             ),
                                           ),
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 50,
+                                            horizontal: 46,
                                             vertical: 12,
                                           ),
                                         ),

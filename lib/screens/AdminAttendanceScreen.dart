@@ -602,7 +602,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                     ? "Downloading..."
                                                     : "Download Excel",
                                                 style: const TextStyle(
-                                                  color: Colors.white,
+                                                  color: AppConstants.textWhite,
                                                   fontSize: 16,
                                                   fontFamily: 'Alata',
                                                 ),
@@ -610,7 +610,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                               const SizedBox(width: 8),
                                               const Icon(
                                                 Icons.download,
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                               ),
                                             ],
                                           ),

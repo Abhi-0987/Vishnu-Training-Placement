@@ -230,13 +230,13 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                 _filterSchedules();
                               });
                             },
-                            backgroundColor: Colors.purple.withOpacity(0.3),
-                            selectedColor: Colors.purple,
-                            checkmarkColor: Colors.white,
+                            backgroundColor: Colors.purple.withOpacity(0.4),
+                            selectedColor: AppConstants.backgroundColor,
+                            checkmarkColor: AppConstants.textWhite,
                             labelStyle: TextStyle(
                               color:
                                   selectedBranch == 'All'
-                                      ? Colors.white
+                                      ? AppConstants.textWhite
                                       : Colors.white70,
                             ),
                           ),
@@ -253,13 +253,13 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                   _filterSchedules();
                                 });
                               },
-                              backgroundColor: Colors.purple.withOpacity(0.3),
-                              selectedColor: Colors.purple,
-                              checkmarkColor: Colors.white,
+                              backgroundColor: Colors.purple.withOpacity(0.4),
+                              selectedColor: AppConstants.backgroundColor,
+                              checkmarkColor: AppConstants.textWhite,
                               labelStyle: TextStyle(
                                 color:
                                     selectedBranch == branch
-                                        ? Colors.white
+                                        ? AppConstants.textWhite
                                         : Colors.white70,
                               ),
                             ),
@@ -295,7 +295,11 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppConstants.backgroundColor,
                               ),
-                              child: Text('Retry'),
+                              child: Text(
+                                'Retry',
+                                style: TextStyle(color: AppConstants.textWhite),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ],
                         ),
