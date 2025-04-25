@@ -84,7 +84,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                         onTap: () {
                           Navigator.pushNamed(
                             context,
-                            AppRoutes.schedulesScreen,
+                            AppRoutes.studentSchedulesScreen,
                           );
                         },
                       ),

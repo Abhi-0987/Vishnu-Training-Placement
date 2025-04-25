@@ -1,20 +1,20 @@
 package com.bvrit.vtp.controller;
 
 import com.bvrit.vtp.model.StudentDetails;
-import com.bvrit.vtp.dao.StudentBranchRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
+import com.bvrit.vtp.dao.StudentDetailsRepo;
 
 import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/student")
-public class StudentBranchController {
+public class StudentController {
 
     @Autowired
-    private StudentBranchRepo studentBranchRepository;
+    private StudentDetailsRepo studentDetailsRepo;
 
     @PostMapping(value="/branch", produces = "application/json")
     public ResponseEntity<?> getBranchByEmail(@RequestBody Map<String, String> payload) {
@@ -23,7 +23,7 @@ public class StudentBranchController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
         }
 
-        Optional<StudentDetails> studentOptional = studentBranchRepository.findByEmail(email);
+        Optional<StudentDetails> studentOptional = studentDetailsRepo.findByEmail(email);
         return studentOptional.<ResponseEntity<?>>map(
                 studentDetails -> ResponseEntity.ok(Map.of(
                         "branch", studentDetails.getBranch()))).orElseGet(() ->

@@ -10,11 +10,6 @@ class StudentService {
     final url = Uri.parse('$baseUrl/api/student/branch');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-
-    if (token == null) {
-      print('No token found in SharedPreferences');
-      return null;
-    }
     final headers = {'Content-Type': 'application/json','Authorization': 'Bearer $token',};
     final body = jsonEncode({'email': email});
     

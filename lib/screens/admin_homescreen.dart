@@ -78,12 +78,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           style: TextStyle(fontSize: 70, fontFamily: 'Alata'),
                           image: 'assets/your-schedules.png',
                         ),
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.schedulesScreen,
-                          );
-                        },
                       ),
                       const SizedBox(height: 40),
                       GestureDetector(

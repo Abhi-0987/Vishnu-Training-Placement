@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/screens/student_homescreen.dart';
+import 'package:vishnu_training_and_placements/screens/student_schedules_screen.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
@@ -15,7 +17,7 @@ class MainApp extends StatelessWidget {
       initialRoute: AppRoutes.splash,
       routes: AppRoutes.routes,
       // home: StudentLoginScreen(isAdmin: false),
-      // home: AdminMarkAttendence(),
+      // home: StudentSchedulesScreen(),
     );
   }
 }
