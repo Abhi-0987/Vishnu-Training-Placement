@@ -192,7 +192,12 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade800.withOpacity(0.3),
+                        color: Color.fromRGBO(
+                          Colors.grey.shade800.red,
+                          Colors.grey.shade800.green,
+                          Colors.grey.shade800.blue,
+                          0.3,
+                        ),
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
                           color: Colors.white.withOpacity(0.1),
