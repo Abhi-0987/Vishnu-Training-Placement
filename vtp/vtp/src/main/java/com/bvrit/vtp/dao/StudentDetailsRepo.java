@@ -10,7 +10,4 @@ import java.util.List;
 @Repository
 public interface StudentDetailsRepo extends JpaRepository<StudentDetails, Long> {
     List<StudentDetails> findByBranchIn(List<String> branches);
-    @Query("SELECT s.email FROM StudentDetails s")
-    List<String> findAllEmails();
-
 }

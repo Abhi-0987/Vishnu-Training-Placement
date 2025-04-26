@@ -91,8 +91,6 @@ public class ScheduleService {
         if (students.isEmpty()) {
             System.out.println("⚠️ No students found for these branches.");
         }
-
-        // Step 4: Prepare attendance list and print count
         List<StudentAttendance> attendanceList = students.stream().map(student -> {
             StudentAttendance attendance = new StudentAttendance();
             attendance.setEmail(student.getEmail());
