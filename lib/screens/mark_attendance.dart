@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -57,7 +58,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(),
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstants.textBlack,
       body: Stack(
         children: [
           //Screen Background
@@ -86,7 +87,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               child: Text(
                                 'Date :',
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: AppConstants.textWhite,
                                   fontSize: 16,
                                 ),
                               ),
@@ -94,7 +95,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                             Text(
                               '16 Feb',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppConstants.textWhite,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -111,7 +112,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               child: Text(
                                 'Time :',
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: AppConstants.textWhite,
                                   fontSize: 16,
                                 ),
                               ),
@@ -119,7 +120,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                             Text(
                               '9:30 AM - 12:30 AM',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppConstants.textWhite,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -136,7 +137,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               child: Text(
                                 'Location :',
                                 style: TextStyle(
-                                  color: Colors.white70,
+                                  color: AppConstants.textWhite,
                                   fontSize: 16,
                                 ),
                               ),
@@ -144,7 +145,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                             Text(
                               'IT Seminar Hall',
                               style: TextStyle(
-                                color: Colors.white,
+                                color: AppConstants.textWhite,
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -182,7 +183,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                                 isMarked ? 'Marked' : 'Mark Attendance',
                                 style: const TextStyle(
                                   fontSize: 16,
-                                  color: Colors.white,
+                                  color: AppConstants.textWhite,
                                 ),
                               ),
                             ),
@@ -197,7 +198,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                   const Text(
                     'Attendance Status',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppConstants.textWhite,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -210,7 +211,10 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                     animationDuration: const Duration(milliseconds: 900),
                     chartLegendSpacing: 32,
                     chartRadius: MediaQuery.of(context).size.width / 3,
-                    colorList: const [Color(0xFF661058), Color(0xFF2B8B7B)],
+                    colorList: const [
+                      AppConstants.piechartcolor1,
+                      AppConstants.piechartcolor2,
+                    ],
                     initialAngleInDegree: 0,
                     chartType: ChartType.ring,
                     ringStrokeWidth: 32,
@@ -218,7 +222,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                       showLegendsInRow: true,
                       legendPosition: LegendPosition.bottom,
                       showLegends: true,
-                      legendTextStyle: TextStyle(color: Colors.white),
+                      legendTextStyle: TextStyle(color: AppConstants.textWhite),
                     ),
                     chartValuesOptions: const ChartValuesOptions(
                       showChartValueBackground: true,
@@ -236,12 +240,15 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                       children: [
                         const Text(
                           'Total Attendance :',
-                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                          style: TextStyle(
+                            color: AppConstants.textWhite,
+                            fontSize: 16,
+                          ),
                         ),
                         Text(
                           '${attendanceData["Present"]?.toInt()} %',
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),

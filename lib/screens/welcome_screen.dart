@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -164,7 +165,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     width * 0.04,
                                   ),
                                   border: Border.all(
-                                    color: Colors.white,
+                                    color: AppConstants.textWhite,
                                     width: 1,
                                   ),
                                 ),
@@ -178,15 +179,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         borderRadius: BorderRadius.circular(18),
                                         gradient: const LinearGradient(
                                           colors: [
-                                            Colors.pinkAccent,
-                                            Colors.orangeAccent,
+                                            AppConstants.gradient_1,
+                                            AppConstants.gradient_2,
                                           ],
                                         ),
                                       ),
                                       padding: const EdgeInsets.all(3),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
+                                          backgroundColor:
+                                              AppConstants.textBlack,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
@@ -210,7 +212,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             Text(
                                               'Admin',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: 28,
                                                 fontFamily: 'Alata',
                                               ),
@@ -231,15 +233,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         borderRadius: BorderRadius.circular(18),
                                         gradient: const LinearGradient(
                                           colors: [
-                                            Colors.pinkAccent,
-                                            Colors.orangeAccent,
+                                            AppConstants.gradient_1,
+                                            AppConstants.gradient_2,
                                           ],
                                         ),
                                       ),
                                       padding: const EdgeInsets.all(3),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
+                                          backgroundColor:
+                                              AppConstants.textBlack,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
@@ -247,7 +250,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             ),
                                           ),
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 50,
+                                            horizontal: 46,
                                             vertical: 12,
                                           ),
                                         ),
@@ -263,7 +266,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             const Text(
                                               'Student',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: 28,
                                                 fontFamily: 'Alata',
                                               ),

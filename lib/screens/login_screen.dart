@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:vishnu_training_and_placements/services/auth_service.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class StudentLoginScreen extends StatefulWidget {
   final bool isAdmin;
@@ -22,16 +23,16 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   bool _isPasswordVisible = false;
   bool _isLoading = false; // Show loading indicator
 
-  Future<String?> getAndroidDeviceId() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    return androidInfo.id; // Unique ID (but may change on factory reset)
-  }
+  // Future<String?> getAndroidDeviceId() async {
+  //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //   return androidInfo.id; // Unique ID (but may change on factory reset)
+  // }
 
   Future<void> login() async {
     final password = passwordController.text.trim();
     final email = emailController.text.trim();
-    final deviceId = await getAndroidDeviceId();
+    // final deviceId = await getAndroidDeviceId();
 
     if (email.isEmpty || password.isEmpty) {
       showError("Email and password cannot be empty.");
@@ -45,7 +46,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       final response = await AuthService().login(
         email,
         password,
-        deviceId!,
+        // deviceId!,
         widget.isAdmin,
       );
 
@@ -130,7 +131,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                 Text(
                   'Vishnu',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                     fontSize: width * 0.09,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Alata',
@@ -142,7 +143,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                     Text(
                       'Training and',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.05,
                         fontFamily: 'Alata',
                       ),
@@ -150,7 +151,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                     Text(
                       'Placements',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.05,
                       ),
                     ),
@@ -241,7 +242,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                     Text(
                       'Please Complete',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.04,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Alata',
@@ -250,7 +251,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                     Text(
                       'Authentication',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.08,
                         fontWeight: FontWeight.w400,
                         fontFamily: 'Alata',
@@ -289,7 +290,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                         width * 0.04,
                                       ),
                                       border: Border.all(
-                                        color: Colors.white,
+                                        color: AppConstants.textWhite,
                                         width: 1,
                                       ),
                                     ),
@@ -306,13 +307,13 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                                 ?.withAlpha(170),
                                             hintText: 'Enter your email',
                                             hintStyle: TextStyle(
-                                              color: Colors.black,
+                                              color: AppConstants.textBlack,
                                             ),
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(10.0),
                                               borderSide: BorderSide(
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                             ),
                                             contentPadding:
@@ -338,7 +339,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                                 _isPasswordVisible
                                                     ? Icons.visibility
                                                     : Icons.visibility_off,
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                               onPressed: () {
                                                 setState(() {
@@ -352,13 +353,13 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                                 ?.withAlpha(170),
                                             hintText: 'Enter password',
                                             hintStyle: TextStyle(
-                                              color: Colors.black,
+                                              color: AppConstants.textBlack,
                                             ),
                                             border: OutlineInputBorder(
                                               borderRadius:
                                                   BorderRadius.circular(10.0),
                                               borderSide: BorderSide(
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                             ),
                                             contentPadding:
@@ -377,8 +378,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                Colors.orangeAccent,
-                                                Colors.pinkAccent,
+                                                AppConstants.gradient_1,
+                                                AppConstants.gradient_2,
                                               ],
                                             ),
                                           ),
@@ -404,7 +405,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                             child: Text(
                                               'Login',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: width * 0.04,
                                                 fontFamily: 'Alata',
                                               ),
@@ -429,7 +430,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                         Text(
                           'Need help with login?',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                             fontSize: width * 0.045,
                           ),
                         ),
@@ -437,7 +438,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                         Text(
                           'Contact Administrator',
                           style: TextStyle(
-                            color: Colors.purple,
+                            color: AppConstants.primaryColor,
                             fontSize: width * 0.045,
                           ),
                         ),

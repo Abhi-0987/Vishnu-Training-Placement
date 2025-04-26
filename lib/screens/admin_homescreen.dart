@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 //import 'package:flutter/widgets.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -20,7 +21,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     final double height = screenSize.height;
     final double width = screenSize.width;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstants.textBlack,
       extendBodyBehindAppBar: true,
       appBar: CustomAppBar(), // Dark theme background
       body: Stack(
@@ -28,80 +29,85 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           // Background with elliptical containers
           ScreensBackground(height: height, width: width),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 50),
-                  const Center(
-                    child: Column(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 50),
+                    const Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Hello..!!',
+                            style: TextStyle(
+                              fontSize: 28,
+                              color: AppConstants.textWhite,
+                              fontFamily: 'Alata',
+                            ),
+                          ),
+                          Text(
+                            'Name of Admin',
+                            style: TextStyle(
+                              fontSize: 28,
+                              color: AppConstants.textWhite,
+                              fontFamily: 'Alata',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Column(
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceAround, // Center the cards
                       children: [
-                        Text(
-                          'Hello..!!',
-                          style: TextStyle(
-                            fontSize: 28,
-                            color: Colors.white,
-                            fontFamily: 'Alata',
+                        GestureDetector(
+                          child: CustomCard(
+                            text: 'Schedule a\n Class',
+                            style: TextStyle(
+                              fontSize: 300,
+                              fontFamily: 'Alata',
+                            ),
+                            image: 'assets/schedule.png',
                           ),
+                          onTap: () {
+                            Navigator.pushNamed(context, AppRoutes.eventVenue);
+                          },
                         ),
-                        Text(
-                          'Name of Admin',
-                          style: TextStyle(
-                            fontSize: 28,
-                            color: Colors.white,
-                            fontFamily: 'Alata',
+                        const SizedBox(height: 40),
+                        GestureDetector(
+                          child: CustomCard(
+                            text: 'Your Schedules',
+                            style: TextStyle(fontSize: 70, fontFamily: 'Alata'),
+                            image: 'assets/your-schedules.png',
                           ),
+                          onTap: () {
+                            /*Navigator.pushNamed(
+                              context,
+                              AppRoutes.markAttendanceAdmin,
+                            );*/
+                          },
+                        ),
+                        const SizedBox(height: 40),
+                        GestureDetector(
+                          child: CustomCard(
+                            text: 'Message Sending',
+                            style: TextStyle(fontSize: 70, fontFamily: 'Alata'),
+                            image: 'assets/send.png',
+                          ),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.markAttendanceAdmin,
+                            );
+                          },
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Column(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceAround, // Center the cards
-                    children: [
-                      GestureDetector(
-                        child: CustomCard(
-                          text: 'Schedule a\n Class',
-                          style: TextStyle(fontSize: 300, fontFamily: 'Alata'),
-                          image: 'assets/schedule.png',
-                        ),
-                        onTap: () {
-                          Navigator.pushNamed(context, AppRoutes.eventVenue);
-                        },
-                      ),
-                      const SizedBox(height: 40),
-                      GestureDetector(
-                        child: CustomCard(
-                          text: 'Your Schedules',
-                          style: TextStyle(fontSize: 70, fontFamily: 'Alata'),
-                          image: 'assets/your-schedules.png',
-                        ),
-                        onTap: () {
-                          /*Navigator.pushNamed(
-                            context,
-                            AppRoutes.markAttendanceAdmin,
-                          );*/
-                        },
-                      ),
-                      const SizedBox(height: 40),
-                      GestureDetector(
-                        child: CustomCard(
-                          text: 'Message Sending',
-                          style: TextStyle(fontSize: 70, fontFamily: 'Alata'),
-                          image: 'assets/send.png',
-                        ),
-                        onTap: () {
-                          Navigator.pushNamed(
-                            context,
-                            AppRoutes.markAttendanceAdmin,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -149,7 +155,10 @@ class CustomCard extends StatelessWidget {
               children: [
                 Text(
                   text,
-                  style: const TextStyle(color: Colors.white, fontSize: 25),
+                  style: const TextStyle(
+                    color: AppConstants.textWhite,
+                    fontSize: 25,
+                  ),
                 ),
                 if (image != null)
                   Image.asset(

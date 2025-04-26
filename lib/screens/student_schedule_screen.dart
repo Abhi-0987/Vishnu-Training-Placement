@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -17,8 +18,6 @@ class StudentSchedulesScreen extends StatefulWidget {
 class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
   List<Schedule> schedules = [];
   List<Schedule> filteredSchedules = [];
-  List<Schedule> currentSchedules = []; // For current and future schedules
-  List<Schedule> pastSchedules = []; // For past schedules
   bool isLoading = true;
   String? userBranch;
   String errorMessage = '';
@@ -38,8 +37,6 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
     'CSBS',
   ];
   String selectedBranch = 'All';
-  bool showPastSchedules =
-      false; // Flag to toggle between current and past schedules
 
   @override
   void initState() {
@@ -66,74 +63,71 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
   }
 
   Future<void> _fetchSchedules() async {
+    // Remove the userBranch check as we will fetch all schedules now
+    // if (userBranch == null) return;
+
     try {
       setState(() {
         isLoading = true;
         errorMessage = '';
       });
 
+      // Fetch ALL schedules instead of just by user's branch
       final schedulesData = await ScheduleServices.getAllSchedules();
 
+      // Update the print statement
       print('Raw schedulesData received (all schedules): $schedulesData');
 
+      // Add specific error handling for parsing
       try {
         final parsedSchedules =
             schedulesData.map((data) {
+              // Add a try-catch within the map to pinpoint parsing errors
               try {
                 return Schedule.fromJson(data as Map<String, dynamic>);
               } catch (e) {
                 print('Error parsing schedule item: $data');
                 print('Parsing error: $e');
+                // Re-throw or handle appropriately, maybe return a default/error Schedule object
                 rethrow;
               }
             }).toList();
 
         setState(() {
           schedules = parsedSchedules;
+          schedules.sort((a, b) {
+            // Safely parse dates, handle potential FormatException
+            try {
+              // Ensure the date strings are in a valid format before parsing
+              final dateA = DateTime.tryParse(a.date);
+              final dateB = DateTime.tryParse(b.date);
 
-          // Separate current/future schedules from past schedules
-          final now = DateTime.now();
-          currentSchedules =
-              schedules.where((schedule) {
-                final scheduleDate = DateTime.tryParse(schedule.date);
-                if (scheduleDate == null) return false;
-                return scheduleDate.isAfter(
-                  now.subtract(const Duration(days: 1)),
-                ); // Include today
-              }).toList();
-
-          pastSchedules =
-              schedules.where((schedule) {
-                final scheduleDate = DateTime.tryParse(schedule.date);
-                if (scheduleDate == null) return false;
-                return scheduleDate.isBefore(
-                  now.subtract(const Duration(days: 1)),
-                ); // Before today
-              }).toList();
-
-          // Sort both lists by date (newest first)
-          currentSchedules.sort((a, b) {
-            final dateA = DateTime.tryParse(a.date) ?? DateTime.now();
-            final dateB = DateTime.tryParse(b.date) ?? DateTime.now();
-            return dateA.compareTo(dateB); // Upcoming first
+              // If parsing fails for either date, handle appropriately (e.g., don't sort or place them at the end)
+              if (dateA == null || dateB == null) {
+                print(
+                  'Warning: Could not parse date for sorting: ${a.date} or ${b.date}',
+                );
+                return 0; // Maintain original order if parsing fails
+              }
+              return dateB.compareTo(dateA); // Newest first
+            } catch (e) {
+              // Catch any unexpected error during parsing/comparison
+              print('Error during date sorting: $e');
+              return 0; // Default sort order if parsing fails
+            }
           });
-
-          pastSchedules.sort((a, b) {
-            final dateA = DateTime.tryParse(a.date) ?? DateTime.now();
-            final dateB = DateTime.tryParse(b.date) ?? DateTime.now();
-            return dateB.compareTo(dateA); // Most recent past first
-          });
-
           _filterSchedules();
           isLoading = false;
         });
       } catch (e) {
+        // Catch errors specifically from the mapping/parsing process
         setState(() {
           errorMessage = 'Failed to parse schedule data: $e';
           isLoading = false;
         });
       }
     } catch (e) {
+      // Catch errors from the API call itself
       setState(() {
         errorMessage = 'Failed to load schedules: $e';
         isLoading = false;
@@ -142,16 +136,11 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
   }
 
   void _filterSchedules() {
-    // First determine which list to use based on showPastSchedules flag
-    List<Schedule> sourceList =
-        showPastSchedules ? pastSchedules : currentSchedules;
-
-    // Then filter by branch
     if (selectedBranch == 'All') {
-      filteredSchedules = List.from(sourceList);
+      filteredSchedules = List.from(schedules);
     } else {
       filteredSchedules =
-          sourceList
+          schedules
               .where(
                 (schedule) => schedule.studentBranch.contains(selectedBranch),
               )
@@ -160,32 +149,36 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
   }
 
   String _formatDate(String dateStr) {
+    // Input should now be "YYYY-MM-DD"
     try {
-      final date = DateTime.tryParse(dateStr);
+      final date = DateTime.tryParse(dateStr); // tryParse handles "YYYY-MM-DD"
       if (date != null) {
-        return DateFormat('MMM dd, yyyy').format(date);
+        return DateFormat('MMM dd, yyyy').format(date); // e.g., "Jan 20, 2024"
       } else {
         print('Warning: Could not parse date for formatting: $dateStr');
-        return dateStr;
+        return dateStr; // Fallback
       }
     } catch (e) {
       print('Error formatting date $dateStr: $e');
-      return dateStr;
+      return dateStr; // Fallback
     }
   }
 
   String _formatTime(String timeStr) {
+    // Input should now be "HH:mm"
     try {
+      // Parse the "HH:mm" string
       int hour = int.parse(timeStr.split(':')[0]);
       int minute = int.parse(timeStr.split(':')[1]);
       final time = TimeOfDay(hour: hour, minute: minute);
 
+      // Format to AM/PM
       final now = DateTime.now();
       final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-      return DateFormat('h:mm a').format(dt);
+      return DateFormat('h:mm a').format(dt); // e.g., "9:30 AM"
     } catch (e) {
       print('Error formatting time $timeStr: $e');
-      return timeStr;
+      return timeStr; // Fallback
     }
   }
 
@@ -197,7 +190,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(),
+      appBar: const CustomAppBar(),
       body: Stack(
         children: [
           ScreensBackground(height: height, width: width),
@@ -208,49 +201,16 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: height * 0.02),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          showPastSchedules
-                              ? 'Past Schedules'
-                              : 'Your Schedules',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: width * 0.06,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                  Center(
+                    child: Text(
+                      'Your Schedules',
+                      style: TextStyle(
+                        color: AppConstants.textWhite,
+                        fontSize: width * 0.06,
+                        fontWeight: FontWeight.bold,
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            showPastSchedules = !showPastSchedules;
-                            _filterSchedules();
-                          });
-                        },
-                        icon: Icon(
-                          showPastSchedules
-                              ? Icons.calendar_today
-                              : Icons.history,
-                          color: Colors.white,
-                          size: width * 0.04,
-                        ),
-                        label: Text(
-                          showPastSchedules ? 'Current' : 'History',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-
                   SizedBox(height: height * 0.02),
 
                   // Branch selection chips
@@ -270,13 +230,13 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                 _filterSchedules();
                               });
                             },
-                            backgroundColor: Colors.purple.withOpacity(0.3),
-                            selectedColor: Colors.purple,
-                            checkmarkColor: Colors.white,
+                            backgroundColor: Colors.purple.withOpacity(0.4),
+                            selectedColor: AppConstants.primaryColor,
+                            checkmarkColor: AppConstants.textWhite,
                             labelStyle: TextStyle(
                               color:
                                   selectedBranch == 'All'
-                                      ? Colors.white
+                                      ? AppConstants.textWhite
                                       : Colors.white70,
                             ),
                           ),
@@ -293,13 +253,13 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                   _filterSchedules();
                                 });
                               },
-                              backgroundColor: Colors.purple.withOpacity(0.3),
-                              selectedColor: Colors.purple,
-                              checkmarkColor: Colors.white,
+                              backgroundColor: Colors.purple.withOpacity(0.4),
+                              selectedColor: AppConstants.primaryColor,
+                              checkmarkColor: AppConstants.textWhite,
                               labelStyle: TextStyle(
                                 color:
                                     selectedBranch == branch
-                                        ? Colors.white
+                                        ? AppConstants.textWhite
                                         : Colors.white70,
                               ),
                             ),
@@ -313,7 +273,9 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                   if (isLoading)
                     Expanded(
                       child: Center(
-                        child: CircularProgressIndicator(color: Colors.purple),
+                        child: CircularProgressIndicator(
+                          color: AppConstants.primaryColor,
+                        ),
                       ),
                     )
                   else if (errorMessage.isNotEmpty)
@@ -331,9 +293,13 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                             ElevatedButton(
                               onPressed: _fetchSchedules,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
+                                backgroundColor: AppConstants.primaryColor,
                               ),
-                              child: Text('Retry'),
+                              child: Text(
+                                'Retry',
+                                style: TextStyle(color: AppConstants.textWhite),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
                           ],
                         ),
@@ -343,11 +309,9 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     Expanded(
                       child: Center(
                         child: Text(
-                          showPastSchedules
-                              ? 'No past schedules found'
-                              : 'No upcoming schedules found',
+                          'No schedules found for ${selectedBranch == 'All' ? 'any branch' : selectedBranch}.',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                             fontSize: width * 0.04,
                           ),
                         ),
@@ -357,7 +321,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: _fetchSchedules,
-                        color: Colors.purple,
+                        color: AppConstants.primaryColor,
                         child: ListView.builder(
                           padding: EdgeInsets.symmetric(
                             vertical: height * 0.01,
@@ -375,7 +339,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                     Text(
                                       '${schedule.location} - Room ${schedule.roomNo}',
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: AppConstants.textWhite,
                                         fontSize: width * 0.045,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -390,7 +354,9 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                         ),
                                         SizedBox(width: width * 0.02),
                                         Text(
-                                          _formatDate(schedule.date),
+                                          _formatDate(
+                                            schedule.date,
+                                          ), // Use the formatter
                                           style: TextStyle(
                                             color: Colors.white70,
                                             fontSize: width * 0.035,
@@ -408,7 +374,9 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                         ),
                                         SizedBox(width: width * 0.02),
                                         Text(
-                                          _formatTime(schedule.time),
+                                          _formatTime(
+                                            schedule.time,
+                                          ), // Use the formatter
                                           style: TextStyle(
                                             color: Colors.white70,
                                             fontSize: width * 0.035,
