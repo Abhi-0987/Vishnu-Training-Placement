@@ -2,10 +2,10 @@ class Schedule {
   final String id;
   final String location;
   final String roomNo;
-  final String date; // Store as YYYY-MM-DD string
-  final String time; // Store as HH:mm string
-  final String studentBranch; // Ensure this is treated as a String
-
+  final String date;
+  final String time;
+  final String studentBranch;
+  
   Schedule({
     required this.id,
     required this.location,
@@ -13,6 +13,7 @@ class Schedule {
     required this.date,
     required this.time,
     required this.studentBranch,
+
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) {
@@ -59,6 +60,19 @@ class Schedule {
       date: formattedDate, // Use the formatted date string
       time: formattedTime, // Use the formatted time string
       studentBranch: json['studentBranch']?.toString() ?? '',
+ // Add this line
     );
+  }
+  
+  // Add this method to convert Schedule object to Map
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'location': location,
+      'roomNo': roomNo,
+      'date': date,
+      'time': time,
+      'studentBranch': studentBranch,
+    };
   }
 }

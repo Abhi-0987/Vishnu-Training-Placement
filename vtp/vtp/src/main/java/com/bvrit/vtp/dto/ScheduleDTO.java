@@ -1,7 +1,9 @@
 package com.bvrit.vtp.dto;
 
+// Remove import for List
+// import java.util.List;
+
 import lombok.Data;
-import java.util.List;
 
 @Data
 public class ScheduleDTO {
@@ -9,5 +11,6 @@ public class ScheduleDTO {
     private String roomNo;
     private String date; // Format: yyyy-MM-dd
     private String time; // Format: HH:mm or similar for parsing
-    private List<String> branches; // Ensure this field exists to receive data
+    // Change type from List<String> to String
+    private String studentBranch; 
 }

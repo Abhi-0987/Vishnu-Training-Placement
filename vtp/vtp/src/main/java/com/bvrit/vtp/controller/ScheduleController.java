@@ -8,7 +8,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.*; // Ensure this includes PutMapping, DeleteMapping, PathVariable, RequestBody
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,7 +21,7 @@ import org.slf4j.Logger; // Import Logger
 import org.slf4j.LoggerFactory; // Import LoggerFactory
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/schedules") // Consolidated base path
 public class ScheduleController {
 
     // Add Logger instance
@@ -31,17 +31,17 @@ public class ScheduleController {
     private ScheduleService scheduleService;
 
     // Make sure you have this endpoint and it's properly secured
-    @GetMapping(value ="/schedules",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Path inherited from class level
     public ResponseEntity<List<Schedule>> getAllSchedules() {
         return ResponseEntity.ok(scheduleService.getAllSchedules());
     }
-    
-    @GetMapping(value = "/schedules/branch/{branch}",produces = MediaType.APPLICATION_JSON_VALUE )
+
+    @GetMapping(value = "/branch/{branch}", produces = MediaType.APPLICATION_JSON_VALUE) // Path relative to class level
     public ResponseEntity<List<Schedule>> getSchedulesByBranch(@PathVariable String branch) {
         return ResponseEntity.ok(scheduleService.getSchedulesByBranch(branch));
     }
 
-    @PostMapping(value = "/schedules", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE) // Path inherited from class level
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
         // Log the received DTO
         logger.info("Received schedule creation request: {}", scheduleDTO);
@@ -72,8 +72,8 @@ public class ScheduleController {
             return ResponseEntity.badRequest().body(response);
         }
     }
-    
-    @GetMapping("/schedules/check-availability")
+
+    @GetMapping("/check-availability") // Path relative to class level
     public ResponseEntity<?> checkAvailability(
             @RequestParam String location,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
@@ -81,17 +81,75 @@ public class ScheduleController {
         try {
             String timeStr = timeSlot.split(" - ")[0];
             LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
-            
+
             boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, time);
-            
+
             Map<String, Boolean> response = new HashMap<>();
             response.put("available", isAvailable);
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();
             response.put("error", "Failed to check availability: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    // Added PUT endpoint for updating schedules
+    @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateSchedule(@PathVariable Long id, @RequestBody ScheduleDTO scheduleDetails) {
+         logger.info("Received schedule update request for ID {}: {}", id, scheduleDetails);
+         try {
+             // TODO: Implement the actual update logic in ScheduleService
+             // Example: Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDetails);
+             // For now, just returning OK if the service call would succeed
+             // Replace this placeholder logic with your actual service call
+             Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDetails); // Assuming this method exists and returns the updated schedule or throws an exception
+             if (updatedSchedule != null) {
+                 logger.info("Successfully updated schedule with ID: {}", id);
+                 return ResponseEntity.ok(updatedSchedule);
+             } else {
+                 // Handle case where schedule is not found or update fails
+                 logger.warn("Schedule with ID {} not found for update.", id);
+                 Map<String, String> response = new HashMap<>();
+                 response.put("error", "Schedule not found with id: " + id);
+                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+             }
+         } catch (Exception e) {
+             Map<String, String> response = new HashMap<>();
+             response.put("error", "Failed to update schedule: " + e.getMessage());
+             logger.error("Error updating schedule with ID {}: {}", id, scheduleDetails, e);
+             return ResponseEntity.badRequest().body(response);
+         }
+    }
+
+    // Added DELETE endpoint for deleting schedules
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long id) {
+        logger.info("Received schedule delete request for ID: {}", id);
+        try {
+            // TODO: Implement the actual delete logic in ScheduleService
+            // Example: scheduleService.deleteSchedule(id);
+            // For now, just returning NoContent if the service call would succeed
+            // Replace this placeholder logic with your actual service call
+            boolean deleted = scheduleService.deleteSchedule(id); // Assuming this method exists and returns true on success, false if not found
+            if (deleted) {
+                 logger.info("Successfully deleted schedule with ID: {}", id);
+                 // Return a success message or just status code
+                 Map<String, String> response = new HashMap<>();
+                 response.put("message", "Schedule deleted successfully");
+                 return ResponseEntity.ok(response); // Or ResponseEntity.noContent().build();
+            } else {
+                 logger.warn("Schedule with ID {} not found for deletion.", id);
+                 Map<String, String> response = new HashMap<>();
+                 response.put("error", "Schedule not found with id: " + id);
+                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to delete schedule: " + e.getMessage());
+            logger.error("Error deleting schedule with ID {}: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response); // Use 500 for server errors
         }
     }
 }
