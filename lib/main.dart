@@ -11,7 +11,7 @@ import 'package:vishnu_training_and_placements/screens/student_change_password_s
 import 'package:vishnu_training_and_placements/screens/student_homescreen.dart';
 import 'package:vishnu_training_and_placements/screens/student_profile.dart';
 import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
-import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
+// import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
