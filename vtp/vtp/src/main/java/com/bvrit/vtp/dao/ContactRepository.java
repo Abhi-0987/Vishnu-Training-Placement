@@ -1,4 +1,4 @@
-package com.bvrit.vtp.repository;
+package com.bvrit.vtp.dao;
 
 import com.bvrit.vtp.model.Contact;
 import org.springframework.data.jpa.repository.JpaRepository;
