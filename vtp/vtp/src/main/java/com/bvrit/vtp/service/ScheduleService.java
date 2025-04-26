@@ -13,10 +13,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Service
 public class ScheduleService {
@@ -52,55 +51,57 @@ public class ScheduleService {
 
     // Method to create a schedule and insert attendance for students in that branch
     public Schedule createSchedule(ScheduleDTO scheduleDTO) {
-        List<Schedule> createdSchedules = new ArrayList<>();
+        Schedule schedule = new Schedule();
+        schedule.setLocation(scheduleDTO.getLocation());
+        schedule.setRoomNo(scheduleDTO.getRoomNo());
 
-        // Loop over all branches provided in the DTO
-        for (String branch : scheduleDTO.getBranches()) {
-            Schedule schedule = new Schedule();
-            schedule.setLocation(scheduleDTO.getLocation());
-            schedule.setRoomNo(scheduleDTO.getRoomNo());
+        LocalDate date = LocalDate.parse(scheduleDTO.getDate());
+        schedule.setDate(date);
 
-            // Parse date from string to LocalDate
-            LocalDate date = LocalDate.parse(scheduleDTO.getDate());
-            schedule.setDate(date);
+        String timeStr = scheduleDTO.getTime().split(" - ")[0];// Assuming format like "9:30 - 11:15"
+        LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
+        schedule.setTime(time);
 
-            // Parse time from string to LocalTime
-            String timeStr = scheduleDTO.getTime().split(" - ")[0];  // Assuming format like "9:30 - 11:15"
-            LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
-            schedule.setTime(time);
-
-            // Set branch (converting list to comma-separated string)
-            if (scheduleDTO.getBranches() != null && !scheduleDTO.getBranches().isEmpty()) {
-                String branchesString = scheduleDTO.getBranches().stream()
-                        .filter(branchName -> branchName != null && !branchName.trim().isEmpty())
-                        .collect(Collectors.joining(","));
-                schedule.setStudentBranch(branchesString);
-            } else {
-                schedule.setStudentBranch(null);  // Or empty string if needed
-            }
-
-            // Save schedule and insert attendance records
-            Schedule savedSchedule = scheduleRepo.save(schedule);
-            insertAttendanceForAllStudents(savedSchedule);
-            createdSchedules.add(savedSchedule);
+        if (scheduleDTO.getBranches() != null && !scheduleDTO.getBranches().isEmpty()) {
+            String branchesString = String.join(",", scheduleDTO.getBranches());
+            schedule.setStudentBranch(branchesString);
+        } else {
+            schedule.setStudentBranch(null);
         }
 
-        return createdSchedules.get(0);  // Returning the first schedule
+        // Save only once
+        Schedule savedSchedule = scheduleRepo.save(schedule);
+
+        // Insert attendance only once
+        insertAttendanceForAllStudents(savedSchedule);
+
+        return savedSchedule;
     }
 
-    private void insertAttendanceForAllStudents(Schedule schedule) {
-        List<String> emails = studentDetailsRepository.findAllEmails();
 
-        List<StudentAttendance> attendanceList = emails.stream().map(email -> {
+    private void insertAttendanceForAllStudents(Schedule schedule) {
+        //  Split branches
+        List<String> branches = Arrays.stream(schedule.getStudentBranch().split(","))
+                .map(String::trim)
+                .filter(b -> !b.isEmpty())
+                .toList();
+
+        List<StudentDetails> students = studentDetailsRepository.findByBranchIn(branches);
+
+        if (students.isEmpty()) {
+            System.out.println("⚠️ No students found for these branches.");
+        }
+
+        // Step 4: Prepare attendance list and print count
+        List<StudentAttendance> attendanceList = students.stream().map(student -> {
             StudentAttendance attendance = new StudentAttendance();
-            attendance.setEmail(email);
+            attendance.setEmail(student.getEmail());
             attendance.setPresent(false);
             attendance.setDate(schedule.getDate());
             return attendance;
         }).toList();
 
         studentAttendanceRepository.saveAll(attendanceList);
-
     }
 
     // Method to check if the given time slot is available for a specific location and date
