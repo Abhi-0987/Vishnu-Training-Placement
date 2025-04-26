@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
@@ -142,7 +141,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                     _resetStudentPassword();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.backgroundColor,
+                    backgroundColor: AppConstants.primaryColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 16,
@@ -241,7 +240,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                     _changePassword();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppConstants.backgroundColor,
+                    backgroundColor: AppConstants.primaryColor,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
                       vertical: 16,
@@ -274,179 +273,169 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     final double height = screenSize.height;
     final double width = screenSize.width;
 
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) {
-        if (!didPop) {
-          Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
-        }
-      },
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: const CustomAppBar(isProfileScreen: true),
-        backgroundColor: Colors.transparent,
-        body: Stack(
-          children: [
-            Container(
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: const CustomAppBar(isProfileScreen: true),
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFF1A1A1A), Color(0xFF0A0A0A)],
+              ),
+            ),
+          ),
+          Positioned(
+            top: -height * 0.2,
+            left: -width * 0.32,
+            child: Container(
+              width: width * 0.6,
+              height: height * 0.3,
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF1A1A1A), Color(0xFF0A0A0A)],
-                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromARGB(154, 164, 86, 22),
+                    blurRadius: 130,
+                    spreadRadius: 70,
+                  ),
+                ],
               ),
             ),
-            Positioned(
-              top: -height * 0.2,
-              left: -width * 0.32,
+          ),
+          Positioned(
+            bottom: -height * 0.15,
+            right: -width * 0.32,
+            child: Container(
+              width: width * 0.6,
+              height: height * 0.3,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color.fromARGB(141, 102, 16, 88),
+                    blurRadius: 150,
+                    spreadRadius: 100,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Positioned.fill(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
-                width: width * 0.6,
-                height: height * 0.3,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromARGB(154, 164, 86, 22),
-                      blurRadius: 130,
-                      spreadRadius: 70,
-                    ),
-                  ],
-                ),
+                color: const Color.fromRGBO(255, 255, 255, 0.05),
               ),
             ),
-            Positioned(
-              bottom: -height * 0.15,
-              right: -width * 0.32,
-              child: Container(
-                width: width * 0.6,
-                height: height * 0.3,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Color.fromARGB(141, 102, 16, 88),
-                      blurRadius: 150,
-                      spreadRadius: 100,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-                child: Container(
-                  color: const Color.fromRGBO(255, 255, 255, 0.05),
-                ),
-              ),
-            ),
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Profile",
-                        style: TextStyle(
-                          fontSize: width * 0.06,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Alata',
-                          color: AppConstants.textWhite,
-                        ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "Profile",
+                      style: TextStyle(
+                        fontSize: width * 0.06,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alata',
+                        color: AppConstants.textWhite,
                       ),
                     ),
-                    SizedBox(height: height * 0.02),
-                    _buildProfileCard(width, height),
-                    SizedBox(height: height * 0.02),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              AppConstants.secondaryColor,
-                              AppConstants.primaryColor,
-                            ],
+                  ),
+                  SizedBox(height: height * 0.02),
+                  _buildProfileCard(width, height),
+                  SizedBox(height: height * 0.02),
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppConstants.gradient_2,
+                            AppConstants.gradient_1,
+                          ],
+                        ),
+                      ),
+                      padding: EdgeInsets.all(width * 0.001),
+                      child: ElevatedButton(
+                        onPressed:
+                            _isLoading ? null : _showPasswordChangeDialog,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black.withAlpha(220),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width * 0.18,
+                            vertical: height * 0.013,
                           ),
                         ),
-                        padding: EdgeInsets.all(width * 0.001),
-                        child: ElevatedButton(
-                          onPressed:
-                              _isLoading ? null : _showPasswordChangeDialog,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black.withAlpha(220),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: width * 0.18,
-                              vertical: height * 0.013,
-                            ),
-                          ),
-                          child: Text(
-                            'Change Password',
-                            style: TextStyle(
-                              color: AppConstants.textWhite,
-                              fontSize: width * 0.04,
-                              fontFamily: 'Alata',
-                            ),
+                        child: Text(
+                          'Change Password',
+                          style: TextStyle(
+                            color: AppConstants.textWhite,
+                            fontSize: width * 0.04,
+                            fontFamily: 'Alata',
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          gradient: const LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              AppConstants.secondaryColor,
-                              AppConstants.primaryColor,
-                            ],
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppConstants.gradient_2,
+                            AppConstants.gradient_1,
+                          ],
+                        ),
+                      ),
+                      padding: EdgeInsets.all(width * 0.001),
+                      child: ElevatedButton(
+                        onPressed:
+                            _isLoading ? null : _showStudentPasswordResetDialog,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black.withAlpha(220),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width * 0.115,
+                            vertical: height * 0.013,
                           ),
                         ),
-                        padding: EdgeInsets.all(width * 0.001),
-                        child: ElevatedButton(
-                          onPressed:
-                              _isLoading
-                                  ? null
-                                  : _showStudentPasswordResetDialog,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black.withAlpha(220),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(100),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: width * 0.115,
-                              vertical: height * 0.013,
-                            ),
-                          ),
-                          child: Text(
-                            'Change Student Password',
-                            style: TextStyle(
-                              color: AppConstants.textWhite,
-                              fontSize: width * 0.04,
-                              fontFamily: 'Alata',
-                            ),
+                        child: Text(
+                          'Change Student Password',
+                          style: TextStyle(
+                            color: AppConstants.textWhite,
+                            fontSize: width * 0.04,
+                            fontFamily: 'Alata',
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

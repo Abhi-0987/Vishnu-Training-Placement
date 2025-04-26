@@ -194,8 +194,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     }
   }
 
-  // Add these imports at the top of the file
-
   // Update the downloadExcelFile method
   Future<void> downloadExcelFile() async {
     try {
@@ -276,19 +274,12 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
           // Get the file name with timestamp
           String fileName =
               'contacts-${DateTime.now().day.toString().padLeft(2, '0')}${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}.xlsx';
-          print("Generated filename: $fileName");
 
           if (kIsWeb) {
-            print("Running on web platform, using browser download...");
             // For web platform
             final blob = html.Blob([Uint8List.fromList(bytes)]);
             final url = html.Url.createObjectUrlFromBlob(blob);
-            final anchor =
-                html.AnchorElement(href: url)
-                  ..setAttribute('download', fileName)
-                  ..click();
             html.Url.revokeObjectUrl(url);
-            print("Web download initiated for file: $fileName");
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -297,7 +288,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
               ),
             );
           } else {
-            print("Running on mobile platform, saving to downloads folder...");
             // For mobile platforms
             try {
               // Create a temporary file in the app's documents directory
@@ -394,10 +384,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
           // For web platform
           final blob = html.Blob([Uint8List.fromList(bytes)]);
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor =
-              html.AnchorElement(href: url)
-                ..setAttribute('download', fileName)
-                ..click();
           html.Url.revokeObjectUrl(url);
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -493,7 +479,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                       ElevatedButton.icon(
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:
-                                              AppConstants.backgroundColor,
+                                              AppConstants.primaryColor,
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 12,
                                             horizontal: 20,
@@ -716,7 +702,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                             child: Obx(
                               () => ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppConstants.backgroundColor,
+                                  backgroundColor: AppConstants.primaryColor,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 12,
                                     horizontal: 20,

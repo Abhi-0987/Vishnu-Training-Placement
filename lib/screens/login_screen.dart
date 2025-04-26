@@ -378,8 +378,8 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                AppConstants.primaryColor,
-                                                AppConstants.secondaryColor,
+                                                AppConstants.gradient_1,
+                                                AppConstants.gradient_2,
                                               ],
                                             ),
                                           ),
@@ -438,7 +438,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                         Text(
                           'Contact Administrator',
                           style: TextStyle(
-                            color: AppConstants.backgroundColor,
+                            color: AppConstants.primaryColor,
                             fontSize: width * 0.045,
                           ),
                         ),

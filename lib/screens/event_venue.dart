@@ -116,9 +116,12 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
-      "date": selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
-      "time": selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
-      "branches": selectedBranches, // <-- Corrected: Use key "branches" and pass the List<String>
+      "date":
+          selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
+      "time":
+          selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
+      "branches":
+          selectedBranches, // <-- Corrected: Use key "branches" and pass the List<String>
     };
 
     // Add a print statement here to verify the map before sending
@@ -235,7 +238,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                           ElevatedButton(
                             onPressed: _scheduleClass,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppConstants.backgroundColor,
+                              backgroundColor: AppConstants.primaryColor,
                               elevation: 0,
                               padding: EdgeInsets.symmetric(
                                 vertical: height * 0.015,
@@ -267,7 +270,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   Widget _buildLocationDropdown(Function(String?) onChanged) {
     if (isLoading) {
       return Center(
-        child: CircularProgressIndicator(color: AppConstants.primaryColor),
+        child: CircularProgressIndicator(color: AppConstants.gradient_1),
       );
     }
 
@@ -289,7 +292,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             ElevatedButton(
               onPressed: fetchVenues,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppConstants.backgroundColor,
+                backgroundColor: AppConstants.primaryColor,
               ),
               child: Text(
                 "Retry",
@@ -378,12 +381,12 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         },
         calendarStyle: CalendarStyle(
           selectedDecoration: BoxDecoration(
-            color: AppConstants.backgroundColor,
+            color: AppConstants.primaryColor,
             shape: BoxShape.circle,
           ),
           selectedTextStyle: TextStyle(color: Colors.white),
           todayDecoration: BoxDecoration(
-            color: AppConstants.backgroundColor,
+            color: AppConstants.primaryColor,
             shape: BoxShape.circle,
           ),
           todayTextStyle: TextStyle(color: AppConstants.textBlack),
@@ -432,7 +435,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppConstants.backgroundColor : Colors.grey[800],
+            color: isSelected ? AppConstants.primaryColor : Colors.grey[800],
             borderRadius: BorderRadius.circular(8.0),
           ),
           alignment: Alignment.center,
@@ -462,7 +465,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
               ),
               selected: isSelected,
               backgroundColor: Colors.grey[800],
-              selectedColor: AppConstants.backgroundColor,
+              selectedColor: AppConstants.primaryColor,
               padding: EdgeInsets.symmetric(
                 horizontal: 8,
                 vertical: 4,

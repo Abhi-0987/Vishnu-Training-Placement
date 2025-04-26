@@ -179,8 +179,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         borderRadius: BorderRadius.circular(18),
                                         gradient: const LinearGradient(
                                           colors: [
-                                            AppConstants.primaryColor,
-                                            AppConstants.secondaryColor,
+                                            AppConstants.gradient_1,
+                                            AppConstants.gradient_2,
                                           ],
                                         ),
                                       ),
@@ -233,15 +233,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                         borderRadius: BorderRadius.circular(18),
                                         gradient: const LinearGradient(
                                           colors: [
-                                            AppConstants.primaryColor,
-                                            AppConstants.secondaryColor,
+                                            AppConstants.gradient_1,
+                                            AppConstants.gradient_2,
                                           ],
                                         ),
                                       ),
                                       padding: const EdgeInsets.all(3),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppConstants.textBlack,
+                                          backgroundColor:
+                                              AppConstants.textBlack,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(

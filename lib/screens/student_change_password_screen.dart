@@ -360,8 +360,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                AppConstants.primaryColor,
-                                                AppConstants.secondaryColor,
+                                                AppConstants.gradient_1,
+                                                AppConstants.gradient_2,
                                               ],
                                             ),
                                           ),
@@ -420,7 +420,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         Text(
                           'Contact Administrator',
                           style: TextStyle(
-                            color: AppConstants.primaryColor,
+                            color: AppConstants.gradient_1,
                             fontSize: width * 0.045,
                           ),
                         ),

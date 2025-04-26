@@ -231,7 +231,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                               });
                             },
                             backgroundColor: Colors.purple.withOpacity(0.4),
-                            selectedColor: AppConstants.backgroundColor,
+                            selectedColor: AppConstants.primaryColor,
                             checkmarkColor: AppConstants.textWhite,
                             labelStyle: TextStyle(
                               color:
@@ -254,7 +254,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                 });
                               },
                               backgroundColor: Colors.purple.withOpacity(0.4),
-                              selectedColor: AppConstants.backgroundColor,
+                              selectedColor: AppConstants.primaryColor,
                               checkmarkColor: AppConstants.textWhite,
                               labelStyle: TextStyle(
                                 color:
@@ -274,7 +274,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     Expanded(
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: AppConstants.backgroundColor,
+                          color: AppConstants.primaryColor,
                         ),
                       ),
                     )
@@ -293,7 +293,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                             ElevatedButton(
                               onPressed: _fetchSchedules,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppConstants.backgroundColor,
+                                backgroundColor: AppConstants.primaryColor,
                               ),
                               child: Text(
                                 'Retry',
@@ -321,7 +321,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: _fetchSchedules,
-                        color: AppConstants.backgroundColor,
+                        color: AppConstants.primaryColor,
                         child: ListView.builder(
                           padding: EdgeInsets.symmetric(
                             vertical: height * 0.01,
