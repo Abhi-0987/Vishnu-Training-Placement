@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/services/token_service.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,20 +14,24 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool _showText = false;
+  late bool isLoggedIn;
+  late String role;
+
+  Future<void> _findLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    isLoggedIn = await TokenService().checkAndRefreshToken();
+    role = prefs.getString('role')!;
+  }
 
   @override
   void initState() {
     super.initState();
-
-    Timer(const Duration(seconds: 5), () {
+    _findLogin();
+    Timer(const Duration(milliseconds: 1500), () {
       setState(() => _showText = true);
 
-      Future.delayed(const Duration(seconds: 2), () async {
-        final prefs = await SharedPreferences.getInstance();
-        final isLoggedIn = await TokenService().checkAndRefreshToken();
-
+      Future.delayed(const Duration(seconds: 3), () async {
         if (isLoggedIn) {
-          final role = prefs.getString('role');
           if (role == 'student') {
             Navigator.pushReplacementNamed(
               context,
@@ -63,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
             children: [
               TweenAnimationBuilder(
                 tween: Tween<double>(begin: 0, end: 1),
-                duration: const Duration(seconds: 3),
+                duration: const Duration(milliseconds: 1500),
                 builder: (context, double value, child) {
                   return Opacity(
                     opacity: 1,
@@ -82,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: const Text(
                   'Vishnu Training and Placements',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),

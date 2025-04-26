@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:excel/excel.dart' as xl;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/services/api_services.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
 import 'package:get/get.dart';
@@ -193,8 +194,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     }
   }
 
-  // Add these imports at the top of the file
-
   // Update the downloadExcelFile method
   Future<void> downloadExcelFile() async {
     try {
@@ -275,19 +274,12 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
           // Get the file name with timestamp
           String fileName =
               'contacts-${DateTime.now().day.toString().padLeft(2, '0')}${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().year}.xlsx';
-          print("Generated filename: $fileName");
 
           if (kIsWeb) {
-            print("Running on web platform, using browser download...");
             // For web platform
             final blob = html.Blob([Uint8List.fromList(bytes)]);
             final url = html.Url.createObjectUrlFromBlob(blob);
-            final anchor =
-                html.AnchorElement(href: url)
-                  ..setAttribute('download', fileName)
-                  ..click();
             html.Url.revokeObjectUrl(url);
-            print("Web download initiated for file: $fileName");
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -296,7 +288,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
               ),
             );
           } else {
-            print("Running on mobile platform, saving to downloads folder...");
             // For mobile platforms
             try {
               // Create a temporary file in the app's documents directory
@@ -393,10 +384,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
           // For web platform
           final blob = html.Blob([Uint8List.fromList(bytes)]);
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor =
-              html.AnchorElement(href: url)
-                ..setAttribute('download', fileName)
-                ..click();
           html.Url.revokeObjectUrl(url);
 
           ScaffoldMessenger.of(context).showSnackBar(
@@ -437,7 +424,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     final Size screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppConstants.textBlack,
       extendBodyBehindAppBar: true,
       appBar: const CustomAppBar(),
       body: Stack(
@@ -458,7 +445,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                           const Text(
                             "Absentees",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppConstants.textWhite,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'Alata',
@@ -479,7 +466,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                   const Text(
                                     "Upload Attendance Sheet",
                                     style: TextStyle(
-                                      color: Colors.white,
+                                      color: AppConstants.textWhite,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'Alata',
@@ -491,7 +478,8 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                     children: [
                                       ElevatedButton.icon(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.purple,
+                                          backgroundColor:
+                                              AppConstants.primaryColor,
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 12,
                                             horizontal: 20,
@@ -510,7 +498,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                             Text(
                                               "Upload Excel File",
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: 16,
                                                 fontFamily: 'Alata',
                                               ),
@@ -601,7 +589,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                     ? "Downloading..."
                                                     : "Download Excel",
                                                 style: const TextStyle(
-                                                  color: Colors.white,
+                                                  color: AppConstants.textWhite,
                                                   fontSize: 16,
                                                   fontFamily: 'Alata',
                                                 ),
@@ -609,7 +597,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                               const SizedBox(width: 8),
                                               const Icon(
                                                 Icons.download,
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                               ),
                                             ],
                                           ),
@@ -633,10 +621,10 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                   0.3, // 30% of screen height
                               padding: const EdgeInsets.all(15),
                               decoration: BoxDecoration(
-                                color: Colors.grey.shade800.withOpacity(0.3),
+                                color: Colors.grey.shade800,
                                 borderRadius: BorderRadius.circular(15),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.1),
+                                  color: AppConstants.textWhite,
                                   width: 1,
                                 ),
                               ),
@@ -677,7 +665,8 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                   controller
                                                       .phoneNumbers[index],
                                                   style: const TextStyle(
-                                                    color: Colors.white,
+                                                    color:
+                                                        AppConstants.textWhite,
                                                     fontSize: 16,
                                                   ),
                                                 ),
@@ -713,7 +702,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                             child: Obx(
                               () => ElevatedButton.icon(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.purple,
+                                  backgroundColor: AppConstants.primaryColor,
                                   padding: const EdgeInsets.symmetric(
                                     vertical: 12,
                                     horizontal: 20,
@@ -862,7 +851,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                           ? "Sending..."
                                           : "Send via WhatsApp",
                                       style: const TextStyle(
-                                        color: Colors.white,
+                                        color: AppConstants.textWhite,
                                         fontSize: 16,
                                         fontFamily: 'Alata',
                                       ),

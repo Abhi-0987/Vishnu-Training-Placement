@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
@@ -22,76 +23,78 @@ class StudentProfileScreen extends StatelessWidget {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: const CustomAppBar(isProfileScreen: true),
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            ScreensBackground(height: height, width: width),
-            SafeArea(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Profile",
+        backgroundColor: AppConstants.textBlack,
+        body: SingleChildScrollView(
+          child: Stack(
+            children: [
+              ScreensBackground(height: height, width: width),
+              SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Center(
+                        child: Text(
+                          "Profile",
+                          style: TextStyle(
+                            fontSize: width * 0.06,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Alata',
+                            color: AppConstants.textWhite,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: height * 0.02),
+                      _buildProfileCard(width, height),
+                      SizedBox(height: height * 0.02),
+                      Text(
+                        "Statistics",
                         style: TextStyle(
-                          fontSize: width * 0.06,
+                          fontSize: width * 0.07,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Alata',
-                          color: Colors.white,
+                          color: AppConstants.textWhite,
                         ),
                       ),
-                    ),
-                    SizedBox(height: height * 0.02),
-                    _buildProfileCard(width, height),
-                    SizedBox(height: height * 0.02),
-                    Text(
-                      "Statistics",
-                      style: TextStyle(
-                        fontSize: width * 0.07,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Alata',
-                        color: Colors.white,
+                      SizedBox(height: height * 0.02),
+                      Center(child: buildPieChart(width, height)),
+
+                      Row(
+                        children: [
+                          SizedBox(width: width * 0.27),
+                          _buildLegend(AppConstants.piechartcolor2, "Present"),
+                          SizedBox(width: width * 0.04),
+                          _buildLegend(AppConstants.piechartcolor1, "Absent"),
+                        ],
                       ),
-                    ),
-                    SizedBox(height: height * 0.02),
-                    Center(child: buildPieChart(width, height)),
 
-                    Row(
-                      children: [
-                        SizedBox(width: width * 0.27),
-                        _buildLegend(const Color(0xFF18B0C1), "Present"),
-                        SizedBox(width: width * 0.04),
-                        _buildLegend(const Color(0xFFB45AA8), "Absent"),
-                      ],
-                    ),
-
-                    SizedBox(height: height * 0.03),
-                    Row(
-                      children: [
-                        _buildInfoCard(
-                          "Total Sessions",
-                          "8",
-                          Colors.white,
-                          width,
-                          height,
-                        ),
-                        SizedBox(width: width * 0.04),
-                        _buildInfoCard(
-                          "Longest Streak",
-                          "1 day",
-                          Colors.white,
-                          width,
-                          height,
-                        ),
-                      ],
-                    ),
-                  ],
+                      SizedBox(height: height * 0.03),
+                      Row(
+                        children: [
+                          _buildInfoCard(
+                            "Total Sessions",
+                            "8",
+                            AppConstants.textWhite,
+                            width,
+                            height,
+                          ),
+                          SizedBox(width: width * 0.04),
+                          _buildInfoCard(
+                            "Longest Streak",
+                            "1 day",
+                            AppConstants.textWhite,
+                            width,
+                            height,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -117,7 +120,7 @@ class StudentProfileScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: width * 0.035,
                     fontFamily: 'Alata',
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                   ),
                 ),
                 Text(
@@ -125,7 +128,7 @@ class StudentProfileScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: width * 0.035,
                     fontFamily: 'Alata',
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                   ),
                 ),
                 Text(
@@ -133,7 +136,7 @@ class StudentProfileScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: width * 0.035,
                     fontFamily: 'Alata',
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                   ),
                 ),
                 Text(
@@ -141,7 +144,7 @@ class StudentProfileScreen extends StatelessWidget {
                   style: TextStyle(
                     fontSize: width * 0.035,
                     fontFamily: 'Alata',
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                   ),
                 ),
               ],
@@ -170,7 +173,7 @@ class StudentProfileScreen extends StatelessWidget {
           style: const TextStyle(
             fontSize: 14,
             fontFamily: 'Alata',
-            color: Colors.white,
+            color: AppConstants.textWhite,
           ),
         ),
       ],
@@ -187,26 +190,26 @@ class StudentProfileScreen extends StatelessWidget {
           sections: [
             PieChartSectionData(
               value: 60,
-              color: const Color(0xFF18B0C1),
+              color: AppConstants.piechartcolor2,
               title: '60%',
               radius: width * 0.20,
               titleStyle: TextStyle(
                 fontSize: width * 0.04,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Alata',
-                color: Colors.white,
+                color: AppConstants.textWhite,
               ),
             ),
             PieChartSectionData(
               value: 40,
-              color: const Color(0xFFB45AA8),
+              color: AppConstants.piechartcolor1,
               title: '40%',
               radius: width * 0.20,
               titleStyle: TextStyle(
                 fontSize: width * 0.04,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Alata',
-                color: Colors.white,
+                color: AppConstants.textWhite,
               ),
             ),
           ],
