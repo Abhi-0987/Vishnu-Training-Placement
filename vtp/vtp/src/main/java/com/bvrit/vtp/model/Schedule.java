@@ -34,5 +34,5 @@ public class Schedule {
     private LocalTime time;
     
     @Column(name = "student_branch")
-    private String studentBranch;
+    private String studentBranch; 
 }

@@ -133,12 +133,16 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final roomNo = parts.length > 1 ? parts[1] : '';
 
     // Format the data as a proper JSON object
+    // Join the selected branches into a comma-separated string
+    String branchesString = selectedBranches.join(',');
+
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
       "date": selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
       "time": selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
-      "branches": selectedBranches, // Pass the List<String>
+      // Correct the key to "studentBranch" and use the joined string
+      "studentBranch": branchesString, 
     };
 
     // Add a print statement here to verify the map before sending

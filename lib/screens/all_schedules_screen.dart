@@ -237,8 +237,10 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                       return Padding(
                                         padding: const EdgeInsets.only(bottom: 16.0),
                                         child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
+                                          // Make the onTap handler async
+                                          onTap: () async { 
+                                            // Await the result of Navigator.push
+                                            final result = await Navigator.push( 
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) => ScheduleDetailsScreen(
@@ -246,6 +248,10 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                 ),
                                               ),
                                             );
+                                            // If result is true, refresh the schedules
+                                            if (result == true) { 
+                                              _fetchSchedules();
+                                            }
                                           },
                                           child: OpaqueContainer(
                                             width: width,
@@ -309,8 +315,10 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                 Align(
                                                   alignment: Alignment.centerRight,
                                                   child: ElevatedButton(
-                                                    onPressed: () {
-                                                      Navigator.push(
+                                                    // Make the onPressed handler async
+                                                    onPressed: () async { 
+                                                      // Await the result of Navigator.push
+                                                      final result = await Navigator.push( 
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (context) => ScheduleDetailsScreen(
@@ -318,6 +326,10 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                           ),
                                                         ),
                                                       );
+                                                      // If result is true, refresh the schedules
+                                                      if (result == true) { 
+                                                        _fetchSchedules();
+                                                      }
                                                     },
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: Colors.purple,
@@ -352,15 +364,7 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Add new schedule functionality to be implemented')),
-          );
-        },
-        backgroundColor: Colors.blue,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+
     );
   }
 }
