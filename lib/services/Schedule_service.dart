@@ -12,7 +12,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = '';
+      final token = prefs.getString('token')?? '';
 
       print('Sending schedule data: ${jsonEncode(scheduleData)}');
 
@@ -89,7 +89,7 @@ class ScheduleServices {
   static Future<List<dynamic>> fetchSchedulesByBranch(String branch) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = '';
+      final token = prefs.getString('token')?? '';
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/branch/$branch'),
         headers: {
@@ -112,7 +112,7 @@ class ScheduleServices {
   static Future<List<dynamic>> getAllSchedules() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token ='';
+      final token =prefs.getString('token')??'';
 
       print('Using token for getAllSchedules: $token');
 
@@ -146,7 +146,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = '';
+      final token = prefs.getString('token')?? '';
       print('Updating schedule data: ${jsonEncode(updatedScheduleData)}');
 
       final response = await http.put(
@@ -193,7 +193,7 @@ class ScheduleServices {
   static Future<Map<String, dynamic>> deleteSchedule(String scheduleId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = '';
+      final token = prefs.getString('token')??'';
 
       final response = await http.delete(
         Uri.parse('$baseUrl/api/schedules/$scheduleId'),

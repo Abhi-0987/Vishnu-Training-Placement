@@ -419,72 +419,88 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   }
 
   Future<void> _saveChanges() async {
-    final scheduleId = widget.schedule['id']?.toString();
-    if (scheduleId == null) {
+    if (!_isDataChanged()) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: Schedule ID is missing. Cannot save.')),
+        const SnackBar(content: Text('No changes detected.')),
       );
       return;
     }
 
-    final String branchesString = _editedBranch.join(',');
-
-    final updatedScheduleData = {
-      'date': _editedDate,
-      'time': _editedTime,
+    // Join the list of branches into a single comma-separated string
+    String branchesString = _editedBranch.join(',');
+    final updatedData = {
       'location': _editedLocation,
       'roomNo': _editedRoomNo,
+      'date': _editedDate,
+      'time': _editedTime,
       'studentBranch': branchesString,
     };
 
-    print("Attempting to save changes for ID $scheduleId: $updatedScheduleData");
+    print("Showing loading dialog..."); // Log: Before showing dialog
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(child: CircularProgressIndicator());
+      },
+    );
 
     try {
+      print("Calling updateSchedule API..."); // Log: Before API call
       final result = await ScheduleServices.updateSchedule(
-        scheduleId,
-        updatedScheduleData,
+        widget.schedule['id'].toString(),
+        updatedData,
       );
+      print("API call finished. Result: $result"); // Log: After API call
 
-      print("Raw result from ScheduleServices.updateSchedule: $result");
+      // IMPORTANT: Check if mounted *before* interacting with context after await
+      if (!mounted) {
+        print("Widget not mounted after API call, returning."); // Log: Not mounted
+        return; 
+      }
 
-      if (result.containsKey('success')) {
-        if (result['success'] == true) {
-          setState(() {
-            originalDate = _editedDate;
-            originalTime = _editedTime;
-            originalLocation = _editedLocation;
-            originalRoomNo = _editedRoomNo;
-            originalBranch = List<String>.from(_editedBranch);
+      print("Attempting to dismiss loading dialog..."); // Log: Before dismissing dialog
+      // Dismiss loading indicator FIRST
+      // Try using rootNavigator: true
+      Navigator.of(context, rootNavigator: true).pop(); 
+      print("Loading dialog dismissed."); // Log: After dismissing dialog
 
-            widget.schedule['date'] = _editedDate;
-            widget.schedule['time'] = _editedTime;
-            widget.schedule['location'] = _editedLocation;
-            widget.schedule['roomNo'] = _editedRoomNo;
-            widget.schedule['studentBranch'] = branchesString;
-
-            showPostButton = false;
-          });
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result['message']?.toString() ?? 'Schedule updated successfully')),
-          );
-        } else {
-          print("Save failed. Server message: ${result['message']}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error saving: ${result['message']?.toString() ?? 'Unknown error'}')),
-          );
-        }
-      } else {
-        print("Error: Unexpected response format received from updateSchedule service: $result");
+      if (result['success'] == true) {
+        print("Update successful. Showing SnackBar and popping screen."); // Log: Success path
+        // Check mounted again before showing SnackBar or popping screen
+        if (!mounted) return; 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Invalid response format received from server.')),
+          const SnackBar(content: Text('Schedule updated successfully!')),
+        );
+        // Navigate back to the previous screen on success
+        Navigator.pop(context, true); // Pop the details screen
+      } else {
+        print("Update failed. Showing error SnackBar. Error: ${result['message']}"); // Log: Failure path
+        // Check mounted again before showing SnackBar
+        if (!mounted) return; 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update schedule: ${result['message'] ?? 'Unknown error'}')),
         );
       }
-    } catch (e, stackTrace) {
-      print("Error calling updateSchedule service: $e");
-      print("Stack trace: $stackTrace");
+    } catch (e, stackTrace) { // Catch stack trace for more info
+       print("Error caught in _saveChanges: $e"); // Log: Error caught
+       print("Stack trace: $stackTrace"); // Log: Stack trace
+
+       // Check mounted again before interacting with context in catch block
+      if (!mounted) {
+        print("Widget not mounted in catch block, returning."); // Log: Not mounted in catch
+        return; 
+      }
+      
+      print("Attempting to dismiss loading dialog in catch block..."); // Log: Before pop in catch
+      // Attempt to dismiss the dialog in case the error occurred before the first pop
+      // Use rootNavigator: true here as well for consistency
+      Navigator.of(context, rootNavigator: true).pop(); 
+      print("Loading dialog dismissed in catch block (if it was still open)."); // Log: After pop in catch
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An unexpected error occurred while saving: $e')),
+        SnackBar(content: Text('An error occurred: ${e.toString()}')),
       );
     }
   }

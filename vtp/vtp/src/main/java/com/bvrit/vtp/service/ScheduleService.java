@@ -74,7 +74,8 @@ public class ScheduleService {
         }
 
         // **Fix:** Use studentBranch directly from the updated DTO
-        schedule.setStudentBranch(scheduleDTO.getStudentBranch()); // Use the string directly
+        // This line now correctly assigns String from DTO to String in Entity
+        schedule.setStudentBranch(scheduleDTO.getStudentBranch()); 
 
         return scheduleRepository.save(schedule);
     }
@@ -103,6 +104,7 @@ public class ScheduleService {
             }
 
             // Update studentBranch
+            // This line now correctly assigns String from DTO to String in Entity
             existingSchedule.setStudentBranch(scheduleDetails.getStudentBranch());
 
             return scheduleRepository.save(existingSchedule);

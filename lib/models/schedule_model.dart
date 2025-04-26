@@ -5,8 +5,6 @@ class Schedule {
   final String date;
   final String time;
   final String studentBranch;
-  final String description;
-  final String companyName;
   
   Schedule({
     required this.id,
@@ -15,8 +13,7 @@ class Schedule {
     required this.date,
     required this.time,
     required this.studentBranch,
-    this.description = '',  // Add default empty string
-    this.companyName = '',  // Add default empty string
+
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) {
@@ -63,8 +60,7 @@ class Schedule {
       date: formattedDate, // Use the formatted date string
       time: formattedTime, // Use the formatted time string
       studentBranch: json['studentBranch']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',  // Add this line
-      companyName: json['companyName']?.toString() ?? '',  // Add this line
+ // Add this line
     );
   }
   
@@ -77,8 +73,6 @@ class Schedule {
       'date': date,
       'time': time,
       'studentBranch': studentBranch,
-      'description': description,
-      'companyName': companyName,
     };
   }
 }
