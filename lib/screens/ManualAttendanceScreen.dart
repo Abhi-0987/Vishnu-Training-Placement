@@ -33,10 +33,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     for (int i = 1; i <= 50; i++) {
       String studentId = i.toString().padLeft(4, '0');
       _students.add(
-        Student(
-          email: "student${studentId}@vishnu.edu.in",
-          isSelected: false,
-        ),
+        Student(email: "student${studentId}@vishnu.edu.in", isSelected: false),
       );
     }
   }
@@ -57,7 +54,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
       for (var student in _students) {
         student.isSelected = value;
       }
-      
+
       if (value) {
         _selectedStudents.clear();
         _selectedStudents.addAll(_students);
@@ -82,18 +79,20 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       // Simulate API call with a delay
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Attendance marked for ${_selectedStudents.length} students"),
+          content: Text(
+            "Attendance marked for ${_selectedStudents.length} students",
+          ),
           backgroundColor: Colors.green,
         ),
       );
-      
+
       // Clear selections
       setState(() {
         for (var student in _students) {
@@ -119,7 +118,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     if (_searchQuery.isEmpty) {
       return _students;
     }
-    
+
     return _students.where((student) {
       return student.email.toLowerCase().contains(_searchQuery.toLowerCase());
     }).toList();
@@ -128,7 +127,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    
+
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
@@ -161,7 +160,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                     ),
                   ),
                   const SizedBox(height: 15),
-                  
+
                   // Search bar
                   TextField(
                     controller: _searchController,
@@ -169,7 +168,10 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                     decoration: InputDecoration(
                       hintText: "Search by email",
                       hintStyle: const TextStyle(color: Colors.white54),
-                      prefixIcon: const Icon(Icons.search, color: Colors.purple),
+                      prefixIcon: const Icon(
+                        Icons.search,
+                        color: Colors.purple,
+                      ),
                       filled: true,
                       fillColor: Colors.grey.shade800,
                       border: OutlineInputBorder(
@@ -183,33 +185,28 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                       });
                     },
                   ),
-                  
+
                   const SizedBox(height: 15),
-                  
+
                   // Remove the "Select all checkbox" container that was here
-                  
+
                   // Student list - simplified to only show email
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Color.fromRGBO(
-                          Colors.grey.shade800.red,
-                          Colors.grey.shade800.green,
-                          Colors.grey.shade800.blue,
-                          0.3,
-                        ),
+                        color: Colors.grey.shade800.withAlpha(76),
+
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withAlpha(26),
                           width: 1,
                         ),
                       ),
                       child: ListView.separated(
                         itemCount: _filteredStudents.length,
-                        separatorBuilder: (context, index) => const Divider(
-                          color: Colors.white24,
-                          height: 1,
-                        ),
+                        separatorBuilder:
+                            (context, index) =>
+                                const Divider(color: Colors.white24, height: 1),
                         itemBuilder: (context, index) {
                           final student = _filteredStudents[index];
                           return ListTile(
@@ -233,9 +230,9 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 15),
-                  
+
                   // Mark attendance button
                   SizedBox(
                     width: double.infinity,
@@ -248,16 +245,19 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
                         ),
                       ),
                       onPressed: _isLoading ? null : _markAttendance,
-                      child: _isLoading
-                          ? const CircularProgressIndicator(color: Colors.white)
-                          : const Text(
-                              "Mark Attendance",
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                      child:
+                          _isLoading
+                              ? const CircularProgressIndicator(
                                 color: Colors.white,
+                              )
+                              : const Text(
+                                "Mark Attendance",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
                     ),
                   ),
                 ],
@@ -274,8 +274,5 @@ class Student {
   final String email;
   bool isSelected;
 
-  Student({
-    required this.email,
-    this.isSelected = false,
-  });
+  Student({required this.email, this.isSelected = false});
 }
