@@ -18,6 +18,8 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       // initialRoute: AppRoutes.splash,
       // routes: AppRoutes.routes,
+      // initialRoute: AppRoutes.splash,
+      // routes: AppRoutes.routes,
       // home: StudentLoginScreen(isAdmin: false),
       home: StudentSchedulesScreen (),
     );

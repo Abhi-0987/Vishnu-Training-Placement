@@ -1,12 +1,8 @@
 package com.bvrit.vtp.service;
 
 import com.bvrit.vtp.dao.ScheduleRepository;
-import com.bvrit.vtp.dao.StudentAttendanceRepo;
-import com.bvrit.vtp.dao.StudentDetailsRepo;
 import com.bvrit.vtp.dto.ScheduleDTO;
 import com.bvrit.vtp.model.Schedule;
-import com.bvrit.vtp.model.StudentAttendance;
-import com.bvrit.vtp.model.StudentDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Import Transactional
@@ -24,32 +20,23 @@ import java.util.Optional;
 public class ScheduleService {
 
     @Autowired
-    private ScheduleRepository scheduleRepo;
+    private ScheduleRepository scheduleRepository;
 
-    @Autowired
-    private StudentDetailsRepo studentDetailsRepository;
-
-    @Autowired
-    private StudentAttendanceRepo studentAttendanceRepository;
-
-    // Method to get all schedules
     public List<Schedule> getAllSchedules() {
-        return scheduleRepo.findAll();
+        return scheduleRepository.findAll();
     }
 
-    // Method to get schedule by its ID
     public Optional<Schedule> getScheduleById(Long id) {
-        return scheduleRepo.findById(id);
+        return scheduleRepository.findById(id);
     }
 
-    // Method to get schedules by location
     public List<Schedule> getSchedulesByLocation(String location) {
-        return scheduleRepo.findByLocation(location);
+        return scheduleRepository.findByLocation(location);
     }
-
-    // Method to get schedules by branch
+    
     public List<Schedule> getSchedulesByBranch(String branch) {
-        return scheduleRepo.findByStudentBranchContaining(branch);
+        // Updated to use studentBranch instead of branches
+        return scheduleRepository.findByStudentBranchContaining(branch);
     }
 
     @Transactional // Add transactional annotation for create operation
@@ -126,7 +113,7 @@ public class ScheduleService {
     }
 
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime time) {
-        List<Schedule> existingSchedules = scheduleRepo.findByLocationAndDateAndTime(location, date, time);
+        List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDateAndTime(location, date, time);
         return existingSchedules.isEmpty();
     }
 }
