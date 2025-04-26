@@ -24,9 +24,9 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       // debugShowCheckedModeBanner: false,
-      // initialRoute: AppRoutes.splash,
+      // initialRoute: AppRoutes.welcome,
       // routes: AppRoutes.routes,
-      // home: AdminHomeScreen(),
+      // home: MarkAttendancePage(),
       home: StudentProfileScreen(),
     );
   }

@@ -339,7 +339,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
                                                 _isPasswordVisible
                                                     ? Icons.visibility
                                                     : Icons.visibility_off,
-                                                color: Colors.black,
+                                                color: AppConstants.textBlack,
                                               ),
                                               onPressed: () {
                                                 setState(() {

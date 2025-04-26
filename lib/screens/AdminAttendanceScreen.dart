@@ -492,7 +492,8 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                     children: [
                                       ElevatedButton.icon(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppConstants.backgroundColor,
+                                          backgroundColor:
+                                              AppConstants.backgroundColor,
                                           padding: const EdgeInsets.symmetric(
                                             vertical: 12,
                                             horizontal: 20,
@@ -887,19 +888,6 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: AppConstants.backgroundColor,
-        selectedItemColor: AppConstants.textWhite,
-        unselectedItemColor: Colors.white60,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.account_circle),
-            label: "Account",
           ),
         ],
       ),

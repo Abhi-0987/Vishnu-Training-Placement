@@ -165,7 +165,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                     width * 0.04,
                                   ),
                                   border: Border.all(
-                                    color: Colors.white,
+                                    color: AppConstants.textWhite,
                                     width: 1,
                                   ),
                                 ),
@@ -212,7 +212,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             Text(
                                               'Admin',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: 28,
                                                 fontFamily: 'Alata',
                                               ),
@@ -241,7 +241,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                       padding: const EdgeInsets.all(3),
                                       child: ElevatedButton(
                                         style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.black,
+                                          backgroundColor: AppConstants.textBlack,
                                           elevation: 0,
                                           shape: RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(
@@ -265,7 +265,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             const Text(
                                               'Student',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: 28,
                                                 fontFamily: 'Alata',
                                               ),

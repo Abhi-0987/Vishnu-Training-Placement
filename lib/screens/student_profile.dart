@@ -197,7 +197,7 @@ class StudentProfileScreen extends StatelessWidget {
                 fontSize: width * 0.04,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Alata',
-                color: Colors.white,
+                color: AppConstants.textWhite,
               ),
             ),
             PieChartSectionData(

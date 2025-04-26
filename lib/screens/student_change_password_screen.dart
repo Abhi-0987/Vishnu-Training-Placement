@@ -370,8 +370,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                                           ),
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
-                                              backgroundColor: AppConstants
-                                                  .textBlack
+                                              backgroundColor: Colors.black
                                                   .withAlpha(220),
                                               elevation: 0,
                                               shape: RoundedRectangleBorder(
