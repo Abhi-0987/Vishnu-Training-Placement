@@ -8,7 +8,7 @@ class AuthService {
   Future<http.Response> login(
     String email,
     String password,
-    String deviceId,
+    // String deviceId,
     bool isAdmin,
   ) async {
     final url = Uri.parse(
@@ -21,7 +21,7 @@ class AuthService {
       body: jsonEncode({
         "email": email,
         "password": password,
-        "deviceId": deviceId,
+        // "deviceId": deviceId,
       }),
     );
 
