@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:ui';
-import 'package:device_info_plus/device_info_plus.dart';
+// import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
@@ -22,16 +22,16 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
   bool _isPasswordVisible = false;
   bool _isLoading = false; // Show loading indicator
 
-  Future<String?> getAndroidDeviceId() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    return androidInfo.id; // Unique ID (but may change on factory reset)
-  }
+  // Future<String?> getAndroidDeviceId() async {
+  //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  //   return androidInfo.id; // Unique ID (but may change on factory reset)
+  // }
 
   Future<void> login() async {
     final password = passwordController.text.trim();
     final email = emailController.text.trim();
-    final deviceId = await getAndroidDeviceId();
+    // final deviceId = await getAndroidDeviceId();
 
     if (email.isEmpty || password.isEmpty) {
       showError("Email and password cannot be empty.");
@@ -45,7 +45,7 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       final response = await AuthService().login(
         email,
         password,
-        deviceId!,
+        // deviceId!,
         widget.isAdmin,
       );
 

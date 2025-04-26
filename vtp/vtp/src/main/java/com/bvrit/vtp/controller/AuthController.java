@@ -60,7 +60,7 @@ public class AuthController {
     public ResponseEntity<?> studentlogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
-        String deviceId = credentials.get("deviceId");
+//        String deviceId = credentials.get("deviceId");
 
         Optional<Student> optionalStudent = studentRepository.findByEmail(email);
         if (optionalStudent.isEmpty()) {
@@ -69,19 +69,19 @@ public class AuthController {
         }
 
         Student student = optionalStudent.get();
-        String studentDeviceId = student.getDeviceId();
+//        String studentDeviceId = student.getDeviceId();
 
-        if(studentDeviceId!=null && !studentDeviceId.equals(deviceId)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", "You are trying to login to new device. Please contact admin"));
-        }
+//        if(studentDeviceId!=null && !studentDeviceId.equals(deviceId)){
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body(Map.of("error", "You are trying to login to new device. Please contact admin"));
+//        }
 
         // Check if a different student already has this deviceId
-        Optional<Student> deviceOwner = studentRepository.findByDeviceId(deviceId);
-        if (deviceOwner.isPresent() && !deviceOwner.get().getEmail().equals(email)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("error", "This device is already linked to another account"));
-        }
+//        Optional<Student> deviceOwner = studentRepository.findByDeviceId(deviceId);
+//        if (deviceOwner.isPresent() && !deviceOwner.get().getEmail().equals(email)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+//                    .body(Map.of("error", "This device is already linked to another account"));
+//        }
 
         TokenResponse tokenResponse;
         try {
@@ -91,8 +91,8 @@ public class AuthController {
                     .body(Map.of("error", "Invalid credentials"));
         }
 
-        student.setDeviceId(deviceId);
-        studentRepository.save(student);
+//        student.setDeviceId(deviceId);
+//        studentRepository.save(student);
         boolean loginFlag = student.isLogin();
 
         return ResponseEntity.ok(Map.of(
