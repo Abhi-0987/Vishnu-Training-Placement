@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "student_attendance")
@@ -25,5 +26,7 @@ public class StudentAttendance {
     private boolean present = false;
 
     private LocalDate date;
+
+    private LocalTime time;
 
 }

@@ -89,7 +89,12 @@ class ScheduleServices {
   static Future<List<dynamic>> fetchSchedulesByBranch(String branch) async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Using hardcoded token for testing as explained by user
       final token = prefs.getString('token') ?? '';
+
+      // Optional: Check if the token is empty (shouldn't happen with hardcoded fallback)
+      // if (token.isEmpty) { ... }
+
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/branch/$branch'),
         headers: {
@@ -97,6 +102,7 @@ class ScheduleServices {
           'Authorization': 'Bearer $token',
         },
       );
+
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -108,13 +114,15 @@ class ScheduleServices {
     }
   }
 
-  // Method to fetch all schedules
+  // Add this method to your ScheduleServices class
   static Future<List<dynamic>> getAllSchedules() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      // Use the SAME hardcoded token here for testing consistency
       final token = prefs.getString('token') ?? '';
 
-      //print('Using token for getAllSchedules: $token');
+      // Optional: Check if the token is empty (shouldn't happen with hardcoded fallback)
+      // if (token.isEmpty) { ... }
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules'),

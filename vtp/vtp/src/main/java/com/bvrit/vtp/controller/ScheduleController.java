@@ -67,7 +67,6 @@ public class ScheduleController {
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();
             response.put("error", "Failed to create schedule: " + e.getMessage());
-            // Log the exception
             logger.error("Error creating schedule for DTO: {}", scheduleDTO, e);
             return ResponseEntity.badRequest().body(response);
         }
