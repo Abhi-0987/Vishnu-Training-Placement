@@ -12,9 +12,9 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token')?? '';
+      final token = prefs.getString('token') ?? '';
 
-      print('Sending schedule data: ${jsonEncode(scheduleData)}');
+      //print('Sending schedule data: ${jsonEncode(scheduleData)}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/schedules'),
@@ -44,7 +44,7 @@ class ScheduleServices {
         };
       }
     } catch (e) {
-      print('Error saving schedule: $e');
+      //print('Error saving schedule: $e');
       return {'success': false, 'error': 'Network error: ${e.toString()}'};
     }
   }
@@ -89,7 +89,7 @@ class ScheduleServices {
   static Future<List<dynamic>> fetchSchedulesByBranch(String branch) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token')?? '';
+      final token = prefs.getString('token') ?? '';
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/branch/$branch'),
         headers: {
@@ -112,9 +112,9 @@ class ScheduleServices {
   static Future<List<dynamic>> getAllSchedules() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token =prefs.getString('token')??'';
+      final token = prefs.getString('token') ?? '';
 
-      print('Using token for getAllSchedules: $token');
+      //print('Using token for getAllSchedules: $token');
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules'),
@@ -124,17 +124,19 @@ class ScheduleServices {
         },
       );
 
-      print('Response status code: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      //print('Response status code: ${response.statusCode}');
+      //print('Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       } else {
-        print('Error fetching all schedules: ${response.statusCode} ${response.body}');
+        //print(
+        //   'Error fetching all schedules: ${response.statusCode} ${response.body}',
+        // );
         throw Exception('Failed to load schedules: ${response.statusCode}');
       }
     } catch (e) {
-      print('Network error in getAllSchedules: $e');
+      // print('Network error in getAllSchedules: $e');
       throw Exception('Network error: ${e.toString()}');
     }
   }
@@ -146,8 +148,8 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token')?? '';
-      print('Updating schedule data: ${jsonEncode(updatedScheduleData)}');
+      final token = prefs.getString('token') ?? '';
+      //print('Updating schedule data: ${jsonEncode(updatedScheduleData)}');
 
       final response = await http.put(
         Uri.parse('$baseUrl/api/schedules/$scheduleId'),
@@ -175,17 +177,11 @@ class ScheduleServices {
           };
         }
       } else {
-        return {
-          'success': false,
-          'message': 'Invalid response from server',
-        };
+        return {'success': false, 'message': 'Invalid response from server'};
       }
     } catch (e) {
-      print('Error updating schedule: $e');
-      return {
-        'success': false,
-        'message': 'Error: ${e.toString()}',
-      };
+      // print('Error updating schedule: $e');
+      return {'success': false, 'message': 'Error: ${e.toString()}'};
     }
   }
 
@@ -193,7 +189,7 @@ class ScheduleServices {
   static Future<Map<String, dynamic>> deleteSchedule(String scheduleId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token')??'';
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.delete(
         Uri.parse('$baseUrl/api/schedules/$scheduleId'),
@@ -204,10 +200,7 @@ class ScheduleServices {
       );
 
       if (response.statusCode == 200) {
-        return {
-          'success': true,
-          'message': 'Schedule deleted successfully',
-        };
+        return {'success': true, 'message': 'Schedule deleted successfully'};
       } else {
         final responseData = jsonDecode(response.body);
         return {
@@ -216,11 +209,8 @@ class ScheduleServices {
         };
       }
     } catch (e) {
-      print('Error deleting schedule: $e');
-      return {
-        'success': false,
-        'message': 'Network error: ${e.toString()}',
-      };
+      // print('Error deleting schedule: $e');
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
 }

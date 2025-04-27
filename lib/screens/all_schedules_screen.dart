@@ -17,6 +17,8 @@ class AllSchedulesScreen extends StatefulWidget {
 class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
   List<Schedule> schedules = [];
   List<Schedule> filteredSchedules = [];
+  List<Schedule> currentSchedules = []; // For current and future schedules
+  List<Schedule> pastSchedules = []; // For past schedules
   bool isLoading = true;
   String errorMessage = '';
   List<String> allBranches = [
@@ -24,6 +26,7 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
     'CSD', 'CSM', 'PHE', 'BME', 'AI & DS', 'CHEM', 'CSBS'
   ];
   String selectedBranch = 'All';
+  bool showPastSchedules = false; // Flag to toggle between current and past schedules
 
   @override
   void initState() {
@@ -49,11 +52,35 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
         }
       }).toList();
 
-      parsedSchedules.sort((a, b) {
+      // Separate current/future schedules from past schedules
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      
+      currentSchedules = parsedSchedules.where((schedule) {
+        final scheduleDate = DateTime.tryParse(schedule.date);
+        if (scheduleDate == null) return false;
+        return scheduleDate.isAtSameMomentAs(today) || scheduleDate.isAfter(today);
+      }).toList();
+      
+      pastSchedules = parsedSchedules.where((schedule) {
+        final scheduleDate = DateTime.tryParse(schedule.date);
+        if (scheduleDate == null) return false;
+        return scheduleDate.isBefore(today);
+      }).toList();
+      
+      // Sort both lists by date
+      currentSchedules.sort((a, b) {
         final dateA = DateTime.tryParse(a.date);
         final dateB = DateTime.tryParse(b.date);
         if (dateA == null || dateB == null) return 0;
-        return dateB.compareTo(dateA);
+        return dateA.compareTo(dateB); // Upcoming first
+      });
+      
+      pastSchedules.sort((a, b) {
+        final dateA = DateTime.tryParse(a.date);
+        final dateB = DateTime.tryParse(b.date);
+        if (dateA == null || dateB == null) return 0;
+        return dateB.compareTo(dateA); // Most recent past first
       });
 
       setState(() {
@@ -71,10 +98,14 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
 
   void _filterSchedules() {
     setState(() {
+      // First determine which list to use based on showPastSchedules flag
+      List<Schedule> sourceList = showPastSchedules ? pastSchedules : currentSchedules;
+      
+      // Then filter by branch
       if (selectedBranch == 'All') {
-        filteredSchedules = List.from(schedules);
+        filteredSchedules = List.from(sourceList);
       } else {
-        filteredSchedules = schedules
+        filteredSchedules = sourceList
             .where((schedule) => schedule.studentBranch.contains(selectedBranch))
             .toList();
       }
@@ -123,26 +154,61 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
+                // Header with toggle button
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start, // Align items to the top
                     children: [
-                      const Text(
-                        'All Schedules',
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      Expanded(  // Make this column take available space
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              showPastSchedules ? 'Past Schedules' : 'Upcoming Schedules',
+                              style: const TextStyle(
+                                fontSize: 24, // Slightly smaller font
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2, // Allow up to 2 lines
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Tap on a schedule to view details',
+                              style: TextStyle(
+                                fontSize: 14, // Slightly smaller font
+                                color: Colors.white.withOpacity(0.7),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Tap on a schedule to view details',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white.withOpacity(0.7),
+                      const SizedBox(width: 8), // Add spacing between text and button
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            showPastSchedules = !showPastSchedules;
+                            _filterSchedules();
+                          });
+                        },
+                        icon: Icon(
+                          showPastSchedules ? Icons.calendar_today : Icons.history,
+                          color: Colors.white,
+                          size: 18, // Smaller icon
+                        ),
+                        label: Text(
+                          showPastSchedules ? 'Current' : 'History',
+                          style: const TextStyle(color: Colors.white, fontSize: 12), // Smaller text
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Smaller padding
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
                         ),
                       ),
                     ],

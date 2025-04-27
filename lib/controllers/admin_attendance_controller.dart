@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../services/api_services.dart';
+import '../services/whatsapp_services.dart';
 import 'package:flutter/material.dart'; // Add this import for Colors
 
 class AdminAttendanceController extends GetxController {
@@ -58,7 +58,7 @@ class AdminAttendanceController extends GetxController {
 
     try {
       isSendingMessages.value = true;
-      final response = await ApiService.sendBulkMessages(
+      final response = await WhatsappServices.sendBulkMessages(
         phoneNumbers.toList(),
         message.value,
       );

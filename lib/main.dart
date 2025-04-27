@@ -21,7 +21,7 @@ class MainApp extends StatelessWidget {
       // initialRoute: AppRoutes.splash,
       // routes: AppRoutes.routes,
       // home: StudentLoginScreen(isAdmin: false),
-      home: StudentSchedulesScreen (),
+      home: AllSchedulesScreen(),
     );
   }
 }
