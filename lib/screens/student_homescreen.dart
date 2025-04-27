@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -68,9 +69,13 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                           image: 'assets/attendance.png',
                         ),
                         onTap: () {
-                          Navigator.pushNamed(
+                          Navigator.push(
                             context,
-                            AppRoutes.markAttendanceStudent,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) =>
+                                      StudentSchedulesScreen(enabled: true),
+                            ),
                           );
                         },
                       ),

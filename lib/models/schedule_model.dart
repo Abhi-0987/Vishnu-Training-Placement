@@ -5,7 +5,8 @@ class Schedule {
   final String date;
   final String time;
   final String studentBranch;
-  
+  final bool mark;
+
   Schedule({
     required this.id,
     required this.location,
@@ -13,7 +14,7 @@ class Schedule {
     required this.date,
     required this.time,
     required this.studentBranch,
-
+    required this.mark,
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) {
@@ -28,13 +29,14 @@ class Schedule {
         int month = int.parse(dateList[1].toString());
         int day = int.parse(dateList[2].toString());
         // Format to YYYY-MM-DD
-        formattedDate = "${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
+        formattedDate =
+            "${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}";
       } catch (e) {
         print('Error parsing date list ${json['date']}: $e');
         formattedDate = json['date'].toString(); // Fallback
       }
     } else {
-       formattedDate = json['date']?.toString() ?? ''; // Fallback if not a list
+      formattedDate = json['date']?.toString() ?? ''; // Fallback if not a list
     }
 
     // Parse time array [H, M]
@@ -44,13 +46,14 @@ class Schedule {
         int hour = int.parse(timeList[0].toString());
         int minute = int.parse(timeList[1].toString());
         // Format to HH:mm (24-hour)
-        formattedTime = "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+        formattedTime =
+            "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
       } catch (e) {
         print('Error parsing time list ${json['time']}: $e');
         formattedTime = json['time'].toString(); // Fallback
       }
     } else {
-       formattedTime = json['time']?.toString() ?? ''; // Fallback if not a list
+      formattedTime = json['time']?.toString() ?? ''; // Fallback if not a list
     }
 
     return Schedule(
@@ -60,10 +63,11 @@ class Schedule {
       date: formattedDate, // Use the formatted date string
       time: formattedTime, // Use the formatted time string
       studentBranch: json['studentBranch']?.toString() ?? '',
- // Add this line
+      mark: json['mark'] ?? false,
+      // Add this line
     );
   }
-  
+
   // Add this method to convert Schedule object to Map
   Map<String, dynamic> toJson() {
     return {
@@ -73,6 +77,7 @@ class Schedule {
       'date': date,
       'time': time,
       'studentBranch': studentBranch,
+      'mark': mark,
     };
   }
 }

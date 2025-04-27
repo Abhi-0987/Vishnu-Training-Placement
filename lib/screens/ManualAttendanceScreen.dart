@@ -33,7 +33,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     for (int i = 1; i <= 50; i++) {
       String studentId = i.toString().padLeft(4, '0');
       _students.add(
-        Student(email: "student${studentId}@vishnu.edu.in", isSelected: false),
+        Student(email: "student$studentId@vishnu.edu.in", isSelected: false),
       );
     }
   }
@@ -45,21 +45,6 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
         _selectedStudents.add(student);
       } else {
         _selectedStudents.removeWhere((s) => s.email == student.email);
-      }
-    });
-  }
-
-  void _selectAllStudents(bool value) {
-    setState(() {
-      for (var student in _students) {
-        student.isSelected = value;
-      }
-
-      if (value) {
-        _selectedStudents.clear();
-        _selectedStudents.addAll(_students);
-      } else {
-        _selectedStudents.clear();
       }
     });
   }
