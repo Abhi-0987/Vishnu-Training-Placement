@@ -81,6 +81,12 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                           style: TextStyle(fontSize: 70, fontFamily: 'Alata'),
                           image: 'assets/calendar.png',
                         ),
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            AppRoutes.studentScheduleScreen,
+                          );
+                        },
                       ),
                     ],
                   ),
