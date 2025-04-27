@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _findLogin() async {
     final prefs = await SharedPreferences.getInstance();
     isLoggedIn = await TokenService().checkAndRefreshToken();
-    role = prefs.getString('role')!;
+    role = prefs.getString('role') ?? " ";
   }
 
   @override
