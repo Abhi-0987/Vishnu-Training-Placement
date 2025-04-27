@@ -4,6 +4,8 @@ import com.bvrit.vtp.dao.ScheduleRepository;
 import com.bvrit.vtp.dao.StudentAttendanceRepo;
 import com.bvrit.vtp.dao.StudentDetailsRepo;
 import com.bvrit.vtp.dto.ScheduleDTO;
+import com.bvrit.vtp.exception.AttendanceAlreadyMarkedException;
+import com.bvrit.vtp.exception.AttendanceRecordNotFoundException;
 import com.bvrit.vtp.model.Schedule;
 import com.bvrit.vtp.model.StudentAttendance;
 import com.bvrit.vtp.model.StudentDetails;
@@ -32,21 +34,24 @@ public class ScheduleService {
     @Autowired
     private StudentAttendanceRepo studentAttendanceRepository;
     // Method to mark attendance as present
-    public boolean markAttendancePresent(String email, LocalDate date) {
-        System.out.println("Checking attendance for email: " + email + ", date: " + date);
+    public boolean markAttendancePresent(String email, LocalDate date, LocalTime time) {
+        Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findByEmailAndDateAndTime(email, date, time);
 
-        Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findByEmailAndDate(email, date);
-
-        if (attendanceOpt.isPresent()) {
-            StudentAttendance attendance = attendanceOpt.get();
-            attendance.setPresent(true);  // marking as present
-            studentAttendanceRepository.save(attendance);
-            return true;
-        } else {
-            System.out.println("No attendance record found for " + email + " on " + date);
-            return false; // attendance not found
+        if (attendanceOpt.isEmpty()) {
+            throw new AttendanceRecordNotFoundException("No attendance record found for " + email + " on " + date + " at " + time);
         }
+
+        StudentAttendance attendance = attendanceOpt.get();
+
+        if (attendance.isPresent()) {
+            throw new AttendanceAlreadyMarkedException("You have already marked your attendance for " + date + " at " + time);
+        }
+
+        attendance.setPresent(true);
+        studentAttendanceRepository.save(attendance);
+        return true;
     }
+
 
     // Method to get all schedules
     public List<Schedule> getAllSchedules() {
