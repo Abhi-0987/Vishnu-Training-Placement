@@ -10,6 +10,7 @@ import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
 import 'package:vishnu_training_and_placements/screens/student_change_password_screen.dart';
 import 'package:vishnu_training_and_placements/screens/student_homescreen.dart';
 import 'package:vishnu_training_and_placements/screens/student_profile.dart';
+import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
 import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
 class AppRoutes {
@@ -26,14 +27,10 @@ class AppRoutes {
   static const String eventVenue = '/event-venue-screen';
   static const String changePasswordScreen = '/change-password-screen';
   static const String adminHomeScreen = '/home-screen-admin';
-  // Get route path based on route name
-
-  // Define route map
-  // Add this line with your other route constants
   static const String allSchedulesScreen = '/all-schedules-screen';
   static const String scheduleScreen = '/schedule-screen';
-  
-  // Then add it to your routes map
+  static const String studentScheduleScreen='/student-schedule-screen';
+
   static final routes = {
     splash: (context) => const SplashScreen(),
     welcome: (context) => const WelcomeScreen(),
@@ -49,5 +46,6 @@ class AppRoutes {
     changePasswordScreen: (_) => const ChangePasswordScreen(),
     allSchedulesScreen: (context) => const AllSchedulesScreen(),
     scheduleScreen: (context) => const ScheduleDetailsScreen(schedule: {},),
+    studentScheduleScreen: (context) => const StudentSchedulesScreen(),
   };
 }

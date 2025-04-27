@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vishnu_training_and_placements/utils/app_constants.dart';
+import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -21,113 +21,88 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
   bool isLoading = true;
   String? userBranch;
   String errorMessage = '';
-  List<String> allBranches = [
-    'CSE',
-    'ECE',
-    'EEE',
-    'MECH',
-    'CIVIL',
-    'IT',
-    'CSD',
-    'CSM',
-    'PHE',
-    'BME',
-    'AI & DS',
-    'CHEM',
-    'CSBS',
-  ];
-  String selectedBranch = 'All';
 
   @override
   void initState() {
     super.initState();
-    _getUserBranch();
+    getUserBranch();
   }
 
-  Future<void> _getUserBranch() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
+  Future<void> getUserBranch() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('studentEmail');
+
+    print('Retrieved email: $email');
+
+    if (email==null||email.isEmpty) {
       setState(() {
-        userBranch =
-            prefs.getString('branch') ?? 'CSE'; // Default to CSE if not found
-        selectedBranch =
-            userBranch!; // Set selected branch to user's branch initially
+        errorMessage = 'Email not found in SharedPreferences';
+        isLoading = false;
+      });
+      return;
+    }
+
+    final branch = await StudentService.getBranchByEmail(email);
+
+    if (branch != null) {
+      await prefs.setString('branch', branch);
+      print('Branch set in SharedPreferences: $branch');
+      setState(() {
+        userBranch = branch;
       });
       _fetchSchedules();
-    } catch (e) {
+    } else {
       setState(() {
-        errorMessage = 'Failed to get user branch: $e';
+        errorMessage = 'Branch not found for email: $email';
         isLoading = false;
       });
     }
+  } catch (e) {
+    setState(() {
+      errorMessage = 'Failed to fetch branch: $e';
+      isLoading = false;
+    });
   }
+}
+
 
   Future<void> _fetchSchedules() async {
-    // Remove the userBranch check as we will fetch all schedules now
-    // if (userBranch == null) return;
-
     try {
       setState(() {
         isLoading = true;
         errorMessage = '';
       });
 
-      // Fetch ALL schedules instead of just by user's branch
       final schedulesData = await ScheduleServices.getAllSchedules();
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
 
-      // Update the print statement
-      print('Raw schedulesData received (all schedules): $schedulesData');
+      final parsedSchedules = schedulesData.map((data) {
+        return Schedule.fromJson(data as Map<String, dynamic>);
+      }).toList();
 
-      // Add specific error handling for parsing
-      try {
-        final parsedSchedules =
-            schedulesData.map((data) {
-              // Add a try-catch within the map to pinpoint parsing errors
-              try {
-                return Schedule.fromJson(data as Map<String, dynamic>);
-              } catch (e) {
-                print('Error parsing schedule item: $data');
-                print('Parsing error: $e');
-                // Re-throw or handle appropriately, maybe return a default/error Schedule object
-                rethrow;
-              }
-            }).toList();
+      final filtered = parsedSchedules.where((schedule) {
+        final scheduleDate = DateTime.tryParse(schedule.date);
+        final isFutureOrToday = scheduleDate != null &&
+            (scheduleDate.isAfter(today) ||
+                (scheduleDate.isAtSameMomentAs(today) && _isTimeAfterNow(schedule.time, now)));
+        final isBranchMatch = schedule.studentBranch.contains(userBranch ?? '');
+        return isFutureOrToday && isBranchMatch;
+      }).toList();
 
-        setState(() {
-          schedules = parsedSchedules;
-          schedules.sort((a, b) {
-            // Safely parse dates, handle potential FormatException
-            try {
-              // Ensure the date strings are in a valid format before parsing
-              final dateA = DateTime.tryParse(a.date);
-              final dateB = DateTime.tryParse(b.date);
+      filtered.sort((a, b) {
+        final dateA = DateTime.tryParse(a.date);
+        final dateB = DateTime.tryParse(b.date);
+        if (dateA == null || dateB == null) return 0;
+        return dateB.compareTo(dateA);
+      });
 
-              // If parsing fails for either date, handle appropriately (e.g., don't sort or place them at the end)
-              if (dateA == null || dateB == null) {
-                print(
-                  'Warning: Could not parse date for sorting: ${a.date} or ${b.date}',
-                );
-                return 0; // Maintain original order if parsing fails
-              }
-              return dateB.compareTo(dateA); // Newest first
-            } catch (e) {
-              // Catch any unexpected error during parsing/comparison
-              print('Error during date sorting: $e');
-              return 0; // Default sort order if parsing fails
-            }
-          });
-          _filterSchedules();
-          isLoading = false;
-        });
-      } catch (e) {
-        // Catch errors specifically from the mapping/parsing process
-        setState(() {
-          errorMessage = 'Failed to parse schedule data: $e';
-          isLoading = false;
-        });
-      }
+      setState(() {
+        schedules = filtered;
+        isLoading = false;
+      });
     } catch (e) {
-      // Catch errors from the API call itself
       setState(() {
         errorMessage = 'Failed to load schedules: $e';
         isLoading = false;
@@ -135,58 +110,44 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
     }
   }
 
-  void _filterSchedules() {
-    if (selectedBranch == 'All') {
-      filteredSchedules = List.from(schedules);
-    } else {
-      filteredSchedules =
-          schedules
-              .where(
-                (schedule) => schedule.studentBranch.contains(selectedBranch),
-              )
-              .toList();
+  bool _isTimeAfterNow(String timeStr, DateTime now) {
+    try {
+      final timeParts = timeStr.split(':');
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+      final scheduleTime = DateTime(now.year, now.month, now.day, hour, minute);
+      return scheduleTime.isAfter(now);
+    } catch (e) {
+      return false;
     }
   }
 
   String _formatDate(String dateStr) {
-    // Input should now be "YYYY-MM-DD"
     try {
-      final date = DateTime.tryParse(dateStr); // tryParse handles "YYYY-MM-DD"
-      if (date != null) {
-        return DateFormat('MMM dd, yyyy').format(date); // e.g., "Jan 20, 2024"
-      } else {
-        print('Warning: Could not parse date for formatting: $dateStr');
-        return dateStr; // Fallback
-      }
+      final date = DateTime.tryParse(dateStr);
+      return date != null ? DateFormat('MMM dd, yyyy').format(date) : dateStr;
     } catch (e) {
-      print('Error formatting date $dateStr: $e');
-      return dateStr; // Fallback
+      return dateStr;
     }
   }
 
   String _formatTime(String timeStr) {
-    // Input should now be "HH:mm"
     try {
-      // Parse the "HH:mm" string
-      int hour = int.parse(timeStr.split(':')[0]);
-      int minute = int.parse(timeStr.split(':')[1]);
-      final time = TimeOfDay(hour: hour, minute: minute);
-
-      // Format to AM/PM
+      final parts = timeStr.split(':');
+      final time = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
       final now = DateTime.now();
       final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
-      return DateFormat('h:mm a').format(dt); // e.g., "9:30 AM"
+      return DateFormat('h:mm a').format(dt);
     } catch (e) {
-      print('Error formatting time $timeStr: $e');
-      return timeStr; // Fallback
+      return timeStr;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
-    final double height = screenSize.height;
-    final double width = screenSize.width;
+    final size = MediaQuery.of(context).size;
+    final height = size.height;
+    final width = size.width;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -205,77 +166,17 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     child: Text(
                       'Your Schedules',
                       style: TextStyle(
-                        color: AppConstants.textWhite,
+                        color: Colors.white,
                         fontSize: width * 0.06,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   SizedBox(height: height * 0.02),
-
-                  // Branch selection chips
-                  SizedBox(
-                    height: height * 0.05,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(right: 8.0),
-                          child: FilterChip(
-                            label: Text('All'),
-                            selected: selectedBranch == 'All',
-                            onSelected: (selected) {
-                              setState(() {
-                                selectedBranch = 'All';
-                                _filterSchedules();
-                              });
-                            },
-                            backgroundColor: Colors.purple.withOpacity(0.4),
-                            selectedColor: AppConstants.primaryColor,
-                            checkmarkColor: AppConstants.textWhite,
-                            labelStyle: TextStyle(
-                              color:
-                                  selectedBranch == 'All'
-                                      ? AppConstants.textWhite
-                                      : Colors.white70,
-                            ),
-                          ),
-                        ),
-                        ...allBranches.map(
-                          (branch) => Padding(
-                            padding: EdgeInsets.only(right: 8.0),
-                            child: FilterChip(
-                              label: Text(branch),
-                              selected: selectedBranch == branch,
-                              onSelected: (selected) {
-                                setState(() {
-                                  selectedBranch = branch;
-                                  _filterSchedules();
-                                });
-                              },
-                              backgroundColor: Colors.purple.withOpacity(0.4),
-                              selectedColor: AppConstants.primaryColor,
-                              checkmarkColor: AppConstants.textWhite,
-                              labelStyle: TextStyle(
-                                color:
-                                    selectedBranch == branch
-                                        ? AppConstants.textWhite
-                                        : Colors.white70,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: height * 0.02),
                   if (isLoading)
                     Expanded(
                       child: Center(
-                        child: CircularProgressIndicator(
-                          color: AppConstants.primaryColor,
-                        ),
+                        child: CircularProgressIndicator(color: Colors.purple),
                       ),
                     )
                   else if (errorMessage.isNotEmpty)
@@ -284,36 +185,23 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              errorMessage,
-                              style: TextStyle(color: Colors.red),
-                              textAlign: TextAlign.center,
-                            ),
+                            Text(errorMessage, style: TextStyle(color: Colors.red)),
                             SizedBox(height: 20),
                             ElevatedButton(
                               onPressed: _fetchSchedules,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppConstants.primaryColor,
-                              ),
-                              child: Text(
-                                'Retry',
-                                style: TextStyle(color: AppConstants.textWhite),
-                                textAlign: TextAlign.center,
-                              ),
+                              style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
+                              child: Text('Retry'),
                             ),
                           ],
                         ),
                       ),
                     )
-                  else if (filteredSchedules.isEmpty)
+                  else if (schedules.isEmpty)
                     Expanded(
                       child: Center(
                         child: Text(
-                          'No schedules found for ${selectedBranch == 'All' ? 'any branch' : selectedBranch}.',
-                          style: TextStyle(
-                            color: AppConstants.textWhite,
-                            fontSize: width * 0.04,
-                          ),
+                          'No schedules found for your branch.',
+                          style: TextStyle(color: Colors.white, fontSize: width * 0.04),
                         ),
                       ),
                     )
@@ -321,14 +209,12 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: _fetchSchedules,
-                        color: AppConstants.primaryColor,
+                        color: Colors.purple,
                         child: ListView.builder(
-                          padding: EdgeInsets.symmetric(
-                            vertical: height * 0.01,
-                          ),
-                          itemCount: filteredSchedules.length,
+                          padding: EdgeInsets.symmetric(vertical: height * 0.01),
+                          itemCount: schedules.length,
                           itemBuilder: (context, index) {
-                            final schedule = filteredSchedules[index];
+                            final schedule = schedules[index];
                             return Padding(
                               padding: EdgeInsets.only(bottom: height * 0.02),
                               child: OpaqueContainer(
@@ -339,7 +225,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                     Text(
                                       '${schedule.location} - Room ${schedule.roomNo}',
                                       style: TextStyle(
-                                        color: AppConstants.textWhite,
+                                        color: Colors.white,
                                         fontSize: width * 0.045,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -347,59 +233,34 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                     SizedBox(height: height * 0.01),
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.calendar_today,
-                                          color: Colors.orange,
-                                          size: width * 0.04,
-                                        ),
+                                        Icon(Icons.calendar_today, color: Colors.orange, size: width * 0.04),
                                         SizedBox(width: width * 0.02),
                                         Text(
-                                          _formatDate(
-                                            schedule.date,
-                                          ), // Use the formatter
-                                          style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: width * 0.035,
-                                          ),
+                                          _formatDate(schedule.date),
+                                          style: TextStyle(color: Colors.white70, fontSize: width * 0.035),
                                         ),
                                       ],
                                     ),
                                     SizedBox(height: height * 0.005),
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.access_time,
-                                          color: Colors.orange,
-                                          size: width * 0.04,
-                                        ),
+                                        Icon(Icons.access_time, color: Colors.orange, size: width * 0.04),
                                         SizedBox(width: width * 0.02),
                                         Text(
-                                          _formatTime(
-                                            schedule.time,
-                                          ), // Use the formatter
-                                          style: TextStyle(
-                                            color: Colors.white70,
-                                            fontSize: width * 0.035,
-                                          ),
+                                          _formatTime(schedule.time),
+                                          style: TextStyle(color: Colors.white70, fontSize: width * 0.035),
                                         ),
                                       ],
                                     ),
                                     SizedBox(height: height * 0.005),
                                     Row(
                                       children: [
-                                        Icon(
-                                          Icons.school,
-                                          color: Colors.orange,
-                                          size: width * 0.04,
-                                        ),
+                                        Icon(Icons.school, color: Colors.orange, size: width * 0.04),
                                         SizedBox(width: width * 0.02),
                                         Expanded(
                                           child: Text(
                                             'For: ${schedule.studentBranch}',
-                                            style: TextStyle(
-                                              color: Colors.white70,
-                                              fontSize: width * 0.035,
-                                            ),
+                                            style: TextStyle(color: Colors.white70, fontSize: width * 0.035),
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
@@ -422,3 +283,4 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
     );
   }
 }
+
