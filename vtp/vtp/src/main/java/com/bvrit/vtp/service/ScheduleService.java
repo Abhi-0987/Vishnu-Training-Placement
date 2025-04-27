@@ -167,6 +167,8 @@ public class ScheduleService {
             attendance.setEmail(student.getEmail());
             attendance.setPresent(false);
             attendance.setDate(schedule.getDate());
+            attendance.setTime(schedule.getTime());
+            System.out.println("Setting time for student " + student.getEmail() + ": " + schedule.getTime());
             return attendance;
         }).toList();
 
