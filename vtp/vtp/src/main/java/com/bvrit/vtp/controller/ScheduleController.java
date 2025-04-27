@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional; // Import Optional
 
 import org.slf4j.Logger; // Import Logger
 import org.slf4j.LoggerFactory; // Import LoggerFactory
@@ -149,6 +150,38 @@ public class ScheduleController {
             response.put("error", "Failed to delete schedule: " + e.getMessage());
             logger.error("Error deleting schedule with ID {}: {}", id, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response); // Use 500 for server errors
+        }
+    }
+
+    // New PUT endpoint for updating mark status
+    @PutMapping(value = "/{id}/mark", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> updateScheduleMarkStatus(@PathVariable Long id, @RequestBody Map<String, Boolean> payload) {
+        Boolean mark = payload.get("mark");
+        if (mark == null) {
+            logger.warn("Update mark request for ID {} missing 'mark' field in payload.", id);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Missing 'mark' field in request body");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        logger.info("Received schedule mark update request for ID {}: mark={}", id, mark);
+        try {
+            Optional<Schedule> updatedScheduleOpt = scheduleService.updateMarkStatus(id, mark);
+
+            if (updatedScheduleOpt.isPresent()) {
+                logger.info("Successfully updated mark status for schedule with ID: {}", id);
+                return ResponseEntity.ok(updatedScheduleOpt.get()); // Return updated schedule
+            } else {
+                logger.warn("Schedule with ID {} not found for mark update.", id);
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Schedule not found with id: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to update schedule mark status: " + e.getMessage());
+            logger.error("Error updating mark status for schedule with ID {}: {}", id, payload, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

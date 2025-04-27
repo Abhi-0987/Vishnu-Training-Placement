@@ -221,4 +221,44 @@ class ScheduleServices {
       return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
+
+  // New method to update the mark status
+  static Future<Map<String, dynamic>> updateScheduleMarkStatus(String scheduleId, bool mark) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? ''; // Use the same token logic
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/mark'), // Use the new endpoint
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'mark': mark}), // Send the mark status in the body
+      );
+
+      if (response.statusCode == 200) {
+        // Successfully updated
+        return {'success': true, 'message': 'Attendance status updated successfully'};
+      } else {
+        // Handle errors
+        String errorMessage = 'Failed to update attendance status';
+        try {
+          // Try to parse error message from backend response
+          final responseData = jsonDecode(response.body);
+          errorMessage = responseData['error'] ?? responseData['message'] ?? errorMessage;
+        } catch (e) {
+          // Ignore parsing errors if response is not JSON
+          print('Error parsing error response: $e');
+        }
+        return {
+          'success': false,
+          'message': '$errorMessage (Status code: ${response.statusCode})',
+        };
+      }
+    } catch (e) {
+      // print('Error updating mark status: $e');
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+    }
+  }
 }
