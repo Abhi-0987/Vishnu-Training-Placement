@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
 import 'package:vishnu_training_and_placements/services/schedule_service.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
@@ -18,7 +19,7 @@ class EventVenueScreen extends StatefulWidget {
 class _EventVenueScreenState extends State<EventVenueScreen> {
   final VenueService _venueService = VenueService();
   List<Venue> venues = [];
-  bool isLoading = true;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -88,6 +89,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   String selectedLocation = '';
 
   Future<void> _scheduleClass() async {
+    setState(() {
+      isLoading = true;
+    });
     // --- Validation Checks ---
     if (selectedLocation.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -105,8 +109,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     // if (selectedDate == null) { ... }
 
     // Check if a time slot is selected (it has a default, but good to check)
-    if (selectedTime.isEmpty) { // Or check against a specific "not selected" value if applicable
-       ScaffoldMessenger.of(context).showSnackBar(
+    if (selectedTime.isEmpty) {
+      // Or check against a specific "not selected" value if applicable
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a time slot.'),
           backgroundColor: Colors.red,
@@ -114,7 +119,6 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       );
       return; // Stop execution if time is not selected
     }
-
 
     if (selectedBranches.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -127,7 +131,6 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     }
     // --- End Validation Checks ---
 
-
     final parts = selectedLocation.split(' - Room ');
     final blockName = parts.isNotEmpty ? parts[0] : '';
     final roomNo = parts.length > 1 ? parts[1] : '';
@@ -139,10 +142,12 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
-      "date": selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
-      "time": selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
+      "date":
+          selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
+      "time":
+          selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
       // Correct the key to "studentBranch" and use the joined string
-      "studentBranch": branchesString, 
+      "studentBranch": branchesString,
     };
 
     // Add a print statement here to verify the map before sending
@@ -162,13 +167,6 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        // Optionally clear fields or navigate away after success
-        // setState(() {
-        //   selectedLocation = '';
-        //   selectedBranches = [];
-        //   selectedDate = DateTime.now();
-        //   focusedDate = DateTime.now();
-        //   selectedTime = "9:30 - 11:15";
         // });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -178,7 +176,13 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           ),
         );
       }
+      setState(() {
+        isLoading = false;
+      });
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       print('Schedule error: $e');
       // Check context before showing SnackBar
       if (!mounted) return;
@@ -189,6 +193,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         ),
       );
     }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   @override
@@ -269,25 +276,29 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                         children: [
                           _buildInfoCard(width),
                           SizedBox(height: height * 0.02),
-                          ElevatedButton(
-                            onPressed: _scheduleClass,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple,
-                              elevation: 0,
-                              padding: EdgeInsets.symmetric(
-                                vertical: height * 0.015,
-                                horizontal: width * 0.04,
+                          isLoading
+                              ? CircularProgressIndicator(
+                                color: AppConstants.primaryColor,
+                              )
+                              : ElevatedButton(
+                                onPressed: _scheduleClass,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  elevation: 0,
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: height * 0.015,
+                                    horizontal: width * 0.04,
+                                  ),
+                                ),
+                                child: Text(
+                                  "Schedule Class",
+                                  style: TextStyle(
+                                    fontSize: height * 0.025,
+                                    fontFamily: 'Alata',
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              "Schedule Class",
-                              style: TextStyle(
-                                fontSize: height * 0.025,
-                                fontFamily: 'Alata',
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),
