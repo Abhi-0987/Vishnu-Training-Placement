@@ -97,7 +97,6 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
               userBranch ?? '',
             );
             final isEnabled = (schedule.mark == true);
-            print(isEnabled);
             return widget.enabled
                 ? isFutureOrToday && isBranchMatch && isEnabled
                 : isFutureOrToday && isBranchMatch;
@@ -324,7 +323,9 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                                 MaterialPageRoute(
                                                   builder:
                                                       (context) =>
-                                                          MarkAttendancePage(),
+                                                          MarkAttendancePage(
+                                                            schedule: schedule,
+                                                          ),
                                                 ),
                                               );
                                             },

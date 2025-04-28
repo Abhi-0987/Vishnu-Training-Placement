@@ -29,7 +29,7 @@ class AppRoutes {
   static const String adminHomeScreen = '/home-screen-admin';
   static const String allSchedulesScreen = '/all-schedules-screen';
   static const String scheduleScreen = '/schedule-screen';
-  static const String studentScheduleScreen='/student-schedule-screen';
+  static const String studentScheduleScreen = '/student-schedule-screen';
 
   static final routes = {
     splash: (context) => const SplashScreen(),
@@ -45,7 +45,7 @@ class AppRoutes {
     eventVenue: (context) => const EventVenueScreen(),
     changePasswordScreen: (_) => const ChangePasswordScreen(),
     allSchedulesScreen: (context) => const AllSchedulesScreen(),
-    scheduleScreen: (context) => const ScheduleDetailsScreen(schedule: {},),
+    scheduleScreen: (context) => const ScheduleDetailsScreen(schedule: {}),
     studentScheduleScreen: (context) => const StudentSchedulesScreen(),
   };
 }

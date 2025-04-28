@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vishnu_training_and_placements/models/schedule_model.dart';
+import 'package:vishnu_training_and_placements/services/attendance_service.dart';
+import 'package:vishnu_training_and_placements/services/venue_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
 class MarkAttendancePage extends StatefulWidget {
-  const MarkAttendancePage({super.key});
+  const MarkAttendancePage({super.key, this.schedule});
+  final Schedule? schedule;
 
   @override
   State<MarkAttendancePage> createState() => _MarkAttendancePageState();
@@ -15,7 +20,11 @@ class MarkAttendancePage extends StatefulWidget {
 class _MarkAttendancePageState extends State<MarkAttendancePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  double targetLatitude = 0;
+  double targetLongitude = 0;
+  final double radiusInMeters = 25;
   bool isMarked = false;
+  bool _isLoading = false;
 
   // Sample attendance data for pie chart
   Map<String, double> attendanceData = {"Present": 85, "Absent": 15};
@@ -23,30 +32,133 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
   @override
   void initState() {
     super.initState();
+    _fetchCoordinates();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  Future<void> _fetchCoordinates() async {
+    final venue = widget.schedule!.location;
+    final roomNo = widget.schedule!.roomNo;
+
+    final coordinates = await VenueService().fetchCoordinates(venue, roomNo);
+
+    targetLatitude = coordinates['latitude']!;
+    targetLongitude = coordinates['longitude']!;
+    print("$targetLatitude, $targetLongitude");
   }
 
-  void _markAttendance() {
+  Future<String> _markAttendance() async {
     setState(() {
       isMarked = true;
     });
-    _controller.forward(from: 0.0);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Attendance Marked Successfully!'),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
-      ),
+    final message = AttendanceService().markAttendance(
+      widget.schedule!.date,
+      widget.schedule!.time,
     );
+    _controller.forward(from: 0.0);
+    return message;
+  }
+
+  Future<bool> _handleLocationPermission() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Location services are disabled. Please enable the services.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    LocationPermission permission = await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Location permissions are denied')),
+        );
+        return false;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Location permissions are permanently denied, we cannot request permissions.',
+          ),
+        ),
+      );
+      return false;
+    }
+    return true;
+  }
+
+  /// Fetches current location and validates distance before submitting attendance
+  Future<void> submitAttendance() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      bool hasPermission = await _handleLocationPermission();
+      if (!hasPermission) {
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition();
+
+      double distance = Geolocator.distanceBetween(
+        position.latitude,
+        position.longitude,
+        targetLatitude,
+        targetLongitude,
+      );
+
+      if (distance <= radiusInMeters) {
+        final message = await _markAttendance();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor:
+                message == 'Attendance marked as present successfully.'
+                    ? Colors.green
+                    : Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'You are not in the designated area to submit attendance.\n'
+              'Your location: (${position.latitude.toStringAsFixed(6)}, '
+              '${position.longitude.toStringAsFixed(6)})',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to get location: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -80,7 +192,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Date Row
-                        const Row(
+                        Row(
                           children: [
                             SizedBox(
                               width: 100, // Fixed width for labels
@@ -93,7 +205,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               ),
                             ),
                             Text(
-                              '16 Feb',
+                              widget.schedule!.date,
                               style: TextStyle(
                                 color: AppConstants.textWhite,
                                 fontSize: 16,
@@ -105,7 +217,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                         const SizedBox(height: 10),
 
                         // Time Row
-                        const Row(
+                        Row(
                           children: [
                             SizedBox(
                               width: 100, // Fixed width for labels
@@ -118,7 +230,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               ),
                             ),
                             Text(
-                              '9:30 AM - 12:30 AM',
+                              widget.schedule!.time,
                               style: TextStyle(
                                 color: AppConstants.textWhite,
                                 fontSize: 16,
@@ -130,7 +242,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                         const SizedBox(height: 10),
 
                         // Location Row
-                        const Row(
+                        Row(
                           children: [
                             SizedBox(
                               width: 100, // Fixed width for labels
@@ -143,7 +255,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               ),
                             ),
                             Text(
-                              'IT Seminar Hall',
+                              "${widget.schedule!.location} - ${widget.schedule!.roomNo}",
                               style: TextStyle(
                                 color: AppConstants.textWhite,
                                 fontSize: 16,
@@ -155,40 +267,49 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                         const SizedBox(height: 20),
 
                         // Neumorphic Mark Attendance Button
-                        Center(
-                          child: GestureDetector(
-                            onTap: !isMarked ? _markAttendance : null,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 40,
-                                vertical: 15,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                borderRadius: BorderRadius.circular(30),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color.fromRGBO(255, 255, 255, 0.2),
-                                    offset: Offset(-3, -3),
-                                    blurRadius: 5,
+                        _isLoading
+                            ? CircularProgressIndicator(
+                              color: AppConstants.primaryColor,
+                            )
+                            : Center(
+                              child: GestureDetector(
+                                onTap: !isMarked ? submitAttendance : null,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 40,
+                                    vertical: 15,
                                   ),
-                                  BoxShadow(
-                                    color: Color.fromRGBO(0, 0, 0, 0.2),
-                                    offset: Offset(3, 5),
-                                    blurRadius: 5,
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Color.fromRGBO(
+                                          255,
+                                          255,
+                                          255,
+                                          0.2,
+                                        ),
+                                        offset: Offset(-3, -3),
+                                        blurRadius: 5,
+                                      ),
+                                      BoxShadow(
+                                        color: Color.fromRGBO(0, 0, 0, 0.2),
+                                        offset: Offset(3, 5),
+                                        blurRadius: 5,
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                              child: Text(
-                                isMarked ? 'Marked' : 'Mark Attendance',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: AppConstants.textWhite,
+                                  child: Text(
+                                    isMarked ? 'Marked' : 'Mark Attendance',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: AppConstants.textWhite,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
                       ],
                     ),
                   ),

@@ -7,11 +7,52 @@ import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 class VenueService {
   String baseUrl = AppConstants.backendUrl;
 
+  Future<Map<String, dynamic>> fetchCoordinates(
+    String venue,
+    String roomNo,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final apiUrl = '$baseUrl/api/fetch/coordinates';
+
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({"venue": venue, "roomNo": roomNo}),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to load venues: ${response.body}');
+      }
+    } catch (e) {
+      if (e is http.ClientException) {
+        throw Exception(
+          'Connection error: Could not connect to the server. Check if the server is running.',
+        );
+      } else if (e is FormatException) {
+        throw Exception(
+          'Format error: The response was not in the expected format.',
+        );
+      } else if (e is Exception) {
+        throw Exception('Error fetching venues: $e');
+      } else {
+        throw Exception('Unknown error occurred: $e');
+      }
+    }
+  }
+
   Future<List<Venue>> fetchVenues() async {
     try {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ??'';
+      final token = prefs.getString('token') ?? '';
 
       final apiUrl = '$baseUrl/api/venues';
 
