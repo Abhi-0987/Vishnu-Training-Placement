@@ -303,10 +303,9 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                       return Padding(
                                         padding: const EdgeInsets.only(bottom: 16.0),
                                         child: GestureDetector(
-                                          // Make the onTap handler async
-                                          onTap: () async { 
-                                            // Await the result of Navigator.push
-                                            final result = await Navigator.push( 
+                                          onTap: () async {
+                                            // Navigate and wait for the screen to be popped
+                                            await Navigator.push(
                                               context,
                                               MaterialPageRoute(
                                                 builder: (context) => ScheduleDetailsScreen(
@@ -314,10 +313,8 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                 ),
                                               ),
                                             );
-                                            // If result is true, refresh the schedules
-                                            if (result == true) { 
-                                              _fetchSchedules();
-                                            }
+                                            // Always refresh schedules after returning from details screen
+                                            _fetchSchedules();
                                           },
                                           child: OpaqueContainer(
                                             width: width,
@@ -381,10 +378,9 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                 Align(
                                                   alignment: Alignment.centerRight,
                                                   child: ElevatedButton(
-                                                    // Make the onPressed handler async
-                                                    onPressed: () async { 
-                                                      // Await the result of Navigator.push
-                                                      final result = await Navigator.push( 
+                                                    onPressed: () async {
+                                                      // Navigate and wait for the screen to be popped
+                                                      await Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
                                                           builder: (context) => ScheduleDetailsScreen(
@@ -392,10 +388,8 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                           ),
                                                         ),
                                                       );
-                                                      // If result is true, refresh the schedules
-                                                      if (result == true) { 
-                                                        _fetchSchedules();
-                                                      }
+                                                      // Always refresh schedules after returning from details screen
+                                                      _fetchSchedules();
                                                     },
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: Colors.purple,

@@ -89,7 +89,7 @@ public class ScheduleService {
             throw new IllegalArgumentException("Invalid date or time format provided.", e);
         }
 
-        // **Fix:** Use studentBranch directly from the updated DTO
+        // *Fix:* Use studentBranch directly from the updated DTO
         // This line now correctly assigns String from DTO to String in Entity
         schedule.setStudentBranch(scheduleDTO.getStudentBranch());
 
@@ -145,6 +145,19 @@ public class ScheduleService {
         }
     }
 
+    // New method to update only the mark status
+    @Transactional
+    public Optional<Schedule> updateMarkStatus(Long id, boolean mark) {
+        Optional<Schedule> scheduleOptional = scheduleRepository.findById(id);
+        if (scheduleOptional.isPresent()) {
+            Schedule schedule = scheduleOptional.get();
+            schedule.setMark(mark);
+            return Optional.of(scheduleRepository.save(schedule));
+        } else {
+            return Optional.empty(); // Schedule not found
+        }
+    }
+
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime time) {
         List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDateAndTime(location, date, time);
         return existingSchedules.isEmpty();
@@ -160,7 +173,7 @@ public class ScheduleService {
         List<StudentDetails> students = studentDetailsRepository.findByBranchIn(branches);
 
         if (students.isEmpty()) {
-            System.out.println("⚠️ No students found for these branches.");
+            System.out.println("⚠ No students found for these branches.");
         }
         List<StudentAttendance> attendanceList = students.stream().map(student -> {
             StudentAttendance attendance = new StudentAttendance();

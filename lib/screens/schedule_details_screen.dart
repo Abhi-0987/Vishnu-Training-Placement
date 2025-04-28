@@ -22,8 +22,10 @@ class ScheduleDetailsScreen extends StatefulWidget {
 }
 
 class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
-  bool isAttendanceEnabled = false;
+  // Initialize with the actual 'mark' value from the schedule
+  late bool isAttendanceEnabled;
   bool showPostButton = false;
+  bool _isUpdatingMark = false; // Add a flag to prevent rapid toggling
 
   Map<String, double> dataMap = {
     "Present": 75,
@@ -62,8 +64,23 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    isAttendanceEnabled = widget.schedule['attendanceEnabled'] ?? false;
 
+    // Remove the date checking logic for past schedules
+    // originalDate = widget.schedule['date'] ?? 'Not specified';
+    // try {
+    //   final scheduleDate = DateFormat('yyyy-MM-dd').parse(originalDate);
+    //   final now = DateTime.now();
+    //   final today = DateTime(now.year, now.month, now.day);
+    //   _isPastSchedule = scheduleDate.isBefore(today);
+    // } catch (e) {
+    //   _isPastSchedule = false;
+    //   print("Error parsing schedule date '$originalDate': $e. Assuming not a past schedule.");
+    // }
+
+    // Initialize isAttendanceEnabled directly from the 'mark' field
+    isAttendanceEnabled = widget.schedule['mark'] ?? false;
+
+    // Initialize original values and controllers as before
     originalDate = widget.schedule['date'] ?? 'Not specified';
     originalTime = widget.schedule['time'] ?? 'Not specified';
     originalLocation = widget.schedule['location'] ?? 'Not specified';
@@ -406,17 +423,62 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     );
   }
 
-  void _toggleAttendance(bool value) {
+  // Modify _toggleAttendance to be async and call the service
+  Future<void> _toggleAttendance(bool value) async {
+    if (_isUpdatingMark) return; // Prevent updates if already updating
+
     setState(() {
-      isAttendanceEnabled = value;
+      _isUpdatingMark = true; // Set updating flag
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Attendance ${value ? 'enabled' : 'disabled'}'),
-        duration: const Duration(seconds: 2),
-      ),
-    );
+
+    final scheduleId = widget.schedule['id']?.toString();
+    if (scheduleId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error: Schedule ID is missing')),
+      );
+      setState(() {
+        _isUpdatingMark = false; // Reset flag on error
+      });
+      return;
+    }
+
+    // Call the service method
+    final result = await ScheduleServices.updateScheduleMarkStatus(scheduleId, value);
+
+    // Check if the widget is still mounted before updating state
+    if (!mounted) return;
+
+    if (result['success']) {
+      // Update the local state ONLY if the API call was successful
+      setState(() {
+        isAttendanceEnabled = value;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Attendance status updated'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      // Show error message if the API call failed
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${result['message'] ?? 'Failed to update status'}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      // Optionally revert the switch state visually if the update failed,
+      // although keeping it as the user intended might also be valid UX.
+      // setState(() {
+      //   isAttendanceEnabled = !value; // Revert state visually
+      // });
+    }
+
+    setState(() {
+      _isUpdatingMark = false; // Reset updating flag
+    });
   }
+
 
   Future<void> _saveChanges() async {
     if (!_isDataChanged()) {
@@ -454,7 +516,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
       );
       print("API call finished. Result: $result"); // Log: After API call
 
-      // IMPORTANT: Check if mounted *before* interacting with context after await
+      // IMPORTANT: Check if mounted before interacting with context after await
       if (!mounted) {
         print("Widget not mounted after API call, returning."); // Log: Not mounted
         return; 
@@ -588,11 +650,17 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        Switch(
-                          value: isAttendanceEnabled,
-                          onChanged: _toggleAttendance,
-                          activeColor: Colors.greenAccent,
-                        ),
+                        _isUpdatingMark
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                              )
+                            : Switch(
+                                value: isAttendanceEnabled,
+                                onChanged: _toggleAttendance,
+                                activeColor: Colors.greenAccent,
+                              ),
                       ],
                     ),
                   ),
