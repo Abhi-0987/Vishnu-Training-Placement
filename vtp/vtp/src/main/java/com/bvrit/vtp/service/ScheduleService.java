@@ -50,6 +50,60 @@ public class ScheduleService {
         studentAttendanceRepository.save(attendance);
         return true;
     }
+    
+    // New method to mark attendance based on schedule ID and email
+    @Transactional
+    public boolean markAttendanceByScheduleId(Long scheduleId, String email) {
+        Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findBySchedule_IdAndEmail(scheduleId, email);
+        
+        if (attendanceOpt.isEmpty()) {
+            throw new AttendanceRecordNotFoundException("No attendance record found for " + email + " in schedule " + scheduleId);
+        }
+        
+        StudentAttendance attendance = attendanceOpt.get();
+        
+        if (attendance.isPresent()) {
+            throw new AttendanceAlreadyMarkedException("Attendance already marked for " + email + " in this schedule");
+        }
+        
+        attendance.setPresent(true);
+        studentAttendanceRepository.save(attendance);
+        return true;
+    }
+    
+    // New method to mark attendance for multiple students in a schedule
+    @Transactional
+    public int markAttendanceForMultipleStudents(Long scheduleId, List<String> emails) {
+        int markedCount = 0;
+        
+        for (String email : emails) {
+            try {
+                if (markAttendanceByScheduleId(scheduleId, email)) {
+                    markedCount++;
+                }
+            } catch (Exception e) {
+                // Log the error but continue with other students
+                System.out.println("Error marking attendance for " + email + ": " + e.getMessage());
+            }
+        }
+        
+        return markedCount;
+    }
+    
+    // New method to get all students for a schedule
+    public List<StudentAttendance> getStudentAttendanceByScheduleId(Long scheduleId) {
+        return studentAttendanceRepository.findBySchedule_Id(scheduleId);
+    }
+    
+    // New method to get present students for a schedule
+    public List<StudentAttendance> getPresentStudentsByScheduleId(Long scheduleId) {
+        return studentAttendanceRepository.findBySchedule_IdAndPresentTrue(scheduleId);
+    }
+    
+    // New method to get absent students for a schedule
+    public List<StudentAttendance> getAbsentStudentsByScheduleId(Long scheduleId) {
+        return studentAttendanceRepository.findBySchedule_IdAndPresentFalse(scheduleId);
+    }
 
     public List<Schedule> getAllSchedules() {
         return scheduleRepository.findAll();
@@ -181,6 +235,8 @@ public class ScheduleService {
             attendance.setPresent(false);
             attendance.setDate(schedule.getDate());
             attendance.setTime(schedule.getTime());
+            // Set the schedule object directly instead of just the ID
+            attendance.setSchedule(schedule);
             System.out.println("Setting time for student " + student.getEmail() + ": " + schedule.getTime());
             return attendance;
         }).toList();

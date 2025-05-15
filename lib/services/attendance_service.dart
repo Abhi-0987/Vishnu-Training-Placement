@@ -9,7 +9,7 @@ class AttendanceService {
   Future<String> markAttendance(String date, String time) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
       final email = prefs.getString('studentEmail');
 
       final apiUrl = '$baseUrl/api/attendance/mark-present';

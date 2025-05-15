@@ -12,7 +12,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       //print('Sending schedule data: ${jsonEncode(scheduleData)}');
 
@@ -91,7 +91,7 @@ class ScheduleServices {
       final prefs = await SharedPreferences.getInstance();
       // Using hardcoded token for testing as explained by user
 
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/branch/$branch'),
@@ -150,7 +150,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
       //print('Updating schedule data: ${jsonEncode(updatedScheduleData)}');
 
       final response = await http.put(
@@ -191,7 +191,7 @@ class ScheduleServices {
   static Future<Map<String, dynamic>> deleteSchedule(String scheduleId) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.delete(
         Uri.parse('$baseUrl/api/schedules/$scheduleId'),
@@ -223,7 +223,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.put(
         Uri.parse(
@@ -271,7 +271,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/$scheduleId/attendance-stats'),
@@ -311,7 +311,7 @@ class ScheduleServices {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/$scheduleId'),

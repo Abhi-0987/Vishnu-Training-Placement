@@ -53,7 +53,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     try {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       // Make API call to get schedule details
       final response = await http
@@ -101,7 +101,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     try {
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       // Make API call to get students for this schedule
       final response = await http
@@ -223,7 +223,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
 
       // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ' ';
+      final token = prefs.getString('token') ?? '';
 
       // Prepare the list of emails to mark as present
       final List<String> emails =
