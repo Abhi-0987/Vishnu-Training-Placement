@@ -2,6 +2,7 @@ package com.bvrit.vtp.controller;
 
 import com.bvrit.vtp.dto.ScheduleDTO;
 import com.bvrit.vtp.model.Schedule;
+import com.bvrit.vtp.model.StudentAttendance;
 import com.bvrit.vtp.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -9,7 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*; // Ensure this includes PutMapping, DeleteMapping, PathVariable, RequestBody
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional; // Import Optional
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger; // Import Logger
 import org.slf4j.LoggerFactory; // Import LoggerFactory
@@ -182,6 +185,148 @@ public class ScheduleController {
             response.put("error", "Failed to update schedule mark status: " + e.getMessage());
             logger.error("Error updating mark status for schedule with ID {}: {}", id, payload, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // New endpoint to get all students for a schedule
+    @GetMapping(value="/{scheduleId}/students", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getStudentsForSchedule(@PathVariable Long scheduleId) {
+        logger.info("Fetching students for schedule ID: {}", scheduleId);
+        try {
+            List<StudentAttendance> attendances = scheduleService.getStudentAttendanceByScheduleId(scheduleId);
+            
+            // Convert to a simplified format for the frontend
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (StudentAttendance attendance : attendances) {
+                Map<String, Object> studentMap = new HashMap<>();
+                studentMap.put("email", attendance.getEmail());
+                studentMap.put("present", attendance.isPresent());
+                result.add(studentMap);
+            }
+            
+            // Explicitly convert to JSON using Jackson
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonResult = mapper.writeValueAsString(result);
+            
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsonResult);
+        } catch (Exception e) {
+            logger.error("Error fetching students for schedule ID {}: {}", scheduleId, e.getMessage(), e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to fetch students: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    // New endpoint to get present students for a schedule
+    @GetMapping(value="/{scheduleId}/students/present", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getPresentStudents(@PathVariable Long scheduleId) {
+        logger.info("Fetching present students for schedule ID: {}", scheduleId);
+        try {
+            List<StudentAttendance> attendances = scheduleService.getPresentStudentsByScheduleId(scheduleId);
+            
+            // Convert to a simplified format for the frontend
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (StudentAttendance attendance : attendances) {
+                Map<String, Object> studentMap = new HashMap<>();
+                studentMap.put("email", attendance.getEmail());
+                studentMap.put("present", true);
+                result.add(studentMap);
+            }
+            
+            // Explicitly convert to JSON using Jackson
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonResult = mapper.writeValueAsString(result);
+            
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsonResult);
+        } catch (Exception e) {
+            logger.error("Error fetching present students for schedule ID {}: {}", scheduleId, e.getMessage(), e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to fetch present students: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    // New endpoint to get absent students for a schedule
+    @GetMapping(value="/{scheduleId}/students/absent", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAbsentStudents(@PathVariable Long scheduleId) {
+        logger.info("Fetching absent students for schedule ID: {}", scheduleId);
+        try {
+            List<StudentAttendance> attendances = scheduleService.getAbsentStudentsByScheduleId(scheduleId);
+            
+            // Convert to a simplified format for the frontend
+            List<Map<String, Object>> result = new ArrayList<>();
+            for (StudentAttendance attendance : attendances) {
+                Map<String, Object> studentMap = new HashMap<>();
+                studentMap.put("email", attendance.getEmail());
+                studentMap.put("present", false);
+                result.add(studentMap);
+            }
+            
+            // Explicitly convert to JSON using Jackson
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonResult = mapper.writeValueAsString(result);
+            
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(jsonResult);
+        } catch (Exception e) {
+            logger.error("Error fetching absent students for schedule ID {}: {}", scheduleId, e.getMessage(), e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to fetch absent students: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    // New endpoint to mark attendance for multiple students
+    @PostMapping(value= "/{scheduleId}/mark-attendance", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> markAttendance(
+            @PathVariable Long scheduleId,
+            @RequestBody List<String> emails) {
+        
+        logger.info("Marking attendance for {} students in schedule ID: {}", emails.size(), scheduleId);
+        try {
+            int markedCount = scheduleService.markAttendanceForMultipleStudents(scheduleId, emails);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("markedCount", markedCount);
+            response.put("message", "Successfully marked attendance for " + markedCount + " students");
+            
+            logger.info("Successfully marked attendance for {} students in schedule ID: {}", markedCount, scheduleId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error marking attendance for schedule ID {}: {}", scheduleId, e.getMessage(), e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to mark attendance: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    
+    // New endpoint to mark attendance for a single student
+    @PostMapping(value= "/{scheduleId}/mark-attendance/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> markSingleAttendance(
+            @PathVariable Long scheduleId,
+            @PathVariable String email) {
+        
+        logger.info("Marking attendance for student {} in schedule ID: {}", email, scheduleId);
+        try {
+            boolean marked = scheduleService.markAttendanceByScheduleId(scheduleId, email);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Successfully marked attendance for " + email);
+            
+            logger.info("Successfully marked attendance for student {} in schedule ID: {}", email, scheduleId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error marking attendance for student {} in schedule ID {}: {}", email, scheduleId, e.getMessage(), e);
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to mark attendance: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
 }

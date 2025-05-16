@@ -90,10 +90,8 @@ class ScheduleServices {
     try {
       final prefs = await SharedPreferences.getInstance();
       // Using hardcoded token for testing as explained by user
-      final token = prefs.getString('token') ?? '';
 
-      // Optional: Check if the token is empty (shouldn't happen with hardcoded fallback)
-      // if (token.isEmpty) { ... }
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules/branch/$branch'),
@@ -102,7 +100,6 @@ class ScheduleServices {
           'Authorization': 'Bearer $token',
         },
       );
-
 
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
@@ -120,9 +117,6 @@ class ScheduleServices {
       final prefs = await SharedPreferences.getInstance();
       // Use the SAME hardcoded token here for testing consistency
       final token = prefs.getString('token') ?? '';
-
-      // Optional: Check if the token is empty (shouldn't happen with hardcoded fallback)
-      // if (token.isEmpty) { ... }
 
       final response = await http.get(
         Uri.parse('$baseUrl/api/schedules'),
@@ -223,13 +217,18 @@ class ScheduleServices {
   }
 
   // New method to update the mark status
-  static Future<Map<String, dynamic>> updateScheduleMarkStatus(String scheduleId, bool mark) async {
+  static Future<Map<String, dynamic>> updateScheduleMarkStatus(
+    String scheduleId,
+    bool mark,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? ''; // Use the same token logic
+      final token = prefs.getString('token') ?? '';
 
       final response = await http.put(
-        Uri.parse('$baseUrl/api/schedules/$scheduleId/mark'), // Use the new endpoint
+        Uri.parse(
+          '$baseUrl/api/schedules/$scheduleId/mark',
+        ), // Use the new endpoint
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -239,14 +238,18 @@ class ScheduleServices {
 
       if (response.statusCode == 200) {
         // Successfully updated
-        return {'success': true, 'message': 'Attendance status updated successfully'};
+        return {
+          'success': true,
+          'message': 'Attendance status updated successfully',
+        };
       } else {
         // Handle errors
         String errorMessage = 'Failed to update attendance status';
         try {
           // Try to parse error message from backend response
           final responseData = jsonDecode(response.body);
-          errorMessage = responseData['error'] ?? responseData['message'] ?? errorMessage;
+          errorMessage =
+              responseData['error'] ?? responseData['message'] ?? errorMessage;
         } catch (e) {
           // Ignore parsing errors if response is not JSON
           print('Error parsing error response: $e');
@@ -260,5 +263,119 @@ class ScheduleServices {
       // print('Error updating mark status: $e');
       return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
+  }
+
+  // Method to get attendance statistics for a schedule
+  static Future<Map<String, dynamic>> getAttendanceStatistics(
+    String scheduleId,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/schedules/$scheduleId/attendance-stats'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        return {'success': true, 'data': responseData};
+      } else {
+        String errorMessage = 'Failed to fetch attendance statistics';
+        try {
+          final responseData = jsonDecode(response.body);
+          errorMessage =
+              responseData['error'] ?? responseData['message'] ?? errorMessage;
+        } catch (e) {
+          print('Error parsing error response: $e');
+        }
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Error fetching attendance statistics: $e');
+      return {
+        'success': false,
+        'message': 'Network error: ${e.toString()}',
+        'data': {'totalStudents': 0, 'presentCount': 0, 'absentCount': 0},
+      };
+    }
+  }
+
+  // Method to get detailed schedule information
+  static Future<Map<String, dynamic>> getScheduleDetails(
+    String scheduleId,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token') ?? '';
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/api/schedules/$scheduleId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+
+        // Process the data to ensure all fields have valid values
+        final processedData = {
+          'id': data['id'],
+          'title': data['title'] ?? 'Untitled Schedule',
+          'date': data['date'] ?? 'Not specified',
+          'time': data['time'] ?? 'Not specified',
+          'location': data['location'] ?? 'Not specified',
+          'roomNo': data['roomNo'] ?? 'Not specified',
+          'mark': data['mark'] ?? false,
+          'studentBranch': _processBranchData(data['studentBranch']),
+        };
+
+        return {'success': true, 'data': processedData};
+      } else {
+        String errorMessage = 'Failed to fetch schedule details';
+        try {
+          final responseData = jsonDecode(response.body);
+          errorMessage =
+              responseData['error'] ?? responseData['message'] ?? errorMessage;
+        } catch (e) {
+          print('Error parsing error response: $e');
+        }
+        return {'success': false, 'message': errorMessage};
+      }
+    } catch (e) {
+      print('Error fetching schedule details: $e');
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+    }
+  }
+
+  // Helper method to process branch data which might come in different formats
+  static List<String> _processBranchData(dynamic branchData) {
+    if (branchData == null) {
+      return ['All Branches'];
+    }
+
+    if (branchData is String) {
+      if (branchData.isEmpty) {
+        return ['All Branches'];
+      }
+      return branchData
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
+    } else if (branchData is List) {
+      if (branchData.isEmpty) {
+        return ['All Branches'];
+      }
+      return List<String>.from(branchData.map((item) => item.toString()));
+    }
+
+    return ['All Branches'];
   }
 }

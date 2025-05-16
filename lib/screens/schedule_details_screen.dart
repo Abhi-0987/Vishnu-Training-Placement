@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
+import 'package:vishnu_training_and_placements/screens/ManualAttendanceScreen.dart';
 import 'package:vishnu_training_and_placements/services/venue_service.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
@@ -12,10 +13,7 @@ import 'package:collection/collection.dart';
 class ScheduleDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> schedule;
 
-  const ScheduleDetailsScreen({
-    super.key,
-    required this.schedule,
-  });
+  const ScheduleDetailsScreen({super.key, required this.schedule});
 
   @override
   State<ScheduleDetailsScreen> createState() => _ScheduleDetailsScreenState();
@@ -27,10 +25,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   bool showPostButton = false;
   bool _isUpdatingMark = false; // Add a flag to prevent rapid toggling
 
-  Map<String, double> dataMap = {
-    "Present": 75,
-    "Absent": 25,
-  };
+  Map<String, double> dataMap = {"Present": 75, "Absent": 25};
 
   late TextEditingController dateController;
   late TextEditingController timeController;
@@ -48,11 +43,24 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   List<Venue> _venues = [];
   bool _isLoadingVenues = true;
   final List<String> _branches = [
-    'CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT', 'AI & DS',
-    'BME', 'PHE', 'CHEM', 'CSM', 'CSD', 'CSBS',
+    'CSE',
+    'ECE',
+    'EEE',
+    'MECH',
+    'CIVIL',
+    'IT',
+    'AI & DS',
+    'BME',
+    'PHE',
+    'CHEM',
+    'CSM',
+    'CSD',
+    'CSBS',
   ];
   final List<String> _timeSlots = [
-    "9:30 - 11:15", "11:30 - 1:15", "2:20 - 3:40"
+    "9:30 - 11:15",
+    "11:30 - 1:15",
+    "2:20 - 3:40",
   ];
 
   late String _editedDate;
@@ -88,9 +96,16 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
 
     final branchData = widget.schedule['studentBranch'];
     if (branchData is String) {
-      originalBranch = branchData.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+      originalBranch =
+          branchData
+              .split(',')
+              .map((s) => s.trim())
+              .where((s) => s.isNotEmpty)
+              .toList();
     } else if (branchData is List) {
-      originalBranch = List<String>.from(branchData.map((item) => item.toString()));
+      originalBranch = List<String>.from(
+        branchData.map((item) => item.toString()),
+      );
     } else {
       originalBranch = [];
     }
@@ -146,13 +161,14 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   }
 
   bool _isDataChanged() {
-    bool branchesChanged = !const ListEquality().equals(originalBranch, _editedBranch);
+    bool branchesChanged =
+        !const ListEquality().equals(originalBranch, _editedBranch);
 
     return _editedDate != originalDate ||
-           _editedTime != originalTime ||
-           _editedLocation != originalLocation ||
-           _editedRoomNo != originalRoomNo ||
-           branchesChanged;
+        _editedTime != originalTime ||
+        _editedLocation != originalLocation ||
+        _editedRoomNo != originalRoomNo ||
+        branchesChanged;
   }
 
   Future<void> _editDate() async {
@@ -160,7 +176,11 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     // Determine the first selectable date (today)
     DateTime firstAllowedDate = DateTime.now();
     // Remove time component to ensure today is selectable
-    firstAllowedDate = DateTime(firstAllowedDate.year, firstAllowedDate.month, firstAllowedDate.day);
+    firstAllowedDate = DateTime(
+      firstAllowedDate.year,
+      firstAllowedDate.month,
+      firstAllowedDate.day,
+    );
 
     try {
       // Attempt to parse the current date string
@@ -204,18 +224,19 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
             builder: (BuildContext context, StateSetter setDialogState) {
               return Column(
                 mainAxisSize: MainAxisSize.min,
-                children: _timeSlots.map((time) {
-                  return RadioListTile<String>(
-                    title: Text(time),
-                    value: time,
-                    groupValue: tempSelectedTime,
-                    onChanged: (String? value) {
-                      setDialogState(() {
-                        tempSelectedTime = value;
-                      });
-                    },
-                  );
-                }).toList(),
+                children:
+                    _timeSlots.map((time) {
+                      return RadioListTile<String>(
+                        title: Text(time),
+                        value: time,
+                        groupValue: tempSelectedTime,
+                        onChanged: (String? value) {
+                          setDialogState(() {
+                            tempSelectedTime = value;
+                          });
+                        },
+                      );
+                    }).toList(),
               );
             },
           ),
@@ -260,7 +281,9 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     }
 
     String? currentSelection = '$_editedLocation - Room $_editedRoomNo';
-    if (!_venues.any((v) => '${v.blockName} - Room ${v.roomNumber}' == currentSelection)) {
+    if (!_venues.any(
+      (v) => '${v.blockName} - Room ${v.roomNumber}' == currentSelection,
+    )) {
       currentSelection = null;
     }
 
@@ -276,20 +299,22 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                 value: tempSelection,
                 hint: const Text("Choose location"),
                 isExpanded: true,
-                items: _venues.map((venue) {
-                  final venueString = "${venue.blockName} - Room ${venue.roomNumber}";
-                  return DropdownMenuItem<String>(
-                    value: venueString,
-                    child: Text(venueString),
-                  );
-                }).toList(),
+                items:
+                    _venues.map((venue) {
+                      final venueString =
+                          "${venue.blockName} - Room ${venue.roomNumber}";
+                      return DropdownMenuItem<String>(
+                        value: venueString,
+                        child: Text(venueString),
+                      );
+                    }).toList(),
                 onChanged: (String? newValue) {
                   setDialogState(() {
                     tempSelection = newValue;
                   });
                 },
               );
-            }
+            },
           ),
           actions: <Widget>[
             TextButton(
@@ -308,10 +333,19 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     if (selectedVenueString != null) {
       final selectedVenue = _venues.firstWhere(
         (v) => "${v.blockName} - Room ${v.roomNumber}" == selectedVenueString,
-        orElse: () => Venue(id: -1, blockName: '', roomNumber: '', latitude: 0, longitude: 0)
+        orElse:
+            () => Venue(
+              id: -1,
+              blockName: '',
+              roomNumber: '',
+              latitude: 0,
+              longitude: 0,
+            ),
       );
 
-      if (selectedVenue.id != -1 && (selectedVenue.blockName != _editedLocation || selectedVenue.roomNumber != _editedRoomNo)) {
+      if (selectedVenue.id != -1 &&
+          (selectedVenue.blockName != _editedLocation ||
+              selectedVenue.roomNumber != _editedRoomNo)) {
         setState(() {
           _editedLocation = selectedVenue.blockName;
           _editedRoomNo = selectedVenue.roomNumber;
@@ -333,21 +367,22 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
               return SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: _branches.map((branch) {
-                    return CheckboxListTile(
-                      title: Text(branch),
-                      value: tempSelection.contains(branch),
-                      onChanged: (bool? selected) {
-                        setDialogState(() {
-                          if (selected == true) {
-                            tempSelection.add(branch);
-                          } else {
-                            tempSelection.remove(branch);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
+                  children:
+                      _branches.map((branch) {
+                        return CheckboxListTile(
+                          title: Text(branch),
+                          value: tempSelection.contains(branch),
+                          onChanged: (bool? selected) {
+                            setDialogState(() {
+                              if (selected == true) {
+                                tempSelection.add(branch);
+                              } else {
+                                tempSelection.remove(branch);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
                 ),
               );
             },
@@ -366,7 +401,8 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
       },
     );
 
-    if (selectedBranches != null && !const ListEquality().equals(selectedBranches, _editedBranch)) {
+    if (selectedBranches != null &&
+        !const ListEquality().equals(selectedBranches, _editedBranch)) {
       setState(() {
         _editedBranch = selectedBranches;
         showPostButton = _isDataChanged();
@@ -377,49 +413,69 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   void _deleteSchedule() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Schedule'),
-        content: const Text('Are you sure you want to delete this schedule?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Delete Schedule'),
+            content: const Text(
+              'Are you sure you want to delete this schedule?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final scheduleId = widget.schedule['id']?.toString();
+                  if (scheduleId == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Error: Schedule ID is missing'),
+                      ),
+                    );
+                    Navigator.pop(context);
+                    return;
+                  }
+
+                  final result = await ScheduleServices.deleteSchedule(
+                    scheduleId,
+                  );
+
+                  Navigator.pop(context);
+
+                  if (result['success']) {
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AllSchedulesScreen(),
+                      ),
+                      (Route<dynamic> route) => false,
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          result['message'] ?? 'Schedule deleted successfully',
+                        ),
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Error: ${result['message'] ?? 'Failed to delete schedule'}',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async {
-              final scheduleId = widget.schedule['id']?.toString();
-              if (scheduleId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Error: Schedule ID is missing')),
-                );
-                Navigator.pop(context);
-                return;
-              }
-
-              final result = await ScheduleServices.deleteSchedule(scheduleId);
-
-              Navigator.pop(context);
-
-              if (result['success']) {
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AllSchedulesScreen()),
-                  (Route<dynamic> route) => false,
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(result['message'] ?? 'Schedule deleted successfully')),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: ${result['message'] ?? 'Failed to delete schedule'}')),
-                );
-              }
-            },
-            child: const Text('Delete', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
     );
   }
 
@@ -443,7 +499,10 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     }
 
     // Call the service method
-    final result = await ScheduleServices.updateScheduleMarkStatus(scheduleId, value);
+    final result = await ScheduleServices.updateScheduleMarkStatus(
+      scheduleId,
+      value,
+    );
 
     // Check if the widget is still mounted before updating state
     if (!mounted) return;
@@ -463,7 +522,9 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
       // Show error message if the API call failed
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: ${result['message'] ?? 'Failed to update status'}'),
+          content: Text(
+            'Error: ${result['message'] ?? 'Failed to update status'}',
+          ),
           backgroundColor: Colors.red,
         ),
       );
@@ -479,12 +540,11 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     });
   }
 
-
   Future<void> _saveChanges() async {
     if (!_isDataChanged()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No changes detected.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('No changes detected.')));
       return;
     }
 
@@ -518,49 +578,68 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
 
       // IMPORTANT: Check if mounted before interacting with context after await
       if (!mounted) {
-        print("Widget not mounted after API call, returning."); // Log: Not mounted
-        return; 
+        print(
+          "Widget not mounted after API call, returning.",
+        ); // Log: Not mounted
+        return;
       }
 
-      print("Attempting to dismiss loading dialog..."); // Log: Before dismissing dialog
+      print(
+        "Attempting to dismiss loading dialog...",
+      ); // Log: Before dismissing dialog
       // Dismiss loading indicator FIRST
       // Try using rootNavigator: true
-      Navigator.of(context, rootNavigator: true).pop(); 
+      Navigator.of(context, rootNavigator: true).pop();
       print("Loading dialog dismissed."); // Log: After dismissing dialog
 
       if (result['success'] == true) {
-        print("Update successful. Showing SnackBar and popping screen."); // Log: Success path
+        print(
+          "Update successful. Showing SnackBar and popping screen.",
+        ); // Log: Success path
         // Check mounted again before showing SnackBar or popping screen
-        if (!mounted) return; 
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Schedule updated successfully!')),
         );
         // Navigate back to the previous screen on success
         Navigator.pop(context, true); // Pop the details screen
       } else {
-        print("Update failed. Showing error SnackBar. Error: ${result['message']}"); // Log: Failure path
+        print(
+          "Update failed. Showing error SnackBar. Error: ${result['message']}",
+        ); // Log: Failure path
         // Check mounted again before showing SnackBar
-        if (!mounted) return; 
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to update schedule: ${result['message'] ?? 'Unknown error'}')),
+          SnackBar(
+            content: Text(
+              'Failed to update schedule: ${result['message'] ?? 'Unknown error'}',
+            ),
+          ),
         );
       }
-    } catch (e, stackTrace) { // Catch stack trace for more info
-       print("Error caught in _saveChanges: $e"); // Log: Error caught
-       print("Stack trace: $stackTrace"); // Log: Stack trace
+    } catch (e, stackTrace) {
+      // Catch stack trace for more info
+      print("Error caught in _saveChanges: $e"); // Log: Error caught
+      print("Stack trace: $stackTrace"); // Log: Stack trace
 
-       // Check mounted again before interacting with context in catch block
+      // Check mounted again before interacting with context in catch block
       if (!mounted) {
-        print("Widget not mounted in catch block, returning."); // Log: Not mounted in catch
-        return; 
+        print(
+          "Widget not mounted in catch block, returning.",
+        ); // Log: Not mounted in catch
+        return;
       }
-      
-      print("Attempting to dismiss loading dialog in catch block..."); // Log: Before pop in catch
+
+      print(
+        "Attempting to dismiss loading dialog in catch block...",
+      ); // Log: Before pop in catch
       // Attempt to dismiss the dialog in case the error occurred before the first pop
       // Use rootNavigator: true here as well for consistency
-      Navigator.of(context, rootNavigator: true).pop(); 
-      print("Loading dialog dismissed in catch block (if it was still open)."); // Log: After pop in catch
-      
+      Navigator.of(context, rootNavigator: true).pop();
+      print(
+        "Loading dialog dismissed in catch block (if it was still open).",
+      ); // Log: After pop in catch
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('An error occurred: ${e.toString()}')),
       );
@@ -577,15 +656,14 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     String displayTime = _editedTime;
     String displayLocation = _editedLocation;
     String displayRoomNo = _editedRoomNo;
-    String displayBranch = _editedBranch.isEmpty ? 'Not specified' : _editedBranch.join(', ');
+    String displayBranch =
+        _editedBranch.isEmpty ? 'Not specified' : _editedBranch.join(', ');
     String displayTitle = widget.schedule['title'] ?? 'Schedule Details';
 
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(
-        showProfileIcon: true,
-      ),
+      appBar: CustomAppBar(showProfileIcon: true),
       body: Stack(
         children: [
           ScreensBackground(height: height, width: width),
@@ -624,7 +702,10 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: const Text(
+                          'Save Changes',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -635,9 +716,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -652,15 +731,18 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                         ),
                         _isUpdatingMark
                             ? const SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : Switch(
-                                value: isAttendanceEnabled,
-                                onChanged: _toggleAttendance,
-                                activeColor: Colors.greenAccent,
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
                               ),
+                            )
+                            : Switch(
+                              value: isAttendanceEnabled,
+                              onChanged: _toggleAttendance,
+                              activeColor: Colors.greenAccent,
+                            ),
                       ],
                     ),
                   ),
@@ -680,9 +762,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
                     child: Column(
                       children: [
@@ -714,7 +794,11 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildStatisticItem('Total Students', '100', Colors.blue),
+                            _buildStatisticItem(
+                              'Total Students',
+                              '100',
+                              Colors.blue,
+                            ),
                             const SizedBox(width: 16),
                             _buildStatisticItem('Present', '75', Colors.green),
                             const SizedBox(width: 16),
@@ -729,13 +813,44 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      ElevatedButton.icon(
-                        onPressed: _deleteSchedule,
-                        icon: const Icon(Icons.delete),
-                        label: const Text('Delete'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.redAccent,
-                          foregroundColor: Colors.white,
+                      // Manual Attendance Button
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => ManualAttendanceScreen(
+                                      scheduleId: int.parse(
+                                        widget.schedule['id'].toString(),
+                                      ),
+                                    ),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.people, color: Colors.white),
+                          label: const Text(
+                            'Manual Attendance',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.purple,
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      // Delete Button
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: _deleteSchedule,
+                          icon: const Icon(Icons.delete),
+                          label: const Text('Delete'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.redAccent,
+                            foregroundColor: Colors.white,
+                          ),
                         ),
                       ),
                     ],
@@ -749,16 +864,18 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     );
   }
 
-  Widget _buildDetailItem(String label, String value, VoidCallback onEditPressed) {
+  Widget _buildDetailItem(
+    String label,
+    String value,
+    VoidCallback onEditPressed,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.2),
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -777,10 +894,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.white,
-              ),
+              style: const TextStyle(fontSize: 16, color: Colors.white),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -807,13 +921,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
             color: color,
           ),
         ),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.white,
-          ),
-        ),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
       ],
     );
   }

@@ -50,7 +50,6 @@ class VenueService {
 
   Future<List<Venue>> fetchVenues() async {
     try {
-      // Get the token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
 

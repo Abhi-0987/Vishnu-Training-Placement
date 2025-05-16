@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
+import '../models/student.dart';
+import '../services/manual_attendance_service.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
 
 class ManualAttendanceScreen extends StatefulWidget {
-  const ManualAttendanceScreen({super.key});
+  final int scheduleId;
+
+  const ManualAttendanceScreen({super.key, required this.scheduleId});
 
   @override
   State<ManualAttendanceScreen> createState() => _ManualAttendanceScreenState();
 }
 
 class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
-  bool _isLoading = false;
+  bool _isLoading = true;
+  bool _isSubmitting = false;
   final List<Student> _students = [];
   final List<Student> _selectedStudents = [];
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _errorMessage = '';
+  Map<String, dynamic> _scheduleDetails = {};
+  bool _loadingScheduleDetails = true;
 
   @override
   void initState() {
     super.initState();
-    _generateDummyStudents();
+    _fetchScheduleDetails();
+    _fetchStudents();
   }
 
   @override
@@ -28,13 +37,37 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
     super.dispose();
   }
 
-  void _generateDummyStudents() {
-    // Generate 50 dummy students with email IDs
-    for (int i = 1; i <= 50; i++) {
-      String studentId = i.toString().padLeft(4, '0');
-      _students.add(
-        Student(email: "student$studentId@vishnu.edu.in", isSelected: false),
-      );
+  Future<void> _fetchScheduleDetails() async {
+    setState(() => _loadingScheduleDetails = true);
+    try {
+      final details = await AttendanceService.fetchScheduleDetails(widget.scheduleId);
+      setState(() {
+        _scheduleDetails = details;
+        _loadingScheduleDetails = false;
+      });
+    } catch (_) {
+      setState(() => _loadingScheduleDetails = false);
+    }
+  }
+
+  Future<void> _fetchStudents() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = '';
+    });
+    try {
+      final students = await AttendanceService.fetchStudents(widget.scheduleId);
+      setState(() {
+        _students
+          ..clear()
+          ..addAll(students);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error: $e';
+        _isLoading = false;
+      });
     }
   }
 
@@ -52,66 +85,37 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
   Future<void> _markAttendance() async {
     if (_selectedStudents.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please select at least one student"),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text("Please select at least one student"), backgroundColor: Colors.red),
       );
       return;
     }
 
     try {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate API call with a delay
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Show success message
+      setState(() => _isSubmitting = true);
+      final emails = _selectedStudents.map((s) => s.email).toList();
+      await AttendanceService.markAttendance(widget.scheduleId, emails);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Attendance marked for ${_selectedStudents.length} students",
-          ),
-          backgroundColor: Colors.green,
-        ),
+        SnackBar(content: Text("Attendance marked for ${_selectedStudents.length} students"), backgroundColor: Colors.green),
       );
-
-      // Clear selections
-      setState(() {
-        for (var student in _students) {
-          student.isSelected = false;
-        }
-        _selectedStudents.clear();
-      });
+      await _fetchStudents();
+      setState(() => _selectedStudents.clear());
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error marking attendance: $e"),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text("Error marking attendance: $e"), backgroundColor: Colors.red),
       );
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isSubmitting = false);
     }
   }
 
   List<Student> get _filteredStudents {
-    if (_searchQuery.isEmpty) {
-      return _students;
-    }
-
-    return _students.where((student) {
-      return student.email.toLowerCase().contains(_searchQuery.toLowerCase());
-    }).toList();
+    if (_searchQuery.isEmpty) return _students;
+    return _students.where((s) => s.email.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
+    final screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -126,123 +130,72 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    "Manual Attendance",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      fontFamily: 'Alata',
-                    ),
-                  ),
+                  const Text("Manual Attendance", style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, fontFamily: 'Alata')),
                   const SizedBox(height: 5),
-                  Text(
-                    "Selected: ${_selectedStudents.length} students",
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 14,
-                      fontFamily: 'Alata',
-                    ),
-                  ),
+                  Text("Selected: ${_selectedStudents.length} students", style: const TextStyle(color: Colors.white70, fontSize: 14, fontFamily: 'Alata')),
                   const SizedBox(height: 15),
-
-                  // Search bar
                   TextField(
                     controller: _searchController,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Search by email",
                       hintStyle: const TextStyle(color: Colors.white54),
-                      prefixIcon: const Icon(
-                        Icons.search,
-                        color: Colors.purple,
-                      ),
+                      prefixIcon: const Icon(Icons.search, color: Colors.purple),
                       filled: true,
                       fillColor: Colors.grey.shade800,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
-                      ),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
                     ),
-                    onChanged: (value) {
-                      setState(() {
-                        _searchQuery = value;
-                      });
-                    },
+                    onChanged: (value) => setState(() => _searchQuery = value),
                   ),
-
                   const SizedBox(height: 15),
-
-                  // Remove the "Select all checkbox" container that was here
-
-                  // Student list - simplified to only show email
                   Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade800.withAlpha(76),
-
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.white.withAlpha(26),
-                          width: 1,
-                        ),
-                      ),
-                      child: ListView.separated(
-                        itemCount: _filteredStudents.length,
-                        separatorBuilder:
-                            (context, index) =>
-                                const Divider(color: Colors.white24, height: 1),
-                        itemBuilder: (context, index) {
-                          final student = _filteredStudents[index];
-                          return ListTile(
-                            leading: Checkbox(
-                              value: student.isSelected,
-                              onChanged: (value) {
-                                _toggleStudentSelection(student);
-                              },
-                              activeColor: Colors.purple,
-                              checkColor: Colors.white,
-                            ),
-                            title: Text(
-                              student.email,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
+                    child: _isLoading
+                        ? const Center(child: CircularProgressIndicator(color: Colors.purple))
+                        : _errorMessage.isNotEmpty
+                            ? Center(child: Text(_errorMessage, style: const TextStyle(color: Colors.red), textAlign: TextAlign.center))
+                            : Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade800.withAlpha(76),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.white.withAlpha(26), width: 1),
+                                ),
+                                child: ListView.separated(
+                                  itemCount: _filteredStudents.length,
+                                  separatorBuilder: (context, index) => const Divider(color: Colors.white24, height: 1),
+                                  itemBuilder: (context, index) {
+                                    final student = _filteredStudents[index];
+                                    return ListTile(
+                                      leading: Checkbox(
+                                        value: student.isSelected,
+                                        onChanged: student.isPresent ? null : (value) => _toggleStudentSelection(student),
+                                        activeColor: Colors.purple,
+                                        checkColor: Colors.white,
+                                      ),
+                                      title: Text(
+                                        student.email,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          decoration: student.isPresent ? TextDecoration.lineThrough : null,
+                                        ),
+                                      ),
+                                      trailing: student.isPresent ? const Icon(Icons.check_circle, color: Colors.green) : null,
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
                   ),
-
                   const SizedBox(height: 15),
-
-                  // Mark attendance button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.purple,
                         padding: const EdgeInsets.symmetric(vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
-                      onPressed: _isLoading ? null : _markAttendance,
-                      child:
-                          _isLoading
-                              ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                              : const Text(
-                                "Mark Attendance",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
+                      onPressed: (_isSubmitting || _selectedStudents.isEmpty) ? null : _markAttendance,
+                      child: _isSubmitting ? const CircularProgressIndicator(color: Colors.white) : const Text("Mark Attendance", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                   ),
                 ],
@@ -253,11 +206,4 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
       ),
     );
   }
-}
-
-class Student {
-  final String email;
-  bool isSelected;
-
-  Student({required this.email, this.isSelected = false});
 }
