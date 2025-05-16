@@ -82,7 +82,6 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     'CSBS',
   ];
   
-  // Add a map to store branch sections
   Map<String, List<String>> branchSections = {
     'CSE': ['CSE-A', 'CSE-B', 'CSE-C', 'CSE-D', 'CSE-E'],
     'ECE': ['ECE-A', 'ECE-B', 'ECE-C', 'ECE-D'],
