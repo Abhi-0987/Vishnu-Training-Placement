@@ -21,5 +21,7 @@ public class Admin {
 
     @Column(nullable = false)
     private boolean login = false;
+
+    private String name;
 }
 

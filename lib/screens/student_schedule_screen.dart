@@ -31,36 +31,26 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
     getUserBranch();
   }
 
-  Future<void> getUserBranch() async {
+Future<void> getUserBranch() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString('studentEmail');
+      final branch = prefs.getString('branch');
 
-      print('Retrieved email: $email');
+      print('Retrieved branch from SharedPreferences: $branch');
 
-      if (email == null || email.isEmpty) {
+      if (branch == null || branch.isEmpty) {
         setState(() {
-          errorMessage = 'Email not found in SharedPreferences';
+          errorMessage = 'Branch not found in SharedPreferences';
           isLoading = false;
         });
         return;
       }
 
-      final branch = await StudentService.getBranchByEmail(email);
+      setState(() {
+        userBranch = branch;
+      });
 
-      if (branch != null) {
-        await prefs.setString('branch', branch);
-        print('Branch set in SharedPreferences: $branch');
-        setState(() {
-          userBranch = branch;
-        });
-        _fetchSchedules();
-      } else {
-        setState(() {
-          errorMessage = 'Branch not found for email: $email';
-          isLoading = false;
-        });
-      }
+      _fetchSchedules();
     } catch (e) {
       setState(() {
         errorMessage = 'Failed to fetch branch: $e';
@@ -68,6 +58,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
       });
     }
   }
+
 
   Future<void> _fetchSchedules() async {
     try {

@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
+import 'package:vishnu_training_and_placements/services/admin_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
@@ -18,14 +20,34 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
   final TextEditingController studentEmailController = TextEditingController();
+  String baseUrl = AppConstants.backendUrl;
   bool _isPasswordVisible = false;
   String? adminEmail;
+  String? adminName;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    loadEmail();
+    fetchAdminDetails();
+  }
+
+  Future<void> fetchAdminDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('adminEmail');
+
+    if (email == null) return;
+
+    final data = await AdminService.getAdminDetails(email);
+
+    if (data != null) {
+      setState(() {
+        adminEmail = data['email'];
+        adminName = data['name'];
+      });
+    } else {
+      _showSnackBar("Failed to load admin details");
+    }
   }
 
   Future<void> loadEmail() async {
@@ -44,7 +66,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
   void _resetStudentPassword() async {
     final email = studentEmailController.text.trim();
-
     if (email.isEmpty) {
       _showSnackBar("Email field cannot be empty.");
       return;
@@ -53,7 +74,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     setState(() => _isLoading = true);
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/api/auth/student/reset-password'),
+      Uri.parse('$baseUrl/api/auth/student/reset-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
@@ -90,7 +111,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     }
 
     final response = await http.post(
-      Uri.parse('http://localhost:8080/api/auth/admin/change-password'),
+      Uri.parse('$baseUrl/api/auth/admin/change-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': adminEmail, 'newPassword': newPassword}),
     );
@@ -431,6 +452,55 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                       ),
                     ),
                   ),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            AppConstants.gradient_2,
+                            AppConstants.gradient_1,
+                          ],
+                        ),
+                      ),
+                      padding: EdgeInsets.all(width * 0.001),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          prefs.clear();
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SplashScreen(),
+                            ),
+                            (routes) => false,
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black.withAlpha(220),
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: width * 0.28,
+                            vertical: height * 0.013,
+                          ),
+                        ),
+                        child: Text(
+                          'Log Out',
+                          style: TextStyle(
+                            color: AppConstants.textWhite,
+                            fontSize: width * 0.04,
+                            fontFamily: 'Alata',
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -458,27 +528,29 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
             SizedBox(width: width * 0.04),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  "admin@bvrit.ac.in",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Alata',
-                    color: AppConstants.textWhite,
-                  ),
-                ),
-                Text(
-                  "admin",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontFamily: 'Alata',
-                    color: AppConstants.textWhite,
-                  ),
-                ),
+              children: [
+                _buildProfileText(adminEmail ?? '', width),
+                _buildProfileText(adminName ?? '', width),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProfileText(String text, double width) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: width * 0.035,
+          fontFamily: 'Alata',
+          color: AppConstants.textWhite,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
       ),
     );
   }
