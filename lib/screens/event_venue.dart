@@ -81,13 +81,102 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     'CSD',
     'CSBS',
   ];
+  
+  Map<String, List<String>> branchSections = {
+    'CSE': ['CSE-A', 'CSE-B', 'CSE-C', 'CSE-D', 'CSE-E'],
+    'ECE': ['ECE-A', 'ECE-B', 'ECE-C', 'ECE-D'],
+    'EEE': ['EEE'],
+    'MECH': ['MECH'],
+    'CIVIL': ['CIVIL-A', 'CIVIL-B'],
+    'IT': ['IT-A', 'IT-B', 'IT-C'],
+    'AI & DS': ['AI & DS'],
+    'BME': ['BME'],
+    'PHE': ['PHE'],
+    'CHEM': ['CHEM'],
+    'CSM': ['CSM-A', 'CSM-B'],
+    'CSD': ['CSD-A', 'CSD-B'],
+    'CSBS': ['CSBS'],
+  };
+  
   List<String> selectedBranches = [];
+  List<String> selectedSections = []; // Add this to track selected sections
 
   DateTime selectedDate = DateTime.now();
   DateTime focusedDate = DateTime.now();
   String selectedTime = "9:30 - 11:15";
   String selectedLocation = '';
 
+  // Add this method to show section selection dialog
+  Future<void> _showSectionSelectionDialog(String branch) async {
+    List<String> sections = branchSections[branch] ?? [];
+    List<String> tempSelectedSections = [];
+    
+    // Pre-select sections that are already selected
+    for (String section in sections) {
+      if (selectedSections.contains(section)) {
+        tempSelectedSections.add(section);
+      }
+    }
+    
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Select Sections for $branch'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: sections.length,
+                  itemBuilder: (context, index) {
+                    final section = sections[index];
+                    return CheckboxListTile(
+                      title: Text(section),
+                      value: tempSelectedSections.contains(section),
+                      onChanged: (bool? value) {
+                        setState(() {
+                          if (value == true) {
+                            tempSelectedSections.add(section);
+                          } else {
+                            tempSelectedSections.remove(section);
+                          }
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Remove any previously selected sections for this branch
+                    selectedSections.removeWhere((section) => section.startsWith('$branch-'));
+                    
+                    // Add newly selected sections
+                    selectedSections.addAll(tempSelectedSections);
+                    
+                    Navigator.pop(context);
+                    
+                    // Update the state to reflect changes
+                    this.setState(() {});
+                  },
+                  child: Text('Confirm'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Modify the _scheduleClass method to include sections
   Future<void> _scheduleClass() async {
     setState(() {
       isLoading = true;
@@ -102,11 +191,6 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       );
       return; // Stop execution if location is not selected
     }
-
-    // Check if a date is selected (though TableCalendar usually ensures this)
-    // You might adjust this check based on how `selectedDate` could become null
-    // For now, we assume it's always initialized. If it could be null:
-    // if (selectedDate == null) { ... }
 
     // Check if a time slot is selected (it has a default, but good to check)
     if (selectedTime.isEmpty) {
@@ -135,18 +219,16 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final blockName = parts.isNotEmpty ? parts[0] : '';
     final roomNo = parts.length > 1 ? parts[1] : '';
 
-    // Format the data as a proper JSON object
-    // Join the selected branches into a comma-separated string
-    String branchesString = selectedBranches.join(',');
+    // Use sections if available, otherwise use branches
+    String branchesString = selectedSections.isEmpty 
+        ? selectedBranches.join(',') 
+        : selectedSections.join(',');
 
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
-      "date":
-          selectedDate.toIso8601String().split('T')[0], // Format: YYYY-MM-DD
-      "time":
-          selectedTime, // Format: "H:mm - H:mm" (Backend parses the start time)
-      // Correct the key to "studentBranch" and use the joined string
+      "date": selectedDate.toIso8601String().split('T')[0],
+      "time": selectedTime,
       "studentBranch": branchesString,
     };
 
@@ -490,33 +572,53 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     return Wrap(
       spacing: 10, // Increased horizontal spacing between chips
       runSpacing: 10, // Added vertical spacing between rows of chips
-      children:
-          branches.map((branch) {
-            final isSelected = selectedBranches.contains(branch);
-            return FilterChip(
-              label: Text(branch, style: TextStyle(color: Colors.white)),
-              selected: isSelected,
-              backgroundColor: Colors.grey[800],
-              selectedColor: Colors.purple,
-              padding: EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 4,
-              ), // Added padding inside chips
-              onSelected: (bool selected) {
+      children: branches.map((branch) {
+        final isSelected = selectedBranches.contains(branch);
+        // Check if any section of this branch is selected
+        final hasSections = selectedSections.any((section) => section.startsWith('$branch-'));
+        
+        return FilterChip(
+          label: Text(branch, style: TextStyle(color: Colors.white)),
+          selected: isSelected || hasSections,
+          backgroundColor: Colors.grey[800],
+          selectedColor: Colors.purple,
+          padding: EdgeInsets.symmetric(
+            horizontal: 8,
+            vertical: 4,
+          ), // Added padding inside chips
+          onSelected: (bool selected) {
+            if (selected) {
+              // Show section selection dialog when branch is selected
+              _showSectionSelectionDialog(branch);
+              if (!selectedBranches.contains(branch)) {
                 setState(() {
-                  if (selected) {
-                    selectedBranches.add(branch);
-                  } else {
-                    selectedBranches.remove(branch);
-                  }
+                  selectedBranches.add(branch);
                 });
-              },
-            );
-          }).toList(),
+              }
+            } else {
+              setState(() {
+                selectedBranches.remove(branch);
+                // Remove all sections of this branch
+                selectedSections.removeWhere((section) => section.startsWith('$branch-'));
+              });
+            }
+          },
+        );
+      }).toList(),
     );
   }
 
   Widget _buildInfoCard(double width) {
+    // Create a formatted string that shows branches with their sections
+    String branchesText = '';
+    if (selectedSections.isEmpty && selectedBranches.isEmpty) {
+      branchesText = 'None selected';
+    } else if (selectedSections.isEmpty) {
+      branchesText = selectedBranches.join(', ');
+    } else {
+      branchesText = selectedSections.join(', ');
+    }
+
     return OpaqueContainer(
       width: width,
       child: Padding(
@@ -552,7 +654,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             ),
             Divider(color: Colors.white),
             Text(
-              "Branches: ${selectedBranches.isEmpty ? 'None selected' : selectedBranches.join(', ')}",
+              "Branches: $branchesText",
               style: TextStyle(
                 color: Colors.white,
                 fontFamily: 'Alata',

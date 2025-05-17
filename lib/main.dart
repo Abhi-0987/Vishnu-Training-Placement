@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/all_schedules_screen.dart';
+import 'package:vishnu_training_and_placements/screens/event_venue.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));
