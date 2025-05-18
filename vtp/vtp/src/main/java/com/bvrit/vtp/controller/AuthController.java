@@ -1,10 +1,12 @@
 package com.bvrit.vtp.controller;
 
 import com.bvrit.vtp.dao.AdminRepo;
+import com.bvrit.vtp.dao.CoordinatorRepo;
 import com.bvrit.vtp.dao.StudentRepo;
 import com.bvrit.vtp.dto.ChangePasswordRequest;
 import com.bvrit.vtp.dto.TokenResponse;
 import com.bvrit.vtp.model.Admin;
+import com.bvrit.vtp.model.Coordinator;
 import com.bvrit.vtp.model.Student;
 import com.bvrit.vtp.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ public class AuthController {
     @Autowired private AuthService authService;
     @Autowired private StudentRepo studentRepository;
     @Autowired private AdminRepo adminRepository;
+    @Autowired private CoordinatorRepo coordinatorRepository;
     @Autowired private PasswordEncoder passwordEncoder;
 
     @PostMapping(value = "/auth/admin/login", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -52,6 +55,36 @@ public class AuthController {
                 "accessToken", tokenResponse.getAccessToken(),
                 "refreshToken", tokenResponse.getRefreshToken(),
                 "role", "Admin",
+                "login", loginFlag
+        ));
+    }
+
+    @PostMapping(value = "/auth/coordinator/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> coordinatorlogin(@RequestBody Map<String, String> credentials) {
+        String email = credentials.get("email");
+        String password = credentials.get("password");
+
+        Optional<Coordinator> optionalCoordinator = coordinatorRepository.findByEmail(email);
+        if (optionalCoordinator.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid email or password"));
+        }
+
+        TokenResponse tokenResponse;
+        try {
+            tokenResponse = authService.coordinatorlogin(email, password);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Invalid credentials"));
+        }
+
+        Coordinator coordinator = optionalCoordinator.get();
+        boolean loginFlag = coordinator.isLogin();
+
+        return ResponseEntity.ok(Map.of(
+                "accessToken", tokenResponse.getAccessToken(),
+                "refreshToken", tokenResponse.getRefreshToken(),
+                "role", "Coordinator",
                 "login", loginFlag
         ));
     }
@@ -134,6 +167,22 @@ public class AuthController {
         adminRepository.save(admin);
 
         return ResponseEntity.ok(Map.of("message", "Admin password updated successfully"));
+    }
+
+    @PostMapping("/coordinator/change-password")
+    public ResponseEntity<?> changeCoordinatorPassword(@RequestBody ChangePasswordRequest request) {
+        Optional<Coordinator> optionalCoordinator = coordinatorRepository.findByEmail(request.getEmail());
+        if (optionalCoordinator.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Coordinator not found"));
+        }
+
+        Coordinator coordinator = optionalCoordinator.get();
+        coordinator.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        coordinator.setLogin(true);
+        coordinatorRepository.save(coordinator);
+
+        return ResponseEntity.ok(Map.of("message", "Coordinator password updated successfully"));
     }
 
     @PostMapping(value = "/auth/refresh", produces = MediaType.APPLICATION_JSON_VALUE)

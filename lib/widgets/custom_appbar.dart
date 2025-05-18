@@ -17,15 +17,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 40);
   Future<void> _handleProfileIconTap(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    final isAdmin = prefs.getBool('isAdmin') ?? false;
+    final role = prefs.getString('role') ?? 'student';
 
-    if (isProfileScreen) {
-      Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
+    if (role == 'admin' || role == 'coordinator') {
+      Navigator.pushNamed(context, AppRoutes.adminProfileScreen);
     } else {
-      Navigator.pushNamed(
-        context,
-        isAdmin ? AppRoutes.adminProfileScreen : AppRoutes.studentProfileScreen,
-      );
+      Navigator.pushNamed(context, AppRoutes.studentProfileScreen);
     }
   }
 

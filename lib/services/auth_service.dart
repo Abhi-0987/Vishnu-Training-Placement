@@ -1,19 +1,30 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
-
 class AuthService {
   static const String baseUrl = AppConstants.backendUrl;
   Future<http.Response> login(
     String email,
     String password,
-    // String deviceId,
-    bool isAdmin,
+    UserRole role,   // Accept role as enum here
   ) async {
-    final url = Uri.parse(
-      '$baseUrl/api/auth/${isAdmin ? 'admin/login' : 'student/login'}',
-    );
+    // Map UserRole enum to backend endpoint string
+    String rolePath;
+    switch (role) {
+      case UserRole.Admin:
+        rolePath = 'admin/login';
+        break;
+      case UserRole.Coordinator:
+        rolePath = 'coordinator/login';
+        break;
+      case UserRole.Student:
+        rolePath = 'student/login';
+        break;
+    }
+
+    final url = Uri.parse('$baseUrl/api/auth/$rolePath');
 
     final response = await http.post(
       url,

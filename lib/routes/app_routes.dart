@@ -13,11 +13,13 @@ import 'package:vishnu_training_and_placements/screens/student_profile.dart';
 import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
 import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
+enum UserRole { Admin, Coordinator, Student }
 class AppRoutes {
   // Route names as static constants
   static const String splash = '/';
   static const String welcome = '/welcome';
   static const String adminLogin = '/admin-login';
+  static const String coordinatorLogin = '/coordinator-login';
   static const String studentLogin = '/student-login';
   static const String markAttendanceAdmin = '/mark-attendance-admin';
   static const String markAttendanceStudent = '/mark-attendance-student';
@@ -34,8 +36,9 @@ class AppRoutes {
   static final routes = {
     splash: (context) => const SplashScreen(),
     welcome: (context) => const WelcomeScreen(),
-    adminLogin: (context) => const StudentLoginScreen(isAdmin: true),
-    studentLogin: (context) => const StudentLoginScreen(isAdmin: false),
+    adminLogin: (context) => const LoginScreen(role: UserRole.Admin),
+    coordinatorLogin: (context) => const LoginScreen(role: UserRole.Coordinator),
+    studentLogin: (context) => const LoginScreen(role: UserRole.Student),
     markAttendanceAdmin: (context) => const AdminMarkAttendence(),
     markAttendanceStudent: (context) => const MarkAttendancePage(),
     studentHomeScreen: (context) => StudentHomeScreen(),
