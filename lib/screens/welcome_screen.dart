@@ -151,7 +151,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                               child: Container(
-                                height: height * 0.32,
+                                height: height * 0.34,
                                 width: width * 0.96,
                                 padding: EdgeInsets.all(width * 0.05),
                                 decoration: BoxDecoration(
