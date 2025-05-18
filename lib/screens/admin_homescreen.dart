@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 //import 'package:flutter/widgets.dart';
@@ -14,6 +15,19 @@ class AdminHomeScreen extends StatefulWidget {
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
+  String? userRole;
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userRole = prefs.getString('role') ?? 'admin';  // Default to 'admin' if no role found
+    });
+  }
   @override
   Widget build(BuildContext context) {
     // Get the screen size, height, and width
@@ -91,6 +105,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                           },
                         ),
                         const SizedBox(height: 40),
+                        if (userRole != 'coordinator')
                         GestureDetector(
                           child: CustomCard(
                             text: 'Message Sending',

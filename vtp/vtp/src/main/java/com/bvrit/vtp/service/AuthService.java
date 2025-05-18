@@ -2,10 +2,12 @@ package com.bvrit.vtp.service;
 
 import com.bvrit.vtp.dao.AdminRepo;
 import com.bvrit.vtp.dao.BlacklistedTokenRepo;
+import com.bvrit.vtp.dao.CoordinatorRepo;
 import com.bvrit.vtp.dao.StudentRepo;
 import com.bvrit.vtp.dto.TokenResponse;
 import com.bvrit.vtp.model.Admin;
 import com.bvrit.vtp.model.BlacklistedToken;
+import com.bvrit.vtp.model.Coordinator;
 import com.bvrit.vtp.model.Student;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class AuthService {
 
     @Autowired private StudentRepo studentRepo;
     @Autowired private AdminRepo adminRepo;
+    @Autowired private CoordinatorRepo coordinatorRepository;
     @Autowired private JwtService jwtService;
     @Autowired private BlacklistedTokenRepo blacklistedTokenRepo;
     @Autowired private PasswordEncoder passwordEncoder;
@@ -25,17 +28,41 @@ public class AuthService {
         Optional<Admin> adminOpt = adminRepo.findByEmail(email);
         if (adminOpt.isPresent()) {
             Admin admin = adminOpt.get();
-
+//
             if (!admin.isLogin()) {
                 // Default password check
                 if (rawPassword.equals(admin.getPassword())) {
                     return generateTokenResponse(email, "Admin");
                 }
             } else {
+                System.out.println("rawPassword: " + rawPassword);
+                System.out.println("storedPassword (encoded): " + admin.getPassword());
+                System.out.println("matches: " + passwordEncoder.matches(rawPassword, admin.getPassword()));
+
                 // Encoded password check
                 if (passwordEncoder.matches(rawPassword, admin.getPassword())) {
                     return generateTokenResponse(email, "Admin");
                 }
+            }
+        }
+
+        throw new RuntimeException("Invalid credentials");
+    }
+    public TokenResponse coordinatorlogin(String email, String rawPassword) {
+        Optional<Coordinator> coordinatorOpt = coordinatorRepository.findByEmail(email);
+        if (coordinatorOpt.isPresent()) {
+            Coordinator coordinator = coordinatorOpt.get();
+//
+            if (!coordinator.isLogin()) {
+//                // Default password check
+                if (rawPassword.equals(coordinator.getPassword())) {
+                    return generateTokenResponse(email, "Coordinator");
+                }
+            } else {
+            // Encoded password check
+            if (passwordEncoder.matches(rawPassword, coordinator.getPassword())) {
+                return generateTokenResponse(email, "Coordinator");
+            }
             }
         }
 

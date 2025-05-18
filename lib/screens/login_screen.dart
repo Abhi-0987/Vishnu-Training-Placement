@@ -9,15 +9,15 @@ import 'package:lottie/lottie.dart';
 import 'package:vishnu_training_and_placements/services/auth_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
-class StudentLoginScreen extends StatefulWidget {
-  final bool isAdmin;
-  const StudentLoginScreen({super.key, required this.isAdmin});
+class LoginScreen extends StatefulWidget {
+  final UserRole role;
+  const LoginScreen({super.key, required this.role});
 
   @override
-  State<StudentLoginScreen> createState() => _StudentLoginScreenState();
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _StudentLoginScreenState extends State<StudentLoginScreen> {
+class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool _isPasswordVisible = false;
@@ -38,16 +38,17 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
       showError("Email and password cannot be empty.");
       return;
     }
-    setState(() {
-      _isLoading = true; // Start loading
-    });
-
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
     try {
       final response = await AuthService().login(
         email,
         password,
         // deviceId!,
-        widget.isAdmin,
+        widget.role,
       );
 
       setState(() {
@@ -59,7 +60,6 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
         final prefs = await SharedPreferences.getInstance();
 
         if (data["role"] == "Student") {
-          prefs.setBool('isAdmin', false);
           prefs.setBool('isLoggedIn', true);
           prefs.setString('role', 'student');
           prefs.setString('token', data['accessToken']);
@@ -76,8 +76,18 @@ class _StudentLoginScreenState extends State<StudentLoginScreen> {
               Navigator.pushNamed(context, AppRoutes.studentHomeScreen);
             }
           } // Navigate on success
-        } else if (data["role"] == "Admin") {
-          prefs.setBool('isAdmin', true);
+        } 
+        else if(data["role"]== "Coordinator"){
+          prefs.setBool('isLoggedIn', true);
+          prefs.setString('role', 'coordinator');
+          prefs.setString('token', data['accessToken']);
+          prefs.setString('refreshToken', data['refreshToken']);
+          prefs.setString('coordinatorEmail', email);
+          if (mounted) {
+            Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
+          }
+        }
+        else if (data["role"] == "Admin") {
           prefs.setBool('isLoggedIn', true);
           prefs.setString('role', 'admin');
           prefs.setString('token', data['accessToken']);

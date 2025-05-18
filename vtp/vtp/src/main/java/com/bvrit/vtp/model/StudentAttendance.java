@@ -25,8 +25,10 @@ public class StudentAttendance {
     @Column(nullable = false)
     private boolean present = false;
 
+    @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
     private LocalTime time;
     
     // Define proper relationship with Schedule using bigint
