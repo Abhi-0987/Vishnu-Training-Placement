@@ -1,13 +1,101 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
+import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
+import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class StudentProfileScreen extends StatelessWidget {
+class StudentProfileScreen extends StatefulWidget {
   const StudentProfileScreen({super.key});
+
+  @override
+  State<StudentProfileScreen> createState() => _StudentProfileScreenState();
+}
+
+class _StudentProfileScreenState extends State<StudentProfileScreen> {
+  String? studentName;
+  String? studentRollNo;
+  String? studentBranch;
+  String? studentEmail;
+  String? studentYear;
+  bool isLoading = true;
+  String? errorMessage;
+  int presentPercentage = 60;
+  int absentPercentage = 40;
+  int totalSessions = 8;
+  String longestStreak = '1 day';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStudentData();
+  }
+
+  Future<void> _loadStudentData() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final email = prefs.getString('studentEmail');
+
+      if (email == null || email.isEmpty) {
+        throw Exception('Email not found in shared preferences');
+      }
+
+      final response = await StudentService.getStudentDetails(email);
+
+      if (response == null) {
+        throw Exception('No response from backend');
+      }
+      setState(() {
+        studentName = response['name'];
+        studentRollNo = response['email'].split('@')[0];
+        studentYear = response['year'];
+        studentBranch = response['branch'];
+        studentEmail = response['email'];
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = 'Failed to load profile: ${e.toString()}';
+        isLoading = false;
+      });
+      _showErrorSnackbar(e.toString());
+    }
+  }
+
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  Future<void> _refreshData() async {
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+    await _loadStudentData();
+  }
+
+  void _showPasswordChangeDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Change Password"),
+            content: const Text("Password change functionality goes here."),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,79 +112,125 @@ class StudentProfileScreen extends StatelessWidget {
         extendBodyBehindAppBar: true,
         appBar: const CustomAppBar(isProfileScreen: true),
         backgroundColor: AppConstants.textBlack,
-        body: SingleChildScrollView(
-          child: Stack(
-            children: [
-              ScreensBackground(height: height, width: width),
-              SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: width * 0.04),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: Text(
-                          "Profile",
-                          style: TextStyle(
-                            fontSize: width * 0.06,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Alata',
-                            color: AppConstants.textWhite,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: height * 0.02),
-                      _buildProfileCard(width, height),
-                      SizedBox(height: height * 0.02),
-                      Text(
-                        "Statistics",
+        body: RefreshIndicator(
+          onRefresh: _refreshData,
+          child: _buildMainContent(width, height),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainContent(double width, double height) {
+    return Stack(
+      children: [
+        ScreensBackground(height: height, width: width),
+        if (isLoading)
+          const Center(child: CircularProgressIndicator())
+        else if (errorMessage != null)
+          Center(
+            child: Padding(
+              padding: EdgeInsets.all(width * 0.04),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    errorMessage!,
+                    style: TextStyle(
+                      color: AppConstants.textWhite,
+                      fontSize: width * 0.04,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: height * 0.02),
+                  ElevatedButton(
+                    onPressed: _refreshData,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          SafeArea(
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: width * 0.04),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        "Profile",
                         style: TextStyle(
-                          fontSize: width * 0.07,
+                          fontSize: width * 0.06,
                           fontWeight: FontWeight.bold,
                           fontFamily: 'Alata',
                           color: AppConstants.textWhite,
                         ),
                       ),
-                      SizedBox(height: height * 0.02),
-                      Center(child: buildPieChart(width, height)),
-
-                      Row(
-                        children: [
-                          SizedBox(width: width * 0.27),
-                          _buildLegend(AppConstants.piechartcolor2, "Present"),
-                          SizedBox(width: width * 0.04),
-                          _buildLegend(AppConstants.piechartcolor1, "Absent"),
-                        ],
-                      ),
-
-                      SizedBox(height: height * 0.03),
-                      Row(
-                        children: [
-                          _buildInfoCard(
-                            "Total Sessions",
-                            "8",
-                            AppConstants.textWhite,
-                            width,
-                            height,
+                    ),
+                    SizedBox(height: height * 0.02),
+                    _buildProfileCard(width, height),
+                    SizedBox(height: height * 0.02),
+                    _buildStatisticsSection(width, height),
+                    SizedBox(height: height * 0.03),
+                    Center(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(100),
+                          gradient: const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              AppConstants.gradient_2,
+                              AppConstants.gradient_1,
+                            ],
                           ),
-                          SizedBox(width: width * 0.04),
-                          _buildInfoCard(
-                            "Longest Streak",
-                            "1 day",
-                            AppConstants.textWhite,
-                            width,
-                            height,
+                        ),
+                        padding: EdgeInsets.all(width * 0.001),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            final prefs = await SharedPreferences.getInstance();
+                            prefs.clear();
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SplashScreen(),
+                              ),
+                              (routes) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.black.withAlpha(220),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: width * 0.18,
+                              vertical: height * 0.013,
+                            ),
                           ),
-                        ],
+                          child: Text(
+                            'Log Out',
+                            style: TextStyle(
+                              color: AppConstants.textWhite,
+                              fontSize: width * 0.04,
+                              fontFamily: 'Alata',
+                            ),
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+
+                    SizedBox(height: height * 0.04),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+      ],
     );
   }
 
@@ -109,45 +243,135 @@ class StudentProfileScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: width * 0.10,
-              backgroundImage: const AssetImage('assets/profile.png'),
+              backgroundColor: Colors.grey[800],
+              child: Icon(
+                Icons.person,
+                size: width * 0.10,
+                color: Colors.white,
+              ),
             ),
             SizedBox(width: width * 0.04),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "N.V Dheeraj",
-                  style: TextStyle(
-                    fontSize: width * 0.035,
-                    fontFamily: 'Alata',
-                    color: AppConstants.textWhite,
-                  ),
-                ),
-                Text(
-                  "22211A1277",
-                  style: TextStyle(
-                    fontSize: width * 0.035,
-                    fontFamily: 'Alata',
-                    color: AppConstants.textWhite,
-                  ),
-                ),
-                Text(
-                  "Information Technology",
-                  style: TextStyle(
-                    fontSize: width * 0.035,
-                    fontFamily: 'Alata',
-                    color: AppConstants.textWhite,
-                  ),
-                ),
-                Text(
-                  "Section B",
-                  style: TextStyle(
-                    fontSize: width * 0.035,
-                    fontFamily: 'Alata',
-                    color: AppConstants.textWhite,
-                  ),
-                ),
-              ],
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildProfileText(studentName ?? 'N/A', width),
+                  _buildProfileText(studentRollNo ?? 'N/A', width),
+                  _buildProfileText(studentYear ?? 'N/A', width),
+                  _buildProfileText(studentBranch ?? 'N/A', width),
+                  if (studentEmail != null)
+                    _buildProfileText(studentEmail!, width),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfileText(String text, double width) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2.0),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: width * 0.035,
+          fontFamily: 'Alata',
+          color: AppConstants.textWhite,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  Widget _buildStatisticsSection(double width, double height) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Statistics",
+          style: TextStyle(
+            fontSize: width * 0.07,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Alata',
+            color: AppConstants.textWhite,
+          ),
+        ),
+        SizedBox(height: height * 0.02),
+        Center(child: _buildPieChart(width, height)),
+        SizedBox(height: height * 0.02),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _buildLegend(
+              AppConstants.piechartcolor2,
+              "Present ($presentPercentage%)",
+            ),
+            SizedBox(width: width * 0.04),
+            _buildLegend(
+              AppConstants.piechartcolor1,
+              "Absent ($absentPercentage%)",
+            ),
+          ],
+        ),
+        SizedBox(height: height * 0.03),
+        Row(
+          children: [
+            _buildInfoCard(
+              "Total Sessions",
+              "$totalSessions",
+              AppConstants.textWhite,
+              width,
+              height,
+            ),
+            SizedBox(width: width * 0.04),
+            _buildInfoCard(
+              "Longest Streak",
+              longestStreak,
+              AppConstants.textWhite,
+              width,
+              height,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPieChart(double width, double height) {
+    return SizedBox(
+      height: height * 0.25,
+      width: width * 0.5,
+      child: PieChart(
+        PieChartData(
+          sectionsSpace: 2,
+          centerSpaceRadius: width * 0.08,
+          sections: [
+            PieChartSectionData(
+              value: presentPercentage.toDouble(),
+              color: AppConstants.piechartcolor2,
+              title: '$presentPercentage%',
+              radius: width * 0.15,
+              titleStyle: TextStyle(
+                fontSize: width * 0.035,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Alata',
+                color: AppConstants.textWhite,
+              ),
+            ),
+            PieChartSectionData(
+              value: absentPercentage.toDouble(),
+              color: AppConstants.piechartcolor1,
+              title: '$absentPercentage%',
+              radius: width * 0.15,
+              titleStyle: TextStyle(
+                fontSize: width * 0.035,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Alata',
+                color: AppConstants.textWhite,
+              ),
             ),
           ],
         ),
@@ -156,64 +380,30 @@ class StudentProfileScreen extends StatelessWidget {
   }
 
   Widget _buildLegend(Color color, String text) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 16,
-          height: 16,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(4),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.grey[800]?.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 12,
+            height: 12,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
           ),
-        ),
-        SizedBox(width: 4),
-        Text(
-          text,
-          style: const TextStyle(
-            fontSize: 14,
-            fontFamily: 'Alata',
-            color: AppConstants.textWhite,
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              fontFamily: 'Alata',
+              color: AppConstants.textWhite,
+            ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget buildPieChart(double width, double height) {
-    return SizedBox(
-      height: height * 0.30,
-      width: width * 0.50,
-      child: PieChart(
-        PieChartData(
-          centerSpaceRadius: width * 0.10,
-          sections: [
-            PieChartSectionData(
-              value: 60,
-              color: AppConstants.piechartcolor2,
-              title: '60%',
-              radius: width * 0.20,
-              titleStyle: TextStyle(
-                fontSize: width * 0.04,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Alata',
-                color: AppConstants.textWhite,
-              ),
-            ),
-            PieChartSectionData(
-              value: 40,
-              color: AppConstants.piechartcolor1,
-              title: '40%',
-              radius: width * 0.20,
-              titleStyle: TextStyle(
-                fontSize: width * 0.04,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Alata',
-                color: AppConstants.textWhite,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -229,29 +419,29 @@ class StudentProfileScreen extends StatelessWidget {
       child: OpaqueContainer(
         width: width,
         child: Padding(
-          padding: EdgeInsets.all(width * 0.02),
+          padding: EdgeInsets.all(width * 0.03),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                width: width * 0.10,
-                height: 4,
+                width: width * 0.1,
+                height: 3,
                 color: Colors.yellow,
                 margin: EdgeInsets.only(bottom: height * 0.01),
               ),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: width * 0.04,
+                  fontSize: width * 0.035,
                   fontFamily: 'Alata',
-                  color: Colors.yellow[50],
+                  color: Colors.yellow[100],
                 ),
               ),
-              SizedBox(height: height * 0.01),
+              SizedBox(height: height * 0.005),
               Text(
                 value,
                 style: TextStyle(
-                  fontSize: width * 0.06,
+                  fontSize: width * 0.05,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Alata',
                   color: color,

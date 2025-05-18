@@ -132,7 +132,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             child: Column(
               children: [
                 SizedBox(height: height * 0.3),
-
                 Stack(
                   children: [
                     Align(
@@ -151,7 +150,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                               child: Container(
-                                height: height * 0.32,
+                                height: height * 0.4,
                                 width: width * 0.96,
                                 padding: EdgeInsets.all(width * 0.05),
                                 decoration: BoxDecoration(
@@ -220,6 +219,55 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             const SizedBox(width: 15),
                                             Image.asset(
                                               'assets/admin.png',
+                                              height: 30,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 20),
+                                    //Coordinator Button
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(18),
+                                        gradient: const LinearGradient(
+                                          colors: [
+                                            AppConstants.gradient_1,
+                                            AppConstants.gradient_2,
+                                          ],
+                                        ),
+                                      ),
+                                      padding: const EdgeInsets.all(3),
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              AppConstants.textBlack,
+                                          elevation: 0,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              18,
+                                            ),
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 20,
+                                            vertical: 12,
+                                          ),
+                                        ),
+                                        onPressed: () {},
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const Text(
+                                              'Coordinator',
+                                              style: TextStyle(
+                                                color: AppConstants.textWhite,
+                                                fontSize: 28,
+                                                fontFamily: 'Alata',
+                                              ),
+                                            ),
+                                            const SizedBox(width: 15),
+                                            Image.asset(
+                                              'assets/student.png', //change icon
                                               height: 30,
                                             ),
                                           ],

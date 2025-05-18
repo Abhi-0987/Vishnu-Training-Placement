@@ -1,8 +1,8 @@
 package com.bvrit.vtp.service;
 
+import com.bvrit.vtp.dao.AdminRepo;
 import com.bvrit.vtp.dao.BlacklistedTokenRepo;
 import com.bvrit.vtp.dao.StudentRepo;
-import com.bvrit.vtp.dao.AdminRepo;
 import com.bvrit.vtp.dto.TokenResponse;
 import com.bvrit.vtp.model.Admin;
 import com.bvrit.vtp.model.BlacklistedToken;

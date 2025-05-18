@@ -46,15 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           Row(
             children: [
               GestureDetector(
-                onTap: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  prefs.clear();
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => SplashScreen()),
-                    (routes) => false,
-                  );
-                },
+                onTap: () {},
                 child: Image.asset('assets/logo.png', height: height * 0.06),
               ),
               SizedBox(width: width * 0.15),
