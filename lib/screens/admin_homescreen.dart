@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
-//import 'package:flutter/widgets.dart';
+import 'package:vishnu_training_and_placements/services/admin_service.dart';
+import 'package:vishnu_training_and_placements/services/coordinator_service.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
@@ -16,6 +17,9 @@ class AdminHomeScreen extends StatefulWidget {
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   String? userRole;
+  String? userName;
+  bool isLoading = true;
+  
   @override
   void initState() {
     super.initState();
@@ -24,10 +28,71 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   Future<void> _loadUserRole() async {
     final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString('role') ?? 'admin';
+    
     setState(() {
-      userRole = prefs.getString('role') ?? 'admin';  // Default to 'admin' if no role found
+      userRole = role;
     });
+    
+    // After loading role, fetch the appropriate name
+    _fetchUserName(role);
   }
+  
+  Future<void> _fetchUserName(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (role == 'coordinator') {
+      final email = prefs.getString('coordinatorEmail');
+      
+      if (email == null) {
+        setState(() {
+          userName = "Coordinator";
+          isLoading = false;
+        });
+        return;
+      }
+
+      final data = await CoordinatorService.getCoordinatorDetails(email);
+      
+      if (data != null && data['name'] != null) {
+        setState(() {
+          userName = data['name'];
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          userName = "Coordinator";
+          isLoading = false;
+        });
+      }
+    } else {
+      // For admin role
+      final email = prefs.getString('adminEmail');
+      
+      if (email == null) {
+        setState(() {
+          userName = "Admin";
+          isLoading = false;
+        });
+        return;
+      }
+
+      final data = await AdminService.getAdminDetails(email);
+      
+      if (data != null && data['name'] != null) {
+        setState(() {
+          userName = data['name'];
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          userName = "Admin";
+          isLoading = false;
+        });
+      }
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     // Get the screen size, height, and width
@@ -50,10 +115,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 50),
-                    const Center(
+                    Center(
                       child: Column(
                         children: [
-                          Text(
+                          const Text(
                             'Hello..!!',
                             style: TextStyle(
                               fontSize: 28,
@@ -61,14 +126,18 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                               fontFamily: 'Alata',
                             ),
                           ),
-                          Text(
-                            'Name of Admin',
-                            style: TextStyle(
-                              fontSize: 28,
-                              color: AppConstants.textWhite,
-                              fontFamily: 'Alata',
-                            ),
-                          ),
+                          isLoading 
+                            ? const CircularProgressIndicator(
+                                color: AppConstants.textWhite,
+                              )
+                            : Text(
+                                userName ?? (userRole == 'coordinator' ? 'Coordinator' : 'Admin'),
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  color: AppConstants.textWhite,
+                                  fontFamily: 'Alata',
+                                ),
+                              ),
                         ],
                       ),
                     ),

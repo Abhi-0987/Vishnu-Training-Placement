@@ -151,7 +151,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                               child: Container(
-                                height: height * 0.34,
+                                height: height * 0.38, // Increased from 0.34 to 0.38
                                 width: width * 0.96,
                                 padding: EdgeInsets.all(width * 0.05),
                                 decoration: BoxDecoration(
@@ -171,7 +171,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Changed from center to spaceEvenly
                                   children: [
                                     // Admin Button
                                     Container(
@@ -219,14 +219,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             ),
                                             const SizedBox(width: 15),
                                             Image.asset(
-                                              'assets/admin.png',
+                                              'assets/admin1.png',
                                               height: 30,
                                             ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 15),
                                     //Coordinator Button
                                     Container(
                                       decoration: BoxDecoration(
@@ -273,14 +273,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                             ),
                                             const SizedBox(width: 15),
                                             Image.asset(
-                                              'assets/student.png', //change icon
+                                              'assets/coordinator.png', //change icon
                                               height: 30,
                                             ),
                                           ],
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(height: 20),
+                                    const SizedBox(height: 15),
                                     // Student Button
                                     Container(
                                       decoration: BoxDecoration(

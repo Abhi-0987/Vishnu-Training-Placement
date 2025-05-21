@@ -291,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     sigmaY: 15,
                                   ),
                                   child: Container(
-                                    height: height * 0.32,
+                                    height: height * 0.36, // Increased from 0.32 to 0.36
                                     width: width * 0.96,
                                     padding: EdgeInsets.all(width * 0.05),
                                     decoration: BoxDecoration(
@@ -306,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     child: Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
+                                          MainAxisAlignment.spaceEvenly, // Changed from spaceAround to spaceEvenly
                                       children: [
                                         // Email input with fixed domain inside the text box
                                         TextField(
@@ -329,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             contentPadding:
                                                 EdgeInsets.symmetric(
                                                   vertical: height * 0.023,
-                                                  horizontal: width * 0.01,
+                                                  horizontal: width * 0.03, // Increased from 0.01 to 0.03
                                                 ),
                                           ),
                                           inputFormatters: [
@@ -375,7 +375,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             contentPadding:
                                                 EdgeInsets.symmetric(
                                                   vertical: height * 0.023,
-                                                  horizontal: width * 0.01,
+                                                  horizontal: width * 0.03,
                                                 ),
                                           ),
                                         ),
@@ -394,7 +394,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                           ),
                                           padding: EdgeInsets.all(
-                                            width * 0.006,
+                                            width * 0.008, // Increased from 0.006 to 0.008
                                           ),
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
@@ -406,8 +406,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     BorderRadius.circular(100),
                                               ),
                                               padding: EdgeInsets.symmetric(
-                                                horizontal: width * 0.1,
-                                                vertical: height * 0.013,
+                                                horizontal: width * 0.12, // Increased from 0.1 to 0.12
+                                                vertical: height * 0.016, // Increased from 0.013 to 0.016
                                               ),
                                             ),
                                             onPressed:
@@ -416,7 +416,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               'Login',
                                               style: TextStyle(
                                                 color: AppConstants.textWhite,
-                                                fontSize: width * 0.04,
+                                                fontSize: width * 0.045, // Increased from 0.04 to 0.045
                                                 fontFamily: 'Alata',
                                               ),
                                             ),

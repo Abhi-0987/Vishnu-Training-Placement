@@ -2,6 +2,7 @@ import 'package:vishnu_training_and_placements/screens/AdminAttendanceScreen.dar
 import 'package:vishnu_training_and_placements/screens/admin_homescreen.dart';
 import 'package:vishnu_training_and_placements/screens/admin_profile_screen.dart';
 import 'package:vishnu_training_and_placements/screens/all_schedules_screen.dart';
+import 'package:vishnu_training_and_placements/screens/coordinator_profile_screen.dart';
 import 'package:vishnu_training_and_placements/screens/event_venue.dart';
 import 'package:vishnu_training_and_placements/screens/login_screen.dart';
 import 'package:vishnu_training_and_placements/screens/mark_attendance.dart';
@@ -26,6 +27,8 @@ class AppRoutes {
   static const String studentHomeScreen = '/home-screen-student';
   static const String studentProfileScreen = '/profile-screen-student';
   static const String adminProfileScreen = '/profile-screen-admin';
+  static const String coordinatorProfileScreen = '/profile-screen-coordinator';
+
   static const String eventVenue = '/event-venue-screen';
   static const String changePasswordScreen = '/change-password-screen';
   static const String adminHomeScreen = '/home-screen-admin';
@@ -45,6 +48,7 @@ class AppRoutes {
     adminHomeScreen: (context) => AdminHomeScreen(),
     studentProfileScreen: (context) => const StudentProfileScreen(),
     adminProfileScreen: (context) => const AdminProfileScreen(),
+    coordinatorProfileScreen: (contect) => const CoordinatorProfileScreen(),
     eventVenue: (context) => const EventVenueScreen(),
     changePasswordScreen: (_) => const ChangePasswordScreen(),
     allSchedulesScreen: (context) => const AllSchedulesScreen(),
