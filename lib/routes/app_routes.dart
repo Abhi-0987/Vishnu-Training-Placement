@@ -16,7 +16,6 @@ import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
 enum UserRole { Admin, Coordinator, Student }
 class AppRoutes {
-  // Route names as static constants
   static const String splash = '/';
   static const String welcome = '/welcome';
   static const String adminLogin = '/admin-login';
@@ -28,7 +27,6 @@ class AppRoutes {
   static const String studentProfileScreen = '/profile-screen-student';
   static const String adminProfileScreen = '/profile-screen-admin';
   static const String coordinatorProfileScreen = '/profile-screen-coordinator';
-
   static const String eventVenue = '/event-venue-screen';
   static const String changePasswordScreen = '/change-password-screen';
   static const String adminHomeScreen = '/home-screen-admin';

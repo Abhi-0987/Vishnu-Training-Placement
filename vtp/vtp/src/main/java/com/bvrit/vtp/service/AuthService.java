@@ -33,6 +33,8 @@ public class AuthService {
                 // Default password check
                 if (rawPassword.equals(admin.getPassword())) {
                     return generateTokenResponse(email, "Admin");
+                } else {
+                    throw new RuntimeException("Incorrect password");
                 }
             } else {
                 System.out.println("rawPassword: " + rawPassword);
@@ -42,6 +44,8 @@ public class AuthService {
                 // Encoded password check
                 if (passwordEncoder.matches(rawPassword, admin.getPassword())) {
                     return generateTokenResponse(email, "Admin");
+                } else {
+                    throw new RuntimeException("Incorrect password");
                 }
             }
         }
@@ -57,12 +61,16 @@ public class AuthService {
 //                // Default password check
                 if (rawPassword.equals(coordinator.getPassword())) {
                     return generateTokenResponse(email, "Coordinator");
+                }else {
+                    throw new RuntimeException("Incorrect password");
                 }
             } else {
             // Encoded password check
             if (passwordEncoder.matches(rawPassword, coordinator.getPassword())) {
                 return generateTokenResponse(email, "Coordinator");
-            }
+            }else {
+                    throw new RuntimeException("Incorrect password");
+                }
             }
         }
 
@@ -78,11 +86,15 @@ public class AuthService {
                 // Default password check
                 if (rawPassword.equals(student.getPassword())) {
                     return generateTokenResponse(email, "Student");
+                }else {
+                    throw new RuntimeException("Incorrect password");
                 }
             } else {
                 // Encoded password check
                 if (passwordEncoder.matches(rawPassword, student.getPassword())) {
                     return generateTokenResponse(email, "Student");
+                }else {
+                    throw new RuntimeException("Incorrect password");
                 }
             }
         }
