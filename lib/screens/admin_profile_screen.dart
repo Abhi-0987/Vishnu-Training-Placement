@@ -21,7 +21,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       TextEditingController();
   final TextEditingController studentEmailController = TextEditingController();
   String baseUrl = AppConstants.backendUrl;
-  bool _isPasswordVisible = false;
   String? adminEmail;
   String? adminName;
   bool _isLoading = false;
@@ -48,13 +47,6 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     } else {
       _showSnackBar("Failed to load admin details");
     }
-  }
-
-  Future<void> loadEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      adminEmail = prefs.getString('adminEmail');
-    });
   }
 
   bool isValidPassword(String password) {
@@ -99,9 +91,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     }
 
     if (!isValidPassword(newPassword)) {
-      _showSnackBar(
-        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
-      );
+      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
       return;
     }
 
@@ -109,16 +99,13 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       _showSnackBar("Passwords do not match");
       return;
     }
+    
+    final success = await AdminService.changePassword(adminEmail!, newPassword);
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/admin/change-password'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': adminEmail, 'newPassword': newPassword}),
-    );
-
-    if (response.statusCode == 200) {
+    if (success) {
       _showSnackBar("Password changed successfully");
-      Navigator.pop(context);
+      newPasswordController.clear();
+      confirmPasswordController.clear();
     } else {
       _showSnackBar("Error changing password");
     }
@@ -189,7 +176,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   void _showPasswordChangeDialog() {
-    bool localPasswordVisible = _isPasswordVisible;
+    bool localPasswordVisible = false;
     
     showDialog(
       context: context,

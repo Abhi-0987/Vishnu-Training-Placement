@@ -38,4 +38,25 @@ class AdminService {
       return null;
     }
   }
+  static Future<bool> changePassword(String email, String newPassword) async {
+    final url = Uri.parse('$baseUrl/api/admin/change-password');
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+    };
+
+    final body = jsonEncode({'email': email, 'newPassword': newPassword});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+
+      return response.statusCode == 200;
+    } catch (e) {
+      print('Error changing password: $e');
+      return false;
+    }
+  }
 }

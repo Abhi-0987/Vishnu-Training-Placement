@@ -20,7 +20,6 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
   final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController studentEmailController = TextEditingController();
   String baseUrl = AppConstants.backendUrl;
-  bool _isPasswordVisible = false;
   String? coordinatorEmail;
   String? coordinatorName;
   bool _isLoading = false;
@@ -29,6 +28,14 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
   void initState() {
     super.initState();
     fetchCoordinatorDetails();
+  }
+
+  @override
+  void dispose() {
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+    studentEmailController.dispose();
+    super.dispose();
   }
 
   Future<void> fetchCoordinatorDetails() async {
@@ -47,13 +54,6 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
     } else {
       _showSnackBar("Failed to load coordinator details");
     }
-  }
-
-  Future<void> loadEmail() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      coordinatorEmail = prefs.getString('coordinatorEmail');
-    });
   }
 
   bool isValidPassword(String password) {
@@ -98,9 +98,7 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
     }
 
     if (!isValidPassword(newPassword)) {
-      _showSnackBar(
-        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
-      );
+      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
       return;
     }
 
@@ -108,16 +106,13 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
       _showSnackBar("Passwords do not match");
       return;
     }
+    
+    final success = await CoordinatorService.changePassword(coordinatorEmail!, newPassword);
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/coordinator/change-password'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': coordinatorEmail, 'newPassword': newPassword}),
-    );
-
-    if (response.statusCode == 200) {
+    if (success) {
       _showSnackBar("Password changed successfully");
-      Navigator.pop(context);
+      newPasswordController.clear();
+      confirmPasswordController.clear();
     } else {
       _showSnackBar("Error changing password");
     }
@@ -188,7 +183,7 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
   }
 
   void _showPasswordChangeDialog() {
-    bool localPasswordVisible = _isPasswordVisible;
+     bool localPasswordVisible = false;
     
     showDialog(
       context: context,

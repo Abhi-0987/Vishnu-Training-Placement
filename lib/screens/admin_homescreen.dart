@@ -33,8 +33,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     setState(() {
       userRole = role;
     });
-    
-    // After loading role, fetch the appropriate name
+
     _fetchUserName(role);
   }
   
@@ -66,7 +65,6 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         });
       }
     } else {
-      // For admin role
       final email = prefs.getString('adminEmail');
       
       if (email == null) {
@@ -95,17 +93,15 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   
   @override
   Widget build(BuildContext context) {
-    // Get the screen size, height, and width
     final Size screenSize = MediaQuery.of(context).size;
     final double height = screenSize.height;
     final double width = screenSize.width;
     return Scaffold(
       backgroundColor: AppConstants.textBlack,
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(), // Dark theme background
+      appBar: CustomAppBar(), 
       body: Stack(
         children: [
-          // Background with elliptical containers
           ScreensBackground(height: height, width: width),
           SafeArea(
             child: SingleChildScrollView(
@@ -144,7 +140,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     const SizedBox(height: 20),
                     Column(
                       mainAxisAlignment:
-                          MainAxisAlignment.spaceAround, // Center the cards
+                          MainAxisAlignment.spaceAround, 
                       children: [
                         GestureDetector(
                           child: CustomCard(
@@ -217,22 +213,22 @@ class CustomCard extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Align(
-      alignment: Alignment.center, // Placed in the middle of the screen
+      alignment: Alignment.center, 
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), // Blurred effect
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), 
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.9, // Increased width
+            width: MediaQuery.of(context).size.width * 0.9, 
             height:
-                MediaQuery.of(context).size.height * 0.19, // Increased height
+                MediaQuery.of(context).size.height * 0.19, 
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.13), // More transparency
+              color: Colors.white.withValues(alpha: 0.13),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: Colors.white.withValues(alpha: 0.3),
-              ), // Optional border
+              ), 
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -249,7 +245,7 @@ class CustomCard extends StatelessWidget {
                     image!,
                     height: screenHeight * 0.20,
                     width: screenWidth * 0.20,
-                  ), // Displays image if available
+                  ), 
               ],
             ),
           ),
