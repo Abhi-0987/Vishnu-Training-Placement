@@ -246,7 +246,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
               backgroundColor: Colors.grey[800],
               child: Icon(
                 Icons.person,
-                size: width * 0.10,
+                size: width * 0.12,
                 color: Colors.white,
               ),
             ),

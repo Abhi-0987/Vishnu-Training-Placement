@@ -4,56 +4,55 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
-import 'package:vishnu_training_and_placements/services/admin_service.dart';
+import 'package:vishnu_training_and_placements/services/coordinator_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
-class AdminProfileScreen extends StatefulWidget {
-  const AdminProfileScreen({super.key});
+class CoordinatorProfileScreen extends StatefulWidget {
+  const CoordinatorProfileScreen({super.key});
 
   @override
-  State<AdminProfileScreen> createState() => _AdminProfileScreenState();
+  State<CoordinatorProfileScreen> createState() => _CoordinatorProfileScreenState();
 }
 
-class _AdminProfileScreenState extends State<AdminProfileScreen> {
+class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController =
-      TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
   final TextEditingController studentEmailController = TextEditingController();
   String baseUrl = AppConstants.backendUrl;
   bool _isPasswordVisible = false;
-  String? adminEmail;
-  String? adminName;
+  String? coordinatorEmail;
+  String? coordinatorName;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    fetchAdminDetails();
+    fetchCoordinatorDetails();
   }
 
-  Future<void> fetchAdminDetails() async {
+  Future<void> fetchCoordinatorDetails() async {
     final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('adminEmail');
+    final email = prefs.getString('coordinatorEmail');
 
     if (email == null) return;
 
-    final data = await AdminService.getAdminDetails(email);
+    final data = await CoordinatorService.getCoordinatorDetails(email);
 
     if (data != null) {
       setState(() {
-        adminEmail = data['email'];
-        adminName = data['name'];
+        coordinatorEmail = data['email'];
+        coordinatorName = data['name'];
       });
     } else {
-      _showSnackBar("Failed to load admin details");
+      _showSnackBar("Failed to load coordinator details");
     }
   }
 
   Future<void> loadEmail() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      adminEmail = prefs.getString('adminEmail');
+      coordinatorEmail = prefs.getString('coordinatorEmail');
     });
   }
 
@@ -111,9 +110,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     }
 
     final response = await http.post(
-      Uri.parse('$baseUrl/api/admin/change-password'),
+      Uri.parse('$baseUrl/api/coordinator/change-password'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': adminEmail, 'newPassword': newPassword}),
+      body: jsonEncode({'email': coordinatorEmail, 'newPassword': newPassword}),
     );
 
     if (response.statusCode == 200) {
@@ -197,7 +196,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              title: const Text("Change Admin Password"),
+              title: const Text("Change Coordinator Password"),
               content: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -540,8 +539,8 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildProfileText(adminEmail ?? '', width),
-                _buildProfileText(adminName ?? '', width),
+                _buildProfileText(coordinatorEmail ?? '', width),
+                _buildProfileText(coordinatorName ?? '', width),
               ],
             ),
           ],

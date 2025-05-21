@@ -1,7 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
+import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -14,6 +16,42 @@ class StudentHomeScreen extends StatefulWidget {
 }
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
+  String? studentName;
+  bool isLoading = true;
+  
+  @override
+  void initState() {
+    super.initState();
+    _fetchStudentName();
+  }
+  
+  Future<void> _fetchStudentName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final email = prefs.getString('studentEmail');
+    
+    if (email == null) {
+      setState(() {
+        studentName = "Student";
+        isLoading = false;
+      });
+      return;
+    }
+
+    final data = await StudentService.getStudentDetails(email);
+    
+    if (data != null && data['name'] != null) {
+      setState(() {
+        studentName = data['name'];
+        isLoading = false;
+      });
+    } else {
+      setState(() {
+        studentName = "Student";
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Get the screen size, height, and width
@@ -35,10 +73,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 50),
-                  const Center(
+                  Center(
                     child: Column(
                       children: [
-                        Text(
+                        const Text(
                           'Hello..!!',
                           style: TextStyle(
                             fontSize: 28,
@@ -46,14 +84,18 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                             fontFamily: 'Alata',
                           ),
                         ),
-                        Text(
-                          'Name of Student',
-                          style: TextStyle(
-                            fontSize: 28,
-                            color: AppConstants.textWhite,
-                            fontFamily: 'Alata',
-                          ),
-                        ),
+                        isLoading 
+                          ? const CircularProgressIndicator(
+                              color: AppConstants.textWhite,
+                            )
+                          : Text(
+                              studentName ?? 'Student',
+                              style: const TextStyle(
+                                fontSize: 28,
+                                color: AppConstants.textWhite,
+                                fontFamily: 'Alata',
+                              ),
+                            ),
                       ],
                     ),
                   ),

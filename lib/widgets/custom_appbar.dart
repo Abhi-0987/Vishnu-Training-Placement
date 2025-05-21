@@ -19,11 +19,17 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final prefs = await SharedPreferences.getInstance();
     final role = prefs.getString('role') ?? 'student';
 
-    if (role == 'admin' || role == 'coordinator') {
+    if (role == 'admin') {
       Navigator.pushNamed(context, AppRoutes.adminProfileScreen);
-    } else {
+    }
+     else if(role == 'coordinator')
+    {
+      Navigator.pushNamed(context, AppRoutes.coordinatorProfileScreen);
+    }
+     else {
       Navigator.pushNamed(context, AppRoutes.studentProfileScreen);
     }
+   
   }
 
   @override
