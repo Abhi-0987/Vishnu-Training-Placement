@@ -494,64 +494,73 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                       .toList(),
                                                   controller.message.value,
                                                 );
-
-                                            if (!mounted) return;
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.check_circle,
-                                                      color: Colors.white,
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    Expanded(
-                                                      child: Text(response),
-                                                    ),
-                                                  ],
-                                                ),
-                                                backgroundColor: Colors.green,
-                                                duration: Duration(seconds: 4),
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                              ),
-                                            );
-                                          } catch (e) {
-                                            if (!mounted) return;
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.error,
-                                                      color: Colors.white,
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    Expanded(
-                                                      child: Text(
-                                                        "Failed to send messages: ${e.toString()}",
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.check_circle,
+                                                        color: Colors.white,
                                                       ),
-                                                    ),
-                                                  ],
+                                                      SizedBox(width: 10),
+                                                      Expanded(
+                                                        child: Text(response),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                  duration: Duration(
+                                                    seconds: 4,
+                                                  ),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
                                                 ),
-                                                backgroundColor: Colors.red,
-                                                duration: Duration(seconds: 4),
-                                                behavior:
-                                                    SnackBarBehavior.floating,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
+                                              );
+                                            }
+                                          } catch (e) {
+                                            if (context.mounted) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.error,
+                                                        color: Colors.white,
+                                                      ),
+                                                      SizedBox(width: 10),
+                                                      Expanded(
+                                                        child: Text(
+                                                          "Failed to send messages: ${e.toString()}",
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  backgroundColor: Colors.red,
+                                                  duration: Duration(
+                                                    seconds: 4,
+                                                  ),
+                                                  behavior:
+                                                      SnackBarBehavior.floating,
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          10,
+                                                        ),
+                                                  ),
                                                 ),
-                                              ),
-                                            );
+                                              );
+                                            }
                                           } finally {
                                             controller.isSendingMessages.value =
                                                 false;

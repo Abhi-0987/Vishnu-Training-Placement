@@ -1,5 +1,3 @@
-// lib/models/student_model.dart
-
 class Student {
   final String email;
   bool isSelected;
