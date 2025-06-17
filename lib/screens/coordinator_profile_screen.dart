@@ -12,12 +12,14 @@ class CoordinatorProfileScreen extends StatefulWidget {
   const CoordinatorProfileScreen({super.key});
 
   @override
-  State<CoordinatorProfileScreen> createState() => _CoordinatorProfileScreenState();
+  State<CoordinatorProfileScreen> createState() =>
+      _CoordinatorProfileScreenState();
 }
 
 class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   final TextEditingController studentEmailController = TextEditingController();
   String baseUrl = AppConstants.backendUrl;
   String? coordinatorEmail;
@@ -73,7 +75,7 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
     setState(() => _isLoading = true);
 
     final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/student/reset-password'),
+      Uri.parse('$baseUrl/api/auth/admin/reset-student-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
@@ -98,7 +100,9 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
     }
 
     if (!isValidPassword(newPassword)) {
-      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
+      _showSnackBar(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
+      );
       return;
     }
 
@@ -106,8 +110,11 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
       _showSnackBar("Passwords do not match");
       return;
     }
-    
-    final success = await CoordinatorService.changePassword(coordinatorEmail!, newPassword);
+
+    final success = await CoordinatorService.changePassword(
+      coordinatorEmail!,
+      newPassword,
+    );
 
     if (success) {
       _showSnackBar("Password changed successfully");
@@ -183,8 +190,8 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
   }
 
   void _showPasswordChangeDialog() {
-     bool localPasswordVisible = false;
-    
+    bool localPasswordVisible = false;
+
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -282,7 +289,7 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
                 ),
               ),
             );
-          }
+          },
         );
       },
     );
