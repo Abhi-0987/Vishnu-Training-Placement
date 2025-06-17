@@ -64,6 +64,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
 
   Future<bool> _handleLocationPermission() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!mounted) return false;
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -76,9 +77,10 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
-
+    
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
+      if (!mounted) return false;
       if (permission == LocationPermission.denied) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Location permissions are denied')),
@@ -88,6 +90,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     }
 
     if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -126,6 +129,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
 
       if (distance <= radiusInMeters) {
         final message = await _markAttendance();
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(message),
@@ -136,6 +140,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
