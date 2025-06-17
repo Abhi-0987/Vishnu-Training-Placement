@@ -34,7 +34,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
 Future<void> getUserBranch() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final branch = prefs.getString('branch');
+      final branch = prefs.getString('studentbranch');
 
       print('Retrieved branch from SharedPreferences: $branch');
 
