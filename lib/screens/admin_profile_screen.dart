@@ -66,7 +66,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     setState(() => _isLoading = true);
 
     final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/student/reset-password'),
+      Uri.parse('$baseUrl/api/auth/admin/reset-student-password'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'email': email}),
     );
@@ -91,7 +91,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
     }
 
     if (!isValidPassword(newPassword)) {
-      _showSnackBar("Password must be at least 8 characters and include uppercase, lowercase, number, and special character.");
+      _showSnackBar(
+        "Password must be at least 8 characters and include uppercase, lowercase, number, and special character.",
+      );
       return;
     }
 
@@ -99,7 +101,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       _showSnackBar("Passwords do not match");
       return;
     }
-    
+
     final success = await AdminService.changePassword(adminEmail!, newPassword);
 
     if (success) {
@@ -177,7 +179,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
   void _showPasswordChangeDialog() {
     bool localPasswordVisible = false;
-    
+
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -275,7 +277,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                 ),
               ),
             );
-          }
+          },
         );
       },
     );
@@ -435,7 +437,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                           ),
                         ),
                         child: Text(
-                          'Change Student Password',
+                          'Change Student Password & Device Id',
                           style: TextStyle(
                             color: AppConstants.textWhite,
                             fontSize: width * 0.04,

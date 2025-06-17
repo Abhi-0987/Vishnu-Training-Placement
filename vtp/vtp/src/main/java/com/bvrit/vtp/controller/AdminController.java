@@ -16,6 +16,7 @@ public class AdminController {
     @Autowired
     private AdminRepo adminRepo;
 
+    // API to get Admin details by email
     @PostMapping(value = "/details", produces = "application/json")
     public ResponseEntity<?> getAdminDetailsByEmail(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
@@ -26,11 +27,15 @@ public class AdminController {
 
         Optional<Admin> adminOptional = adminRepo.findByEmail(email);
 
-        return adminOptional.<ResponseEntity<?>>map(
-                admin -> ResponseEntity.ok(Map.of(
-                        "name", admin.getName(),
-                        "email", admin.getEmail()
-                ))).orElseGet(() ->
-                ResponseEntity.status(404).body(Map.of("error", "Admin not found")));
+        if (adminOptional.isEmpty()) {
+            return ResponseEntity.status(404).body(Map.of("error", "Admin not found"));
+        }
+
+        Admin admin = adminOptional.get();
+
+        return ResponseEntity.ok(Map.of(
+                "name", admin.getName(),
+                "email", admin.getEmail()
+        ));
     }
 }
