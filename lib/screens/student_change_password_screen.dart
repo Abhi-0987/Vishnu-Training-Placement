@@ -1,8 +1,5 @@
-import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:lottie/lottie.dart';
 import 'package:vishnu_training_and_placements/services/student_service.dart';
@@ -59,6 +56,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     if (success) {
       _showSnackBar("Password changed successfully");
+      if (!mounted) return;
       Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
       newPasswordController.clear();
       confirmPasswordController.clear();

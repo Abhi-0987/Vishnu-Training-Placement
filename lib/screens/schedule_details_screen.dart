@@ -2,14 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
-import 'package:vishnu_training_and_placements/screens/ManualAttendanceScreen.dart';
+import 'package:vishnu_training_and_placements/screens/manual_attendance_screen.dart';
 import 'package:vishnu_training_and_placements/services/venue_service.dart';
+import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
-import 'package:vishnu_training_and_placements/services/Schedule_service.dart';
+import 'package:vishnu_training_and_placements/services/schedule_service.dart';
 import 'package:vishnu_training_and_placements/screens/all_schedules_screen.dart';
 import 'package:collection/collection.dart';
 
+// ignore_for_file: depend_on_referenced_packages
 class ScheduleDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> schedule;
 
@@ -440,33 +442,39 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                   final result = await ScheduleServices.deleteSchedule(
                     scheduleId,
                   );
-
-                  Navigator.pop(context);
-
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
                   if (result['success']) {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AllSchedulesScreen(),
-                      ),
-                      (Route<dynamic> route) => false,
-                    );
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          result['message'] ?? 'Schedule deleted successfully',
+                    if (context.mounted) {
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AllSchedulesScreen(),
                         ),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Error: ${result['message'] ?? 'Failed to delete schedule'}',
+                        (Route<dynamic> route) => false,
+                      );
+                    }
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            result['message'] ??
+                                'Schedule deleted successfully',
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Error: ${result['message'] ?? 'Failed to delete schedule'}',
+                            ),
+                          ),
+                        );
+                      }
+                    }
                   }
                 },
                 child: const Text(
@@ -714,9 +722,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Color(
+                        0x19FFFFFF,
+                      ), // 0x19 = 10% opacity (0.1), FFFFFF = white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(
+                        color: Color(
+                          0x33FFFFFF,
+                        ), // 0x33 = 20% opacity (0.2), FFFFFF = white),
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -726,7 +740,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            color: AppConstants.textWhite,
                           ),
                         ),
                         _isUpdatingMark
@@ -735,7 +749,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                               height: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppConstants.textWhite,
                               ),
                             )
                             : Switch(
@@ -753,16 +767,22 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: AppConstants.textWhite,
                     ),
                   ),
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Color(
+                        0x19FFFFFF,
+                      ), // 0x19 = 10% opacity (0.1), FFFFFF = white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      border: Border.all(
+                        color: Color(
+                          0x33FFFFFF,
+                        ), // 0x33 = 20% opacity (0.2), FFFFFF = white),
+                      ),
                     ),
                     child: Column(
                       children: [
@@ -780,7 +800,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                             showLegends: true,
                             legendTextStyle: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                              color: AppConstants.textWhite,
                             ),
                           ),
                           chartValuesOptions: const ChartValuesOptions(
@@ -829,14 +849,17 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.people, color: Colors.white),
+                          icon: const Icon(
+                            Icons.people,
+                            color: AppConstants.textWhite,
+                          ),
                           label: const Text(
                             'Manual Attendance',
-                            style: TextStyle(color: Colors.white),
+                            style: TextStyle(color: AppConstants.textWhite),
                           ),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.purple,
-                            foregroundColor: Colors.white,
+                            backgroundColor: AppConstants.primaryColor,
+                            foregroundColor: AppConstants.textWhite,
                           ),
                         ),
                       ),
@@ -849,7 +872,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                           label: const Text('Delete'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.redAccent,
-                            foregroundColor: Colors.white,
+                            foregroundColor: AppConstants.textWhite,
                           ),
                         ),
                       ),
@@ -873,9 +896,13 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
       margin: const EdgeInsets.only(bottom: 12.0),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
+        color: Color(0x19FFFFFF), // 0x19 = 10% opacity (0.1), FFFFFF = white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.2)),
+        border: Border.all(
+          color: Color(
+            0x33FFFFFF,
+          ), // 0x33 = 20% opacity (0.2), FFFFFF = white),
+        ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -887,14 +914,17 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: Colors.white,
+                color: AppConstants.textWhite,
               ),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 16, color: Colors.white),
+              style: const TextStyle(
+                fontSize: 16,
+                color: AppConstants.textWhite,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -921,7 +951,10 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
             color: color,
           ),
         ),
-        Text(label, style: const TextStyle(fontSize: 14, color: Colors.white)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: AppConstants.textWhite),
+        ),
       ],
     );
   }

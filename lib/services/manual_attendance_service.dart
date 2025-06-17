@@ -10,7 +10,9 @@ import '../utils/app_constants.dart';
 class AttendanceService {
   static String baseUrl = AppConstants.backendUrl;
 
-  static Future<Map<String, dynamic>> fetchScheduleDetails(int scheduleId) async {
+  static Future<Map<String, dynamic>> fetchScheduleDetails(
+    int scheduleId,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
 
@@ -34,7 +36,9 @@ class AttendanceService {
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
-      throw Exception('Failed to load schedule details: ${response.statusCode}');
+      throw Exception(
+        'Failed to load schedule details: ${response.statusCode}',
+      );
     }
   }
 
@@ -65,16 +69,20 @@ class AttendanceService {
       }
 
       if (response.body.trim().startsWith('<')) {
-        throw Exception('Server returned HTML/XML instead of JSON. Check server logs.');
+        throw Exception(
+          'Server returned HTML/XML instead of JSON. Check server logs.',
+        );
       }
 
       final List<dynamic> studentsJson = json.decode(response.body);
       return studentsJson
           .whereType<Map<String, dynamic>>()
-          .map((json) => Student(
-                email: json['email'] ?? '',
-                isPresent: json['present'] ?? false,
-              ))
+          .map(
+            (json) => Student(
+              email: json['email'] ?? '',
+              isPresent: json['present'] ?? false,
+            ),
+          )
           .toList();
     } else {
       String errorMsg = 'Failed to load students: ${response.statusCode}';
@@ -85,14 +93,18 @@ class AttendanceService {
         }
       } catch (_) {
         if (response.body.isNotEmpty) {
-          errorMsg += ' - ${response.body.substring(0, min(100, response.body.length))}...';
+          errorMsg +=
+              ' - ${response.body.substring(0, min(100, response.body.length))}...';
         }
       }
       throw Exception(errorMsg);
     }
   }
 
-  static Future<void> markAttendance(int scheduleId, List<String> emails) async {
+  static Future<void> markAttendance(
+    int scheduleId,
+    List<String> emails,
+  ) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
 

@@ -6,7 +6,9 @@ import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 class CoordinatorService {
   static const String baseUrl = AppConstants.backendUrl;
 
-  static Future<Map<String, dynamic>?> getCoordinatorDetails(String email) async {
+  static Future<Map<String, dynamic>?> getCoordinatorDetails(
+    String email,
+  ) async {
     final url = Uri.parse('$baseUrl/api/coordinator/details');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -38,6 +40,7 @@ class CoordinatorService {
       return null;
     }
   }
+
   static Future<bool> changePassword(String email, String newPassword) async {
     final url = Uri.parse('$baseUrl/api/coordinator/change-password');
     final prefs = await SharedPreferences.getInstance();

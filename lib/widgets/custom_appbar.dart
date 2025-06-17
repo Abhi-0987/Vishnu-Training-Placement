@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vishnu_training_and_placements/screens/Splash_Screen.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
@@ -18,18 +17,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Future<void> _handleProfileIconTap(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final role = prefs.getString('role') ?? 'student';
-
-    if (role == 'admin') {
-      Navigator.pushNamed(context, AppRoutes.adminProfileScreen);
+    if (context.mounted) {
+      if (role == 'admin') {
+        Navigator.pushNamed(context, AppRoutes.adminProfileScreen);
+      } else if (role == 'coordinator') {
+        Navigator.pushNamed(context, AppRoutes.coordinatorProfileScreen);
+      } else {
+        Navigator.pushNamed(context, AppRoutes.studentProfileScreen);
+      }
     }
-     else if(role == 'coordinator')
-    {
-      Navigator.pushNamed(context, AppRoutes.coordinatorProfileScreen);
-    }
-     else {
-      Navigator.pushNamed(context, AppRoutes.studentProfileScreen);
-    }
-   
   }
 
   @override

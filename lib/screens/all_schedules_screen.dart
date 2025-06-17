@@ -22,11 +22,23 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
   bool isLoading = true;
   String errorMessage = '';
   List<String> allBranches = [
-    'CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT',
-    'CSD', 'CSM', 'PHE', 'BME', 'AI & DS', 'CHEM', 'CSBS'
+    'CSE',
+    'ECE',
+    'EEE',
+    'MECH',
+    'CIVIL',
+    'IT',
+    'CSD',
+    'CSM',
+    'PHE',
+    'BME',
+    'AI & DS',
+    'CHEM',
+    'CSBS',
   ];
   String selectedBranch = 'All';
-  bool showPastSchedules = false; // Flag to toggle between current and past schedules
+  bool showPastSchedules =
+      false; // Flag to toggle between current and past schedules
 
   @override
   void initState() {
@@ -43,31 +55,35 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
 
       final schedulesData = await ScheduleServices.getAllSchedules();
 
-      final parsedSchedules = (schedulesData).map((data) {
-        try {
-          return Schedule.fromJson(data as Map<String, dynamic>);
-        } catch (e) {
-          print('Error parsing schedule: $e');
-          rethrow;
-        }
-      }).toList();
+      final parsedSchedules =
+          (schedulesData).map((data) {
+            try {
+              return Schedule.fromJson(data as Map<String, dynamic>);
+            } catch (e) {
+              print('Error parsing schedule: $e');
+              rethrow;
+            }
+          }).toList();
 
       // Separate current/future schedules from past schedules
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
-      
-      currentSchedules = parsedSchedules.where((schedule) {
-        final scheduleDate = DateTime.tryParse(schedule.date);
-        if (scheduleDate == null) return false;
-        return scheduleDate.isAtSameMomentAs(today) || scheduleDate.isAfter(today);
-      }).toList();
-      
-      pastSchedules = parsedSchedules.where((schedule) {
-        final scheduleDate = DateTime.tryParse(schedule.date);
-        if (scheduleDate == null) return false;
-        return scheduleDate.isBefore(today);
-      }).toList();
-      
+
+      currentSchedules =
+          parsedSchedules.where((schedule) {
+            final scheduleDate = DateTime.tryParse(schedule.date);
+            if (scheduleDate == null) return false;
+            return scheduleDate.isAtSameMomentAs(today) ||
+                scheduleDate.isAfter(today);
+          }).toList();
+
+      pastSchedules =
+          parsedSchedules.where((schedule) {
+            final scheduleDate = DateTime.tryParse(schedule.date);
+            if (scheduleDate == null) return false;
+            return scheduleDate.isBefore(today);
+          }).toList();
+
       // Sort both lists by date
       currentSchedules.sort((a, b) {
         final dateA = DateTime.tryParse(a.date);
@@ -75,7 +91,7 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
         if (dateA == null || dateB == null) return 0;
         return dateA.compareTo(dateB); // Upcoming first
       });
-      
+
       pastSchedules.sort((a, b) {
         final dateA = DateTime.tryParse(a.date);
         final dateB = DateTime.tryParse(b.date);
@@ -99,15 +115,19 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
   void _filterSchedules() {
     setState(() {
       // First determine which list to use based on showPastSchedules flag
-      List<Schedule> sourceList = showPastSchedules ? pastSchedules : currentSchedules;
-      
+      List<Schedule> sourceList =
+          showPastSchedules ? pastSchedules : currentSchedules;
+
       // Then filter by branch
       if (selectedBranch == 'All') {
         filteredSchedules = List.from(sourceList);
       } else {
-        filteredSchedules = sourceList
-            .where((schedule) => schedule.studentBranch.contains(selectedBranch))
-            .toList();
+        filteredSchedules =
+            sourceList
+                .where(
+                  (schedule) => schedule.studentBranch.contains(selectedBranch),
+                )
+                .toList();
       }
     });
   }
@@ -159,14 +179,18 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start, // Align items to the top
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start, // Align items to the top
                     children: [
-                      Expanded(  // Make this column take available space
+                      Expanded(
+                        // Make this column take available space
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              showPastSchedules ? 'Past Schedules' : 'Upcoming Schedules',
+                              showPastSchedules
+                                  ? 'Past Schedules'
+                                  : 'Upcoming Schedules',
                               style: const TextStyle(
                                 fontSize: 24, // Slightly smaller font
                                 fontWeight: FontWeight.bold,
@@ -180,13 +204,20 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                               'Tap on a schedule to view details',
                               style: TextStyle(
                                 fontSize: 14, // Slightly smaller font
-                                color: Colors.white.withOpacity(0.7),
+                                color: Color.fromRGBO(
+                                  255,
+                                  255,
+                                  255,
+                                  0.7,
+                                ), // RGB(255,255,255) = white + 0.7 opacity as it is deprecated
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8), // Add spacing between text and button
+                      const SizedBox(
+                        width: 8,
+                      ), // Add spacing between text and button
                       ElevatedButton.icon(
                         onPressed: () {
                           setState(() {
@@ -195,17 +226,25 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                           });
                         },
                         icon: Icon(
-                          showPastSchedules ? Icons.calendar_today : Icons.history,
+                          showPastSchedules
+                              ? Icons.calendar_today
+                              : Icons.history,
                           color: Colors.white,
                           size: 18, // Smaller icon
                         ),
                         label: Text(
                           showPastSchedules ? 'Current' : 'History',
-                          style: const TextStyle(color: Colors.white, fontSize: 12), // Smaller text
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ), // Smaller text
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Smaller padding
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ), // Smaller padding
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -230,201 +269,246 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                             selectedBranch = 'All';
                             _filterSchedules();
                           },
-                          backgroundColor: Colors.purple.withOpacity(0.3),
+                          backgroundColor: Color.fromRGBO(
+                            128,
+                            0,
+                            128,
+                            0.3,
+                          ), // Purple (RGB 128,0,128) with 0.3 opacity
                           selectedColor: Colors.purple,
                           checkmarkColor: Colors.white,
                           labelStyle: TextStyle(
-                            color: selectedBranch == 'All' ? Colors.white : Colors.white70,
+                            color:
+                                selectedBranch == 'All'
+                                    ? Colors.white
+                                    : Colors.white70,
                           ),
                         ),
                       ),
-                      ...allBranches.map((branch) => Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(branch),
-                          selected: selectedBranch == branch,
-                          onSelected: (selected) {
-                            selectedBranch = branch;
-                            _filterSchedules();
-                          },
-                          backgroundColor: Colors.purple.withOpacity(0.3),
-                          selectedColor: Colors.purple,
-                          checkmarkColor: Colors.white,
-                          labelStyle: TextStyle(
-                            color: selectedBranch == branch ? Colors.white : Colors.white70,
+                      ...allBranches.map(
+                        (branch) => Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: FilterChip(
+                            label: Text(branch),
+                            selected: selectedBranch == branch,
+                            onSelected: (selected) {
+                              selectedBranch = branch;
+                              _filterSchedules();
+                            },
+                            backgroundColor: Color.fromRGBO(
+                              128,
+                              0,
+                              128,
+                              0.3,
+                            ), // Purple (RGB 128,0,128) with 0.3 opacity
+                            selectedColor: Colors.purple,
+                            checkmarkColor: Colors.white,
+                            labelStyle: TextStyle(
+                              color:
+                                  selectedBranch == branch
+                                      ? Colors.white
+                                      : Colors.white70,
+                            ),
                           ),
                         ),
-                      )),
+                      ),
                     ],
                   ),
                 ),
 
                 // Content
                 Expanded(
-                  child: isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Colors.purple))
-                      : errorMessage.isNotEmpty
+                  child:
+                      isLoading
+                          ? const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.purple,
+                            ),
+                          )
+                          : errorMessage.isNotEmpty
                           ? Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    errorMessage,
-                                    style: const TextStyle(color: Colors.red),
-                                    textAlign: TextAlign.center,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  errorMessage,
+                                  style: const TextStyle(color: Colors.red),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 20),
+                                ElevatedButton(
+                                  onPressed: _fetchSchedules,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.purple,
                                   ),
-                                  const SizedBox(height: 20),
-                                  ElevatedButton(
-                                    onPressed: _fetchSchedules,
-                                    style: ElevatedButton.styleFrom(backgroundColor: Colors.purple),
-                                    child: const Text('Retry'),
-                                  ),
-                                ],
-                              ),
-                            )
+                                  child: const Text('Retry'),
+                                ),
+                              ],
+                            ),
+                          )
                           : filteredSchedules.isEmpty
-                              ? Center(
-                                  child: Text(
-                                    'No schedules found for ${selectedBranch == 'All' ? 'any branch' : selectedBranch}.',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: width * 0.04,
-                                    ),
-                                  ),
-                                )
-                              : RefreshIndicator(
-                                  onRefresh: _fetchSchedules,
-                                  color: Colors.purple,
-                                  child: ListView.builder(
-                                    padding: const EdgeInsets.all(16.0),
-                                    itemCount: filteredSchedules.length,
-                                    itemBuilder: (context, index) {
-                                      final schedule = filteredSchedules[index];
-                                      return Padding(
-                                        padding: const EdgeInsets.only(bottom: 16.0),
-                                        child: GestureDetector(
-                                          onTap: () async {
-                                            // Navigate and wait for the screen to be popped
-                                            await Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => ScheduleDetailsScreen(
-                                                  schedule: schedule.toJson(),
-                                                ),
-                                              ),
-                                            );
-                                            // Always refresh schedules after returning from details screen
-                                            _fetchSchedules();
-                                          },
-                                          child: OpaqueContainer(
-                                            width: width,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  '${schedule.location} - Room ${schedule.roomNo}',
-                                                  style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: width * 0.045,
-                                                    fontWeight: FontWeight.bold,
+                          ? Center(
+                            child: Text(
+                              'No schedules found for ${selectedBranch == 'All' ? 'any branch' : selectedBranch}.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: width * 0.04,
+                              ),
+                            ),
+                          )
+                          : RefreshIndicator(
+                            onRefresh: _fetchSchedules,
+                            color: Colors.purple,
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16.0),
+                              itemCount: filteredSchedules.length,
+                              itemBuilder: (context, index) {
+                                final schedule = filteredSchedules[index];
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16.0),
+                                  child: GestureDetector(
+                                    onTap: () async {
+                                      // Navigate and wait for the screen to be popped
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  ScheduleDetailsScreen(
+                                                    schedule: schedule.toJson(),
                                                   ),
-                                                ),
-                                                SizedBox(height: height * 0.01),
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.calendar_today, color: Colors.orange, size: width * 0.04),
-                                                    SizedBox(width: width * 0.02),
-                                                    Text(
-                                                      _formatDate(schedule.date),
-                                                      style: TextStyle(
-                                                        color: Colors.white70,
-                                                        fontSize: width * 0.035,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: height * 0.005),
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.access_time, color: Colors.orange, size: width * 0.04),
-                                                    SizedBox(width: width * 0.02),
-                                                    Text(
-                                                      _formatTime(schedule.time),
-                                                      style: TextStyle(
-                                                        color: Colors.white70,
-                                                        fontSize: width * 0.035,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: height * 0.005),
-                                                Row(
-                                                  children: [
-                                                    Icon(Icons.school, color: Colors.orange, size: width * 0.04),
-                                                    SizedBox(width: width * 0.02),
-                                                    Expanded(
-                                                      child: Text(
-                                                        'For: ${schedule.studentBranch}',
-                                                        style: TextStyle(
-                                                          color: Colors.white70,
-                                                          fontSize: width * 0.035,
-                                                        ),
-                                                        overflow: TextOverflow.ellipsis,
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                SizedBox(height: height * 0.015),
-                                                Align(
-                                                  alignment: Alignment.centerRight,
-                                                  child: ElevatedButton(
-                                                    onPressed: () async {
-                                                      // Navigate and wait for the screen to be popped
-                                                      await Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (context) => ScheduleDetailsScreen(
-                                                            schedule: schedule.toJson(),
-                                                          ),
-                                                        ),
-                                                      );
-                                                      // Always refresh schedules after returning from details screen
-                                                      _fetchSchedules();
-                                                    },
-                                                    style: ElevatedButton.styleFrom(
-                                                      backgroundColor: Colors.purple,
-                                                      padding: EdgeInsets.symmetric(
-                                                        horizontal: width * 0.03,
-                                                        vertical: height * 0.005,
-                                                      ),
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                      ),
-                                                    ),
-                                                    child: Text(
-                                                      'View Details',
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: width * 0.035,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
                                         ),
                                       );
+                                      // Always refresh schedules after returning from details screen
+                                      _fetchSchedules();
                                     },
+                                    child: OpaqueContainer(
+                                      width: width,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${schedule.location} - Room ${schedule.roomNo}',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: width * 0.045,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: height * 0.01),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.calendar_today,
+                                                color: Colors.orange,
+                                                size: width * 0.04,
+                                              ),
+                                              SizedBox(width: width * 0.02),
+                                              Text(
+                                                _formatDate(schedule.date),
+                                                style: TextStyle(
+                                                  color: Colors.white70,
+                                                  fontSize: width * 0.035,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: height * 0.005),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.access_time,
+                                                color: Colors.orange,
+                                                size: width * 0.04,
+                                              ),
+                                              SizedBox(width: width * 0.02),
+                                              Text(
+                                                _formatTime(schedule.time),
+                                                style: TextStyle(
+                                                  color: Colors.white70,
+                                                  fontSize: width * 0.035,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: height * 0.005),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.school,
+                                                color: Colors.orange,
+                                                size: width * 0.04,
+                                              ),
+                                              SizedBox(width: width * 0.02),
+                                              Expanded(
+                                                child: Text(
+                                                  'For: ${schedule.studentBranch}',
+                                                  style: TextStyle(
+                                                    color: Colors.white70,
+                                                    fontSize: width * 0.035,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(height: height * 0.015),
+                                          Align(
+                                            alignment: Alignment.centerRight,
+                                            child: ElevatedButton(
+                                              onPressed: () async {
+                                                // Navigate and wait for the screen to be popped
+                                                await Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            ScheduleDetailsScreen(
+                                                              schedule:
+                                                                  schedule
+                                                                      .toJson(),
+                                                            ),
+                                                  ),
+                                                );
+                                                // Always refresh schedules after returning from details screen
+                                                _fetchSchedules();
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.purple,
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: width * 0.03,
+                                                  vertical: height * 0.005,
+                                                ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                'View Details',
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: width * 0.035,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                );
+                              },
+                            ),
+                          ),
                 ),
               ],
             ),
           ),
         ],
       ),
-
     );
   }
 }

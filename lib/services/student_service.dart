@@ -36,6 +36,7 @@ class StudentService {
       return null;
     }
   }
+
   static Future<bool> changePassword(String email, String newPassword) async {
     final url = Uri.parse('$baseUrl/api/student/change-password');
     final prefs = await SharedPreferences.getInstance();
@@ -44,10 +45,7 @@ class StudentService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
     };
-    final body = jsonEncode({
-      'email': email,
-      'newPassword': newPassword,
-    });
+    final body = jsonEncode({'email': email, 'newPassword': newPassword});
 
     try {
       final response = await http.post(url, headers: headers, body: body);

@@ -33,7 +33,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 Text(
                   'Vishnu',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppConstants.textWhite,
                     fontSize: width * 0.09,
                     fontWeight: FontWeight.w400,
                     fontFamily: 'Alata',
@@ -45,7 +45,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Text(
                       'Training and',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.05,
                         fontFamily: 'Alata',
                       ),
@@ -53,7 +53,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     Text(
                       'Placements',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.05,
                       ),
                     ),
@@ -151,7 +151,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                             child: BackdropFilter(
                               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                               child: Container(
-                                height: height * 0.38, // Increased from 0.34 to 0.38
+                                height:
+                                    height *
+                                    0.38, // Increased from 0.34 to 0.38
                                 width: width * 0.96,
                                 padding: EdgeInsets.all(width * 0.05),
                                 decoration: BoxDecoration(
@@ -171,7 +173,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 ),
                                 child: Column(
                                   mainAxisSize: MainAxisSize.min,
-                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Changed from center to spaceEvenly
+                                  mainAxisAlignment:
+                                      MainAxisAlignment
+                                          .spaceEvenly, // Changed from center to spaceEvenly
                                   children: [
                                     // Admin Button
                                     Container(

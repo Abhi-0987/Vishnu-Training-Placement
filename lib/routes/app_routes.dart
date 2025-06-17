@@ -1,4 +1,4 @@
-import 'package:vishnu_training_and_placements/screens/AdminAttendanceScreen.dart';
+import 'package:vishnu_training_and_placements/screens/admin_attendance_screen.dart';
 import 'package:vishnu_training_and_placements/screens/admin_homescreen.dart';
 import 'package:vishnu_training_and_placements/screens/admin_profile_screen.dart';
 import 'package:vishnu_training_and_placements/screens/all_schedules_screen.dart';
@@ -14,7 +14,8 @@ import 'package:vishnu_training_and_placements/screens/student_profile.dart';
 import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
 import 'package:vishnu_training_and_placements/screens/welcome_screen.dart';
 
-enum UserRole { Admin, Coordinator, Student }
+enum UserRole { admin, coordinator, student }
+
 class AppRoutes {
   static const String splash = '/';
   static const String welcome = '/welcome';
@@ -37,18 +38,19 @@ class AppRoutes {
   static final routes = {
     splash: (context) => const SplashScreen(),
     welcome: (context) => const WelcomeScreen(),
-    adminLogin: (context) => const LoginScreen(role: UserRole.Admin),
-    coordinatorLogin: (context) => const LoginScreen(role: UserRole.Coordinator),
-    studentLogin: (context) => const LoginScreen(role: UserRole.Student),
+    adminLogin: (context) => const LoginScreen(role: UserRole.admin),
+    coordinatorLogin:
+        (context) => const LoginScreen(role: UserRole.coordinator),
+    studentLogin: (context) => const LoginScreen(role: UserRole.student),
     markAttendanceAdmin: (context) => const AdminMarkAttendence(),
     markAttendanceStudent: (context) => const MarkAttendancePage(),
     studentHomeScreen: (context) => StudentHomeScreen(),
     adminHomeScreen: (context) => AdminHomeScreen(),
     studentProfileScreen: (context) => const StudentProfileScreen(),
     adminProfileScreen: (context) => const AdminProfileScreen(),
-    coordinatorProfileScreen: (contect) => const CoordinatorProfileScreen(),
+    coordinatorProfileScreen: (context) => const CoordinatorProfileScreen(),
     eventVenue: (context) => const EventVenueScreen(),
-    changePasswordScreen: (_) => const ChangePasswordScreen(),
+    changePasswordScreen: (context) => const ChangePasswordScreen(),
     allSchedulesScreen: (context) => const AllSchedulesScreen(),
     scheduleScreen: (context) => const ScheduleDetailsScreen(schedule: {}),
     studentScheduleScreen: (context) => const StudentSchedulesScreen(),
