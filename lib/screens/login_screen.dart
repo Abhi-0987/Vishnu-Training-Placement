@@ -7,6 +7,7 @@ import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:vishnu_training_and_placements/services/auth_service.dart';
+import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -65,6 +66,10 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('studentEmail', email);
+          final studentResponse = await StudentService.getStudentDetails(email);
+          if (studentResponse != null && studentResponse['branch'] != null) {
+            prefs.setString('studentbranch', studentResponse['branch']);
+          }
           if (mounted) {
             if (data["login"] == false) {
               Navigator.pushNamed(
