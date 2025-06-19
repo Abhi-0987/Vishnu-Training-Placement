@@ -188,33 +188,35 @@ class ScheduleServices {
   }
 
   // Method to delete a schedule
-  static Future<Map<String, dynamic>> deleteSchedule(String scheduleId) async {
+static Future<Map<String, dynamic>> deleteSchedule(String scheduleId) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('token') ?? '';
 
-      final response = await http.delete(
-        Uri.parse('$baseUrl/api/schedules/$scheduleId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+        final url = '$baseUrl/api/schedules/$scheduleId';
+        print('Calling DELETE: $url');
 
-      if (response.statusCode == 200) {
-        return {'success': true, 'message': 'Schedule deleted successfully'};
-      } else {
-        final responseData = jsonDecode(response.body);
-        return {
-          'success': false,
-          'message': responseData['message'] ?? 'Failed to delete schedule',
-        };
-      }
+        final response = await http.delete(
+            Uri.parse(url),
+            headers: {
+                'Authorization': 'Bearer $token',
+            },
+        );
+
+        print('Response status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+
+        if (response.statusCode == 200) {
+            return {'success': true};
+        } else {
+            return {'success': false, 'error': 'Failed to delete schedule'};
+        }
     } catch (e) {
-      // print('Error deleting schedule: $e');
-      return {'success': false, 'message': 'Network error: ${e.toString()}'};
+        print('Error deleting schedule: $e');
+        return {'success': false, 'error': 'Network error: ${e.toString()}'};
     }
-  }
+}
+
 
   // New method to update the mark status
   static Future<Map<String, dynamic>> updateScheduleMarkStatus(
