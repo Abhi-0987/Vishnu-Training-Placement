@@ -12,12 +12,11 @@ import java.util.Optional;
 @Repository
 public interface StudentAttendanceRepo extends JpaRepository<StudentAttendance, Long> {
     Optional<StudentAttendance> findByEmailAndDateAndTime(String email, LocalDate date, LocalTime time);
-    
-    // Change this method to return Optional instead of List
-    // If using Schedule entity relationship
     Optional<StudentAttendance> findBySchedule_IdAndEmail(Long scheduleId, String email);
     List<StudentAttendance> findBySchedule_Id(Long scheduleId);
     List<StudentAttendance> findBySchedule_IdAndPresentTrue(Long scheduleId);
     List<StudentAttendance> findBySchedule_IdAndPresentFalse(Long scheduleId);
-   
+
+    // Add this method to delete records by schedule ID
+    void deleteBySchedule_Id(Long scheduleId);
 }

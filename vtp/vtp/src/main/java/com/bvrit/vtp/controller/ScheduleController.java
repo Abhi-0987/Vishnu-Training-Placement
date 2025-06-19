@@ -127,34 +127,31 @@ public class ScheduleController {
     }
 
     // Added DELETE endpoint for deleting schedules
-    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Long id) {
-        logger.info("Received schedule delete request for ID: {}", id);
+        System.out.println(">>> deleteSchedule controller called with id: " + id);
         try {
-            // TODO: Implement the actual delete logic in ScheduleService
-            // Example: scheduleService.deleteSchedule(id);
-            // For now, just returning NoContent if the service call would succeed
-            // Replace this placeholder logic with your actual service call
-            boolean deleted = scheduleService.deleteSchedule(id); // Assuming this method exists and returns true on success, false if not found
+            boolean deleted = scheduleService.deleteSchedule(id);
             if (deleted) {
-                 logger.info("Successfully deleted schedule with ID: {}", id);
-                 // Return a success message or just status code
-                 Map<String, String> response = new HashMap<>();
-                 response.put("message", "Schedule deleted successfully");
-                 return ResponseEntity.ok(response); // Or ResponseEntity.noContent().build();
+                System.out.println("Schedule deleted successfully for id: " + id);
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Schedule deleted successfully");
+                return ResponseEntity.ok(response);
             } else {
-                 logger.warn("Schedule with ID {} not found for deletion.", id);
-                 Map<String, String> response = new HashMap<>();
-                 response.put("error", "Schedule not found with id: " + id);
-                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+                System.out.println("Schedule not found for id: " + id);
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Schedule not found with id: " + id);
+                return ResponseEntity.status(404).body(response);
             }
         } catch (Exception e) {
-            Map<String, String> response = new HashMap<>();
-            response.put("error", "Failed to delete schedule: " + e.getMessage());
-            logger.error("Error deleting schedule with ID {}: {}", id, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response); // Use 500 for server errors
+            System.out.println("Error deleting schedule with id " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Failed to delete schedule: " + e.getMessage());
+            return ResponseEntity.status(500).body(error);
         }
     }
+    
 
     // New PUT endpoint for updating mark status
     @PutMapping(value = "/{id}/mark", produces = MediaType.APPLICATION_JSON_VALUE)

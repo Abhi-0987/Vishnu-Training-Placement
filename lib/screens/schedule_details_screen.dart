@@ -137,6 +137,7 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
           _isLoadingVenues = false;
         });
       }
+      print('Fetched venues successfully');
     } catch (e) {
       print('Error fetching venues in ScheduleDetailsScreen: $e');
       if (mounted) {
