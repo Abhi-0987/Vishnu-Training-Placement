@@ -34,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
       Future.delayed(const Duration(seconds: 3), () async {
         if (!mounted) return;
+        if (!mounted) return;
         if (isLoggedIn) {
           if (role == 'student') {
             Navigator.pushReplacementNamed(
