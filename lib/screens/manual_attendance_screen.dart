@@ -4,6 +4,7 @@ import '../models/student.dart';
 import '../services/manual_attendance_service.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
+
 // ignore_for_file: unused_field
 class ManualAttendanceScreen extends StatefulWidget {
   final int scheduleId;
@@ -100,7 +101,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
       setState(() => _isSubmitting = true);
       final emails = _selectedStudents.map((s) => s.email).toList();
       await AttendanceService.markAttendance(widget.scheduleId, emails);
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -112,7 +113,7 @@ class _ManualAttendanceScreenState extends State<ManualAttendanceScreen> {
       await _fetchStudents();
       setState(() => _selectedStudents.clear());
     } catch (e) {
-      // ignore: use_build_context_synchronously
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error marking attendance: $e"),

@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -15,7 +13,7 @@ class EventVenueScreen extends StatefulWidget {
   const EventVenueScreen({super.key});
 
   @override
-  _EventVenueScreenState createState() => _EventVenueScreenState();
+  State<EventVenueScreen> createState() => _EventVenueScreenState();
 }
 
 class _EventVenueScreenState extends State<EventVenueScreen> {
