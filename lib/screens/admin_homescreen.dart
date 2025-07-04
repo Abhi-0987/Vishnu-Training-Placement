@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
@@ -39,7 +40,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   Future<void> _fetchUserName(String role) async {
     final prefs = await SharedPreferences.getInstance();
-
+    final box = Hive.box('infoBox');
     if (role == 'coordinator') {
       final email = prefs.getString('coordinatorEmail');
 
@@ -51,9 +52,19 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         return;
       }
 
+    final coordinatorData = box.get('coordinatorDetails');
+    
+    if (coordinatorData != null && coordinatorData['name'] != null) {
+      // Load from Hive
+      setState(() {
+        userName = coordinatorData['name'];
+        isLoading = false;
+      });
+    } else {
+      // Fallback to API
       final data = await CoordinatorService.getCoordinatorDetails(email);
-
       if (data != null && data['name'] != null) {
+        box.put('coordinatorDetails', data);
         setState(() {
           userName = data['name'];
           isLoading = false;
@@ -64,7 +75,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
           isLoading = false;
         });
       }
-    } else {
+     }
+    }  else {
       final email = prefs.getString('adminEmail');
 
       if (email == null) {
@@ -75,9 +87,19 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         return;
       }
 
-      final data = await AdminService.getAdminDetails(email);
+      final adminData = box.get('adminDetails');
 
+    if (adminData != null && adminData['name'] != null) {
+      // Load from Hive
+      setState(() {
+        userName = adminData['name'];
+        isLoading = false;
+      });
+    } else {
+      // Fallback to API
+      final data = await AdminService.getAdminDetails(email);
       if (data != null && data['name'] != null) {
+        box.put('adminDetails', data);
         setState(() {
           userName = data['name'];
           isLoading = false;
@@ -89,6 +111,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         });
       }
     }
+  }
   }
 
   @override
