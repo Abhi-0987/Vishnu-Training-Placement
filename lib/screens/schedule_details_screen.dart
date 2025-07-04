@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
+import 'package:vishnu_training_and_placements/screens/AdminAttendanceScreen.dart';
 import 'package:vishnu_training_and_placements/screens/ManualAttendanceScreen.dart';
 import 'package:vishnu_training_and_placements/services/venue_service.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -813,7 +814,6 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      // Manual Attendance Button
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
@@ -841,7 +841,6 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // Delete Button
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: _deleteSchedule,
@@ -854,6 +853,37 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                         ),
                       ),
                     ],
+                  ),
+
+                  const SizedBox(height: 16), // Spacing before the new button
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => AdminMarkAttendence(
+                                  scheduleId: int.parse(
+                                    widget.schedule['id'].toString(),
+                                  ),
+                                ),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.assignment_turned_in),
+                      label: const Text(
+                        'Message Sending',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                    ),
                   ),
                 ],
               ),

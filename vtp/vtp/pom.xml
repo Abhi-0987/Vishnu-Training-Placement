@@ -90,7 +90,6 @@
 			<version>0.11.5</version>
 			<scope>runtime</scope>
 		</dependency>
-
 		<!-- Twilio SDK for WhatsApp Messaging -->
 		<dependency>
 			<groupId>com.twilio.sdk</groupId>

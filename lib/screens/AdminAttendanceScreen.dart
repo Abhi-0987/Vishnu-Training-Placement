@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:vishnu_training_and_placements/services/whatsapp_services.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import '../widgets/custom_appbar.dart';
@@ -7,7 +8,8 @@ import 'package:get/get.dart';
 import '../controllers/admin_attendance_controller.dart';
 
 class AdminMarkAttendence extends StatefulWidget {
-  const AdminMarkAttendence({super.key});
+  final int? scheduleId;
+  const AdminMarkAttendence({super.key, this.scheduleId});
 
   @override
   State<AdminMarkAttendence> createState() => _AdminMarkAttendenceState();
@@ -18,11 +20,24 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     AdminAttendanceController(),
   );
   final TextEditingController _messageController = TextEditingController();
+  List<String> availableDates = [];
+  String? selectedDate;
+  bool isLoadingDates = false;
+  DateTime? scheduleDateFromPicker;
 
   @override
   void dispose() {
     _messageController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.scheduleId != null) {
+      fetchContactsfromApi(); // Fetch by scheduleId directly
+    }
   }
 
   // Simplified method that calls the service
@@ -53,45 +68,187 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     }
   }
 
-  // Simplified method that calls the service
-  Future<void> fetchContactsFromApi() async {
+  Future<void> fetchAvailableDates() async {
+    setState(() {
+      isLoadingDates = true;
+    });
+
+    try {
+      final response = await WhatsappServices.fetchAvailableDates();
+
+      if (response.isEmpty) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("No dates available")));
+        return;
+      }
+
+      // Convert to DateTime, filter <= today, remove duplicates
+      Set<DateTime> uniqueDates =
+          response
+              .map((dateStr) => DateTime.parse(dateStr))
+              .where(
+                (d) =>
+                    d.isBefore(DateTime.now()) || isSameDate(d, DateTime.now()),
+              )
+              .toSet();
+
+      List<DateTime> sortedDates =
+          uniqueDates.toList()..sort((a, b) => b.compareTo(a)); // Descending
+
+      if (sortedDates.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No past dates available")),
+        );
+        return;
+      }
+
+      DateTime initialDate = sortedDates.first;
+
+      DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: initialDate,
+        firstDate: DateTime(2023),
+        lastDate: DateTime.now(),
+        selectableDayPredicate: (DateTime day) {
+          return uniqueDates.any((d) => isSameDate(d, day));
+        },
+      );
+
+      if (pickedDate != null) {
+        setState(() {
+          scheduleDateFromPicker = pickedDate;
+          selectedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+        });
+
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Selected date: $selectedDate")));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching dates: ${e.toString()}")),
+      );
+    } finally {
+      setState(() {
+        isLoadingDates = false;
+      });
+    }
+  }
+
+  bool isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  void showDateSelectionDialog() {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text("Select a Date"),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: availableDates.length,
+                itemBuilder: (context, index) {
+                  final date = availableDates[index];
+                  return ListTile(
+                    title: Text(date),
+                    onTap: () {
+                      setState(() {
+                        selectedDate = date;
+                      });
+                      Navigator.of(context).pop();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+    );
+  }
+
+  Future<void> fetchContactsfromApi() async {
     try {
       controller.isFetchingContacts.value = true;
 
-      List<String> newPhoneNumbers =
-          await WhatsappServices.fetchContactsFromApi();
+      List<String> newPhoneNumbers = [];
+
+      if (widget.scheduleId != null) {
+        // Case 1: Fetch using schedule ID
+        newPhoneNumbers = await WhatsappServices.fetchContactsByScheduleId(
+          widget.scheduleId!.toString(),
+        );
+      } else if (scheduleDateFromPicker != null) {
+        // Case 2: Fetch using selected date
+        String formattedDate = DateFormat(
+          'yyyy-MM-dd',
+        ).format(scheduleDateFromPicker!);
+        newPhoneNumbers = await WhatsappServices.fetchContactsFromApi(
+          formattedDate,
+        );
+      } else {
+        _showSnackbar(
+          "Please select a date or provide a schedule ID",
+          Colors.orange,
+        );
+        return;
+      }
+
+      if (!mounted) return;
 
       setState(() {
         controller.clearPhoneNumbers();
         controller.addPhoneNumbers(newPhoneNumbers);
       });
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Fetched ${newPhoneNumbers.length} contacts from API"),
-          backgroundColor: Colors.green,
-        ),
+      _showSnackbar(
+        "Fetched ${newPhoneNumbers.length} contacts from API",
+        Colors.green,
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error fetching contacts: ${e.toString()}"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showSnackbar("Error fetching contacts: ${e.toString()}", Colors.red);
     } finally {
       controller.isFetchingContacts.value = false;
     }
   }
 
-  // Simplified method that calls the service
+  void _showSnackbar(String message, Color color) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
+  }
+
   Future<void> downloadExcelFile() async {
+    if (widget.scheduleId == null && selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "Please provide either a Schedule ID or select a date.",
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     try {
       controller.isDownloadingExcel.value = true;
 
-      String result = await WhatsappServices.downloadExcelFile();
+      String result;
+
+      // 🔹 Primary Case 1: Download by scheduleId
+      if (widget.scheduleId != null) {
+        result = await WhatsappServices.downloadExcelByScheduleId(
+          widget.scheduleId!.toString(),
+        );
+      }
+      // 🔹 Primary Case 2: Download by selectedDate
+      else {
+        result = await WhatsappServices.downloadExcelFile(selectedDate!);
+      }
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -99,6 +256,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
       );
     } catch (e) {
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error downloading Excel file: ${e.toString()}"),
@@ -106,11 +264,19 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
         ),
       );
 
-      // Fallback to generating Excel from phone numbers
+      // 🔁 Fallback: Generate Excel from memory
       try {
+        final String? label =
+            selectedDate ??
+            (widget.scheduleId != null
+                ? "schedule_${widget.scheduleId}"
+                : null);
+
         String result = await WhatsappServices.generateExcelFromPhoneNumbers(
-          controller.phoneNumbers,
+          controller.phoneNumbers.toList(),
+          label: label,
         );
+
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(result), backgroundColor: Colors.green),
@@ -130,6 +296,78 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
       controller.isDownloadingExcel.value = false;
     }
   }
+
+  /*// Simplified method that calls the service
+  Future<void> downloadExcelFile() async {
+    try {
+      controller.isDownloadingExcel.value = true;
+
+      String result;
+
+      if (widget.scheduleId != null) {
+        // 🔹 Case 1: Download by scheduleId
+        result = await WhatsappServices.downloadExcelByScheduleId(
+          widget.scheduleId!.toString(),
+        );
+      } else if (selectedDate != null) {
+        // 🔹 Case 2: Download by selectedDate
+        result = await WhatsappServices.downloadExcelFile(selectedDate!);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Please provide either a Schedule ID or select a date.",
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result), backgroundColor: Colors.green),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error downloading Excel file: ${e.toString()}"),
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      // 🔁 Fallback: Generate Excel from phone numbers in memory
+      try {
+        final String? label =
+            selectedDate ??
+            (widget.scheduleId != null
+                ? "schedule_${widget.scheduleId}"
+                : null);
+
+        String result = await WhatsappServices.generateExcelFromPhoneNumbers(
+          controller.phoneNumbers.toList(),
+          label: label, // 👈 used in file name
+        );
+        //String result = await WhatsappServices.downloadExcelFile(selectedDate!);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result), backgroundColor: Colors.green),
+        );
+      } catch (fallbackError) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Fallback Excel generation failed: ${fallbackError.toString()}",
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -185,6 +423,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                     ),
                                   ),
                                   const SizedBox(height: 10),
+
                                   // Changed from Row to Column for button layout
                                   Column(
                                     children: [
@@ -224,6 +463,37 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                         ),
                                         icon: const SizedBox(),
                                       ),
+                                      const SizedBox(height: 10),
+
+                                      if (widget.scheduleId == null)
+                                        ElevatedButton.icon(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.blueAccent,
+                                            padding: const EdgeInsets.symmetric(
+                                              vertical: 12,
+                                              horizontal: 20,
+                                            ),
+                                          ),
+                                          onPressed:
+                                              isLoadingDates
+                                                  ? null
+                                                  : fetchAvailableDates,
+                                          icon: const Icon(
+                                            Icons.date_range,
+                                            color: Colors.white,
+                                          ),
+                                          label: Text(
+                                            selectedDate == null
+                                                ? "Select Date"
+                                                : "Selected: ${DateFormat('dd MMM yyyy').format(DateTime.parse(selectedDate!))}",
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 16,
+                                              fontFamily: 'Alata',
+                                            ),
+                                          ),
+                                        ),
+
                                       const SizedBox(
                                         height: 10,
                                       ), // Vertical spacing between buttons
@@ -243,7 +513,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                   ? null
                                                   : () {
                                                     // Wrap in anonymous function to prevent cross-triggering
-                                                    fetchContactsFromApi();
+                                                    fetchContactsfromApi();
                                                   },
                                           label: Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -253,7 +523,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
                                                         .isFetchingContacts
                                                         .value
                                                     ? "Fetching..."
-                                                    : "Fetch from API",
+                                                    : "Fetch Absentees",
                                                 style: const TextStyle(
                                                   color: Colors.white,
                                                   fontSize: 16,

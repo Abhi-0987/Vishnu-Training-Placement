@@ -35,6 +35,4 @@ public class StudentAttendance {
     @ManyToOne
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
-    
-    // No need for separate scheduleId field as it's handled by the relationship
 }
