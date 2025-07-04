@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
@@ -32,14 +33,29 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   Future<void> fetchAdminDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final email = prefs.getString('adminEmail');
+  final prefs = await SharedPreferences.getInstance();
+  final box = Hive.box('infoBox');
 
-    if (email == null) return;
+  final email = prefs.getString('adminEmail');
 
+  if (email == null) {
+    _showSnackBar("No admin email found");
+    return;
+  }
+
+  final adminData = box.get('adminDetails');
+
+  if (adminData != null && adminData['email'] == email) {
+    // Load from Hive cache
+    setState(() {
+      adminEmail = adminData['email'];
+      adminName = adminData['name'];
+    });
+  } else {
+    // Fallback to API
     final data = await AdminService.getAdminDetails(email);
-
-    if (data != null) {
+    if (data != null && data['email'] != null) {
+      box.put('adminDetails', data);
       setState(() {
         adminEmail = data['email'];
         adminName = data['name'];
@@ -48,6 +64,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       _showSnackBar("Failed to load admin details");
     }
   }
+}
 
   bool isValidPassword(String password) {
     final passwordRegex = RegExp(
