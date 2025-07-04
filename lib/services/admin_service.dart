@@ -38,6 +38,7 @@ class AdminService {
       return null;
     }
   }
+
   static Future<bool> changePassword(String email, String newPassword) async {
     final url = Uri.parse('$baseUrl/api/admin/change-password');
     final prefs = await SharedPreferences.getInstance();
