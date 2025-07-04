@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
-import 'package:vishnu_training_and_placements/screens/AdminAttendanceScreen.dart';
 
 void main() {
   runApp(const MaterialApp(home: MainApp()));

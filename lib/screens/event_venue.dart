@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -13,7 +15,7 @@ class EventVenueScreen extends StatefulWidget {
   const EventVenueScreen({super.key});
 
   @override
-  _EventVenueScreenState createState() => _EventVenueScreenState();
+  State<EventVenueScreen> createState() => _EventVenueScreenState();
 }
 
 class _EventVenueScreenState extends State<EventVenueScreen> {
@@ -81,7 +83,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     'CSD',
     'CSBS',
   ];
-  
+
   Map<String, List<String>> branchSections = {
     'CSE': ['CSE-A', 'CSE-B', 'CSE-C', 'CSE-D', 'CSE-E'],
     'ECE': ['ECE-A', 'ECE-B', 'ECE-C', 'ECE-D'],
@@ -97,7 +99,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     'CSD': ['CSD-A', 'CSD-B'],
     'CSBS': ['CSBS'],
   };
-  
+
   List<String> selectedBranches = [];
   List<String> selectedSections = []; // Add this to track selected sections
 
@@ -110,14 +112,14 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   Future<void> _showSectionSelectionDialog(String branch) async {
     List<String> sections = branchSections[branch] ?? [];
     List<String> tempSelectedSections = [];
-    
+
     // Pre-select sections that are already selected
     for (String section in sections) {
       if (selectedSections.contains(section)) {
         tempSelectedSections.add(section);
       }
     }
-    
+
     await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -156,13 +158,15 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                 TextButton(
                   onPressed: () {
                     // Remove any previously selected sections for this branch
-                    selectedSections.removeWhere((section) => section.startsWith('$branch-'));
-                    
+                    selectedSections.removeWhere(
+                      (section) => section.startsWith('$branch-'),
+                    );
+
                     // Add newly selected sections
                     selectedSections.addAll(tempSelectedSections);
-                    
+
                     Navigator.pop(context);
-                    
+
                     // Update the state to reflect changes
                     this.setState(() {});
                   },
@@ -220,9 +224,10 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     final roomNo = parts.length > 1 ? parts[1] : '';
 
     // Use sections if available, otherwise use branches
-    String branchesString = selectedSections.isEmpty 
-        ? selectedBranches.join(',') 
-        : selectedSections.join(',');
+    String branchesString =
+        selectedSections.isEmpty
+            ? selectedBranches.join(',')
+            : selectedSections.join(',');
 
     final scheduleData = {
       "location": blockName,
@@ -503,7 +508,12 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           ),
           selectedTextStyle: TextStyle(color: Colors.white),
           todayDecoration: BoxDecoration(
-            color: Colors.purple.withOpacity(0.3),
+            color: Color.fromRGBO(
+              128,
+              0,
+              128,
+              0.3,
+            ), // Purple (RGB 128,0,128) with 0.3 opacity
             shape: BoxShape.circle,
           ),
           todayTextStyle: TextStyle(color: Colors.black),
@@ -572,39 +582,44 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     return Wrap(
       spacing: 10, // Increased horizontal spacing between chips
       runSpacing: 10, // Added vertical spacing between rows of chips
-      children: branches.map((branch) {
-        final isSelected = selectedBranches.contains(branch);
-        // Check if any section of this branch is selected
-        final hasSections = selectedSections.any((section) => section.startsWith('$branch-'));
-        
-        return FilterChip(
-          label: Text(branch, style: TextStyle(color: Colors.white)),
-          selected: isSelected || hasSections,
-          backgroundColor: Colors.grey[800],
-          selectedColor: Colors.purple,
-          padding: EdgeInsets.symmetric(
-            horizontal: 8,
-            vertical: 4,
-          ), // Added padding inside chips
-          onSelected: (bool selected) {
-            if (selected) {
-              // Show section selection dialog when branch is selected
-              _showSectionSelectionDialog(branch);
-              if (!selectedBranches.contains(branch)) {
-                setState(() {
-                  selectedBranches.add(branch);
-                });
-              }
-            } else {
-              setState(() {
-                selectedBranches.remove(branch);
-                // Remove all sections of this branch
-                selectedSections.removeWhere((section) => section.startsWith('$branch-'));
-              });
-            }
-          },
-        );
-      }).toList(),
+      children:
+          branches.map((branch) {
+            final isSelected = selectedBranches.contains(branch);
+            // Check if any section of this branch is selected
+            final hasSections = selectedSections.any(
+              (section) => section.startsWith('$branch-'),
+            );
+
+            return FilterChip(
+              label: Text(branch, style: TextStyle(color: Colors.white)),
+              selected: isSelected || hasSections,
+              backgroundColor: Colors.grey[800],
+              selectedColor: Colors.purple,
+              padding: EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ), // Added padding inside chips
+              onSelected: (bool selected) {
+                if (selected) {
+                  // Show section selection dialog when branch is selected
+                  _showSectionSelectionDialog(branch);
+                  if (!selectedBranches.contains(branch)) {
+                    setState(() {
+                      selectedBranches.add(branch);
+                    });
+                  }
+                } else {
+                  setState(() {
+                    selectedBranches.remove(branch);
+                    // Remove all sections of this branch
+                    selectedSections.removeWhere(
+                      (section) => section.startsWith('$branch-'),
+                    );
+                  });
+                }
+              },
+            );
+          }).toList(),
     );
   }
 
@@ -629,34 +644,34 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             Text(
               "Location: $selectedLocation",
               style: TextStyle(
-                color: Colors.white,
+                color: AppConstants.textWhite,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
             ),
-            Divider(color: Colors.white),
+            Divider(color: AppConstants.textWhite),
             Text(
               "Date: ${DateFormat('MMM dd, yyyy').format(selectedDate)}",
               style: TextStyle(
-                color: Colors.white,
+                color: AppConstants.textWhite,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
             ),
-            Divider(color: Colors.white),
+            Divider(color: AppConstants.textWhite),
             Text(
               "Time: $selectedTime",
               style: TextStyle(
-                color: Colors.white,
+                color: AppConstants.textWhite,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),
             ),
-            Divider(color: Colors.white),
+            Divider(color: AppConstants.textWhite),
             Text(
               "Branches: $branchesText",
               style: TextStyle(
-                color: Colors.white,
+                color: AppConstants.textWhite,
                 fontFamily: 'Alata',
                 fontSize: 18,
               ),

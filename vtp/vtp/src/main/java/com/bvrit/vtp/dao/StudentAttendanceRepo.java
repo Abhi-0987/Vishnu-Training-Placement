@@ -51,4 +51,7 @@ public interface StudentAttendanceRepo extends JpaRepository<StudentAttendance, 
     List<AbsentStudentPhoneProjection> findAbsentStudentsWithPhoneByDate(@Param("date") LocalDate date);
 
 
+
+    // Add this method to delete records by schedule ID
+    void deleteBySchedule_Id(Long scheduleId);
 }

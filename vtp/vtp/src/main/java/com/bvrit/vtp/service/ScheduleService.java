@@ -186,15 +186,23 @@ public class ScheduleService {
         }
     }
 
-    @Transactional // Add transactional annotation for delete operation
+    @Transactional
     public boolean deleteSchedule(Long id) {
+        System.out.println(">>> deleteSchedule service called with id: " + id);
         if (scheduleRepository.existsById(id)) {
+            System.out.println("Schedule exists. Deleting related attendance records.");
+            studentAttendanceRepository.deleteBySchedule_Id(id);
+            System.out.println("Deleted related attendance records. Deleting schedule now.");
             scheduleRepository.deleteById(id);
+            System.out.println("Schedule deleted successfully.");
             return true;
         } else {
+            System.out.println("Schedule with id " + id + " does not exist.");
             return false;
         }
     }
+    
+    
 
     // New method to update only the mark status
     @Transactional

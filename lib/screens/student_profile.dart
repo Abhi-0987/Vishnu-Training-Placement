@@ -80,34 +80,18 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     await _loadStudentData();
   }
 
-  void _showPasswordChangeDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Change Password"),
-            content: const Text("Password change functionality goes here."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double height = screenSize.height;
     final double width = screenSize.width;
 
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
-        return false;
-      },
+    return PopScope(
+      onPopInvokedWithResult:
+          (didPop, result) => Navigator.pushReplacementNamed(
+            context,
+            AppRoutes.studentHomeScreen,
+          ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: const CustomAppBar(isProfileScreen: true),
@@ -192,6 +176,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                         child: ElevatedButton(
                           onPressed: () async {
                             final prefs = await SharedPreferences.getInstance();
+                            if (!mounted) return;
                             prefs.clear();
                             Navigator.pushAndRemoveUntil(
                               context,
@@ -383,7 +368,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[800]?.withOpacity(0.5),
+        color: Color.fromRGBO(66, 66, 66, 0.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
