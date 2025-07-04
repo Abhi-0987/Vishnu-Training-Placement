@@ -49,6 +49,7 @@ public class AuthController {
         }
 
         Student student = optionalStudent.get();
+        String studentDeviceId = student.getDeviceId();
         return ResponseEntity.ok(Map.of(
                 "accessToken", tokenResponse.getAccessToken(),
                 "refreshToken", tokenResponse.getRefreshToken(),
