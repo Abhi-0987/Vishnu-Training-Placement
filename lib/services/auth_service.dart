@@ -11,7 +11,7 @@ class AuthService {
     String password,
     UserRole role, // Accept role as enum here
   ) async {
-    // Map UserRole enum to backend endpoint string
+    // Map  UserRole enum to backend endpoint string
     String rolePath;
     switch (role) {
       case UserRole.admin:

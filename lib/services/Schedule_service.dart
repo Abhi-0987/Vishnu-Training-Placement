@@ -7,7 +7,7 @@ import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 class ScheduleServices {
   static const String baseUrl = AppConstants.backendUrl;
 
-  // Method to save schedule
+  //  Method to save schedule
   static Future<Map<String, dynamic>> saveSchedule(
     Map<String, dynamic> scheduleData,
   ) async {

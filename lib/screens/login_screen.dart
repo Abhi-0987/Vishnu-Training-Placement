@@ -30,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Future<String?> getAndroidDeviceId() async {
   //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-  //   return androidInfo.id; // Unique ID (but may change on factory reset)
+  //   return androidInfo.id; // Unique ID (but may change on factory reset )
   // }
 
   Future<void> login() async {
@@ -91,7 +91,8 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('coordinatorEmail', email);
-          final coordinatorResponse = await CoordinatorService.getCoordinatorDetails(email);
+          final coordinatorResponse =
+              await CoordinatorService.getCoordinatorDetails(email);
           if (coordinatorResponse != null) {
             final box = Hive.box('infoBox');
             box.put('coordinatorDetails', coordinatorResponse);
