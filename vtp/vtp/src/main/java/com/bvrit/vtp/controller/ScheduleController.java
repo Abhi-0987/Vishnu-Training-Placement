@@ -330,4 +330,24 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
     }
+    
+    @GetMapping(value = "/{scheduleId}/attendance-stats", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAttendanceStats(@PathVariable Long scheduleId) {
+        try {
+            List<StudentAttendance> all = scheduleService.getStudentAttendanceByScheduleId(scheduleId);
+            List<StudentAttendance> present = scheduleService.getPresentStudentsByScheduleId(scheduleId);
+            List<StudentAttendance> absent = scheduleService.getAbsentStudentsByScheduleId(scheduleId);
+    
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalStudents", all.size());
+            stats.put("presentCount", present.size());
+            stats.put("absentCount", absent.size());
+    
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Failed to fetch attendance stats: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
+    }
 }

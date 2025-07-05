@@ -47,7 +47,7 @@ class AppRoutes {
     markAttendanceStudent: (context) => const MarkAttendancePage(),
     studentHomeScreen: (context) => StudentHomeScreen(),
     adminHomeScreen: (context) => AdminHomeScreen(),
-    studentProfileScreen: (context) => const StudentProfileScreen(),
+    studentProfileScreen: (context) => const StudentProfileScreen(schedule: {},),
     adminProfileScreen: (context) => const AdminProfileScreen(),
     coordinatorProfileScreen: (context) => const CoordinatorProfileScreen(),
     eventVenue: (context) => const EventVenueScreen(),

@@ -9,9 +9,11 @@ import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vishnu_training_and_placements/services/Schedule_service.dart';
 
 class StudentProfileScreen extends StatefulWidget {
-  const StudentProfileScreen({super.key});
+  final Map<String, dynamic> schedule;
+  const StudentProfileScreen({super.key,required this.schedule});
 
   @override
   State<StudentProfileScreen> createState() => _StudentProfileScreenState();
@@ -25,16 +27,22 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   String? studentYear;
   bool isLoading = true;
   String? errorMessage;
-  int presentPercentage = 60;
-  int absentPercentage = 40;
-  int totalSessions = 8;
-  String longestStreak = '1 day';
+  int presentPercentage = 0;
+  int absentPercentage = 0;
+  int totalSessions = 0;
+  int presentCount = 0;
+  // String longestStreak = '1 day';
 
   @override
-  void initState() {
-    super.initState();
-    _loadStudentData();
-  }
+ void initState() {
+  super.initState();
+  _initializeData();
+}
+
+Future<void> _initializeData() async {
+  await _loadStudentData();
+  await _fetchAttendanceStats();
+}
 
   Future<void> _loadStudentData() async {
     try {
@@ -84,6 +92,28 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       _showErrorSnackbar(e.toString());
     }
   }
+
+Future<void> _fetchAttendanceStats() async {
+  final email = studentEmail;
+  if (email == null) return;
+
+  final result = await ScheduleServices.getStudentOverallAttendance(email);
+  if (result['success']) {
+    final data = result['data'];
+    setState(() {
+      totalSessions = data['totalSessions'] ?? 0;
+      int present = data['presentCount'] ?? 0;
+      int absent = data['absentCount'] ?? 0;
+      presentCount = data['presentCount'] ?? 0;
+
+      presentPercentage = totalSessions > 0 ? ((present / totalSessions) * 100).round() : 0;
+      absentPercentage = totalSessions > 0 ? ((absent / totalSessions) * 100).round() : 0;
+    });
+  } else {
+    _showErrorSnackbar(result['message'] ?? 'Failed to load attendance stats');
+  }
+}
+
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -332,13 +362,13 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
               width,
               height,
             ),
-            SizedBox(width: width * 0.04),
+            SizedBox(width: width * 0.03),
             _buildInfoCard(
-              "Longest Streak",
-              longestStreak,
-              AppConstants.textWhite,
-              width,
-              height,
+              "Sessions Attended",
+  presentCount.toString(), 
+  AppConstants.textWhite,
+  width,
+  height,
             ),
           ],
         ),
@@ -431,14 +461,14 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
             children: [
               Container(
                 width: width * 0.1,
-                height: 3,
+                height: 4,
                 color: Colors.yellow,
                 margin: EdgeInsets.only(bottom: height * 0.01),
               ),
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: width * 0.035,
+                  fontSize: width * 0.032,
                   fontFamily: 'Alata',
                   color: Colors.yellow[100],
                 ),
@@ -460,3 +490,6 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     );
   }
 }
+
+
+

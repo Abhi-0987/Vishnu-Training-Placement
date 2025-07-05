@@ -1,5 +1,6 @@
 package com.bvrit.vtp.controller;
 
+import com.bvrit.vtp.dao.StudentAttendanceRepo;
 import com.bvrit.vtp.dao.VenuesRepository;
 import com.bvrit.vtp.model.Venues;
 import com.bvrit.vtp.service.ScheduleService;
@@ -27,6 +28,9 @@ public class AttendanceController {
 
     @Autowired
     private VenuesRepository venuesRepository;
+
+    @Autowired
+    private StudentAttendanceRepo studentAttendanceRepo;
 
     // Endpoint to mark attendance as present for a student
     @PutMapping("/attendance/mark-present")
@@ -86,5 +90,31 @@ public class AttendanceController {
 
         return ResponseEntity.ok(coordinates);
     }
+
+    @GetMapping(value = "/attendance/student/{email}/statistics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getStudentOverallAttendance(@PathVariable String email) {
+        try {
+            int totalSessions = studentAttendanceRepo.countByEmail(email);
+            int presentCount = studentAttendanceRepo.countByEmailAndPresentTrue(email);
+            int absentCount = totalSessions - presentCount;
+    
+            return ResponseEntity.ok(
+                Map.of(
+                    "success", true,
+                    "data", Map.of(
+                        "totalSessions", totalSessions,
+                        "presentCount", presentCount,
+                        "absentCount", absentCount
+                    )
+                )
+            );
+        } catch (Exception e) {
+            return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("success", false, "message", "Failed to fetch attendance statistics"));
+        }
+    }
+    
 
 }
