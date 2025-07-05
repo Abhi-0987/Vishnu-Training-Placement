@@ -380,4 +380,37 @@ class ScheduleServices {
 
     return ['All Branches'];
   }
+
+  static Future<Map<String, dynamic>> getStudentOverallAttendance(String email) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/attendance/student/$email/statistics'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return {'success': true, 'data': responseData['data']};
+    } else {
+      String errorMessage = 'Failed to fetch attendance statistics';
+      try {
+        final responseData = jsonDecode(response.body);
+        errorMessage = responseData['message'] ?? errorMessage;
+      } catch (_) {}
+      return {'success': false, 'message': errorMessage};
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'message': 'Network error: ${e.toString()}',
+    };
+  }
+}
+
 }

@@ -16,6 +16,9 @@ public interface StudentAttendanceRepo extends JpaRepository<StudentAttendance, 
     List<StudentAttendance> findBySchedule_Id(Long scheduleId);
     List<StudentAttendance> findBySchedule_IdAndPresentTrue(Long scheduleId);
     List<StudentAttendance> findBySchedule_IdAndPresentFalse(Long scheduleId);
+    int countByEmail(String email);
+    int countByEmailAndPresentTrue(String email);
+
 
     void deleteBySchedule_Id(Long scheduleId);
 
