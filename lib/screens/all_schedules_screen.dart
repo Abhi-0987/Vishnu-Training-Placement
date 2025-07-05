@@ -45,6 +45,18 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
     super.initState();
     _fetchSchedules();
   }
+  DateTime? _combineDateAndTime(String dateStr, String timeStr) {
+  final date = DateTime.tryParse(dateStr);
+  final parts = timeStr.split(':');
+  if (date == null || parts.length < 2) return null;
+
+  final hour = int.tryParse(parts[0]);
+  final minute = int.tryParse(parts[1]);
+  if (hour == null || minute == null) return null;
+
+  return DateTime(date.year, date.month, date.day, hour, minute);
+}
+
 
   Future<void> _fetchSchedules() async {
     try {
@@ -69,35 +81,50 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
       final now = DateTime.now();
       final today = DateTime(now.year, now.month, now.day);
 
-      currentSchedules =
-          parsedSchedules.where((schedule) {
-            final scheduleDate = DateTime.tryParse(schedule.date);
-            if (scheduleDate == null) return false;
-            return scheduleDate.isAtSameMomentAs(today) ||
-                scheduleDate.isAfter(today);
-          }).toList();
+  
 
-      pastSchedules =
-          parsedSchedules.where((schedule) {
-            final scheduleDate = DateTime.tryParse(schedule.date);
-            if (scheduleDate == null) return false;
-            return scheduleDate.isBefore(today);
-          }).toList();
+currentSchedules = parsedSchedules.where((schedule) {
+  final date = DateTime.tryParse(schedule.date);
+  final toTimeParts = schedule.toTime.split(':');
+  if (date == null || toTimeParts.length < 2) return false;
+
+  final toHour = int.tryParse(toTimeParts[0]);
+  final toMinute = int.tryParse(toTimeParts[1]);
+  if (toHour == null || toMinute == null) return false;
+
+  final scheduleEndTime = DateTime(date.year, date.month, date.day, toHour, toMinute);
+  return scheduleEndTime.isAfter(now);
+}).toList();
+
+pastSchedules = parsedSchedules.where((schedule) {
+  final date = DateTime.tryParse(schedule.date);
+  final toTimeParts = schedule.toTime.split(':');
+  if (date == null || toTimeParts.length < 2) return true;
+
+  final toHour = int.tryParse(toTimeParts[0]);
+  final toMinute = int.tryParse(toTimeParts[1]);
+  if (toHour == null || toMinute == null) return true;
+
+  final scheduleEndTime = DateTime(date.year, date.month, date.day, toHour, toMinute);
+  return scheduleEndTime.isBefore(now) || scheduleEndTime.isAtSameMomentAs(now);
+}).toList();
+
 
       // Sort both lists by date
-      currentSchedules.sort((a, b) {
-        final dateA = DateTime.tryParse(a.date);
-        final dateB = DateTime.tryParse(b.date);
-        if (dateA == null || dateB == null) return 0;
-        return dateA.compareTo(dateB); // Upcoming first
-      });
+     currentSchedules.sort((a, b) {
+  final dateTimeA = _combineDateAndTime(a.date, a.fromTime);
+  final dateTimeB = _combineDateAndTime(b.date, b.fromTime);
+  if (dateTimeA == null || dateTimeB == null) return 0;
+  return dateTimeA.compareTo(dateTimeB); // Upcoming first
+});
 
-      pastSchedules.sort((a, b) {
-        final dateA = DateTime.tryParse(a.date);
-        final dateB = DateTime.tryParse(b.date);
-        if (dateA == null || dateB == null) return 0;
-        return dateB.compareTo(dateA); // Most recent past first
-      });
+pastSchedules.sort((a, b) {
+  final dateTimeA = _combineDateAndTime(a.date, a.fromTime);
+  final dateTimeB = _combineDateAndTime(b.date, b.fromTime);
+  if (dateTimeA == null || dateTimeB == null) return 0;
+  return dateTimeB.compareTo(dateTimeA); // Most recent past first
+});
+
 
       setState(() {
         schedules = parsedSchedules;
@@ -424,7 +451,7 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                               ),
                                               SizedBox(width: width * 0.02),
                                               Text(
-                                                _formatTime(schedule.fromTime),
+                                               '${_formatTime(schedule.fromTime)} - ${_formatTime(schedule.toTime)}',
                                                 style: TextStyle(
                                                   color: Colors.white70,
                                                   fontSize: width * 0.035,
