@@ -47,7 +47,7 @@ class AppRoutes {
     markAttendanceStudent: (context) => const MarkAttendancePage(),
     studentHomeScreen: (context) => StudentHomeScreen(),
     adminHomeScreen: (context) => AdminHomeScreen(),
-    studentProfileScreen: (context) => const StudentProfileScreen(schedule: {},),
+    studentProfileScreen: (context) => const StudentProfileScreen(schedule: {},),// Pass an empty map for now
     adminProfileScreen: (context) => const AdminProfileScreen(),
     coordinatorProfileScreen: (context) => const CoordinatorProfileScreen(),
     eventVenue: (context) => const EventVenueScreen(),
