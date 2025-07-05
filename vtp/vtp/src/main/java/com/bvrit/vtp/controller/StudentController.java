@@ -1,14 +1,14 @@
 package com.bvrit.vtp.controller;
 
+import com.bvrit.vtp.dao.StudentAttendanceRepo;
 import com.bvrit.vtp.dao.StudentDetailsRepo;
 import com.bvrit.vtp.model.StudentDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,6 +17,9 @@ import java.util.Optional;
 public class StudentController {
     @Autowired
     private StudentDetailsRepo studentDetailsRepo;
+
+    @Autowired
+    private StudentAttendanceRepo studentAttendanceRepo;
 
     @PostMapping(value="/details", produces = "application/json")
     public ResponseEntity<?> getStudentDetailsByEmail(@RequestBody Map<String, String> payload) {
@@ -36,4 +39,17 @@ public class StudentController {
                 ))).orElseGet(() ->
                 ResponseEntity.status(404).body(Map.of("error", "Student not found")));
     }
+
+    @GetMapping(value = "/dates", produces = "application/json")
+    public ResponseEntity<List<String>> getAvailableDates() {
+        List<LocalDate> dates = studentAttendanceRepo.findDistinctDates();
+        List<String> formattedDates = dates.stream()
+                .map(LocalDate::toString)
+                .toList();
+
+        return ResponseEntity.ok(formattedDates);
+    }
+
+
+
 }
