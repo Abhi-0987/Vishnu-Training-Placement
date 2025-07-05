@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
@@ -42,11 +43,11 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
 
   Future<void> fetchCoordinatorDetails() async {
     final prefs = await SharedPreferences.getInstance();
+    final box = Hive.box('infoBox');
     final email = prefs.getString('coordinatorEmail');
 
     if (email == null) return;
-
-    final data = await CoordinatorService.getCoordinatorDetails(email);
+    final data = box.get('coordinatorDetails');
 
     if (data != null) {
       setState(() {
@@ -54,7 +55,17 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
         coordinatorName = data['name'];
       });
     } else {
+    // Fallback to API
+    final data = await CoordinatorService.getCoordinatorDetails(email);
+    if (data != null && data['email'] != null) {
+      box.put('adminDetails', data);
+      setState(() {
+        coordinatorEmail = data['email'];
+        coordinatorName = data['name'];
+      });
+    } else {
       _showSnackBar("Failed to load coordinator details");
+    }
     }
   }
 
@@ -477,7 +488,9 @@ class _CoordinatorProfileScreenState extends State<CoordinatorProfileScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
-                          prefs.clear();
+                          final box = Hive.box('infoBox'); 
+                          await prefs.clear();
+                          await box.clear();
                           if (context.mounted) {
                             Navigator.pushAndRemoveUntil(
                               context,
