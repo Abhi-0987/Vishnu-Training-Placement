@@ -482,7 +482,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
-                          prefs.clear();
+                          final box = Hive.box('infoBox'); 
+                          await prefs.clear();
+                          await box.clear();
                           if (context.mounted) {
                             Navigator.pushAndRemoveUntil(
                               context,

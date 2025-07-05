@@ -195,8 +195,10 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                         child: ElevatedButton(
                           onPressed: () async {
                             final prefs = await SharedPreferences.getInstance();
+                            final box = Hive.box('infoBox'); 
                             if (!mounted) return;
-                            prefs.clear();
+                            await prefs.clear();
+                            await box.clear();
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
