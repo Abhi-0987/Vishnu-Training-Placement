@@ -3,7 +3,8 @@ class Schedule {
   final String location;
   final String roomNo;
   final String date;
-  final String time;
+  final String fromTime;
+  final String toTime;
   final String studentBranch;
   final bool mark;
 
@@ -12,14 +13,16 @@ class Schedule {
     required this.location,
     required this.roomNo,
     required this.date,
-    required this.time,
+    required this.fromTime,
+    required this.toTime,
     required this.studentBranch,
     required this.mark,
   });
 
   factory Schedule.fromJson(Map<String, dynamic> json) {
     String formattedDate = '';
-    String formattedTime = '';
+    String formattedFromTime = '';
+    String formattedToTime = '';
 
     // Parse date array [YYYY, M, D]
     if (json['date'] is List && (json['date'] as List).length == 3) {
@@ -39,21 +42,38 @@ class Schedule {
       formattedDate = json['date']?.toString() ?? ''; // Fallback if not a list
     }
 
-    // Parse time array [H, M]
-    if (json['time'] is List && (json['time'] as List).length == 2) {
+    // Parse fromTime array [H, M]
+    if (json['fromTime'] is List && (json['fromTime'] as List).length == 2) {
       try {
-        List<dynamic> timeList = json['time'];
+        List<dynamic> timeList = json['fromTime'];
         int hour = int.parse(timeList[0].toString());
         int minute = int.parse(timeList[1].toString());
         // Format to HH:mm (24-hour)
-        formattedTime =
+        formattedFromTime =
             "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
       } catch (e) {
-        print('Error parsing time list ${json['time']}: $e');
-        formattedTime = json['time'].toString(); // Fallback
+        print('Error parsing fromTime list ${json['fromTime']}: $e');
+        formattedFromTime = json['fromTime'].toString(); // Fallback
       }
     } else {
-      formattedTime = json['time']?.toString() ?? ''; // Fallback if not a list
+      formattedFromTime = json['fromTime']?.toString() ?? ''; // Fallback if not a list
+    }
+    
+    // Parse toTime array [H, M]
+    if (json['toTime'] is List && (json['toTime'] as List).length == 2) {
+      try {
+        List<dynamic> timeList = json['toTime'];
+        int hour = int.parse(timeList[0].toString());
+        int minute = int.parse(timeList[1].toString());
+        // Format to HH:mm (24-hour)
+        formattedToTime =
+            "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+      } catch (e) {
+        print('Error parsing toTime list ${json['toTime']}: $e');
+        formattedToTime = json['toTime'].toString(); // Fallback
+      }
+    } else {
+      formattedToTime = json['toTime']?.toString() ?? ''; // Fallback if not a list
     }
 
     return Schedule(
@@ -61,10 +81,10 @@ class Schedule {
       location: json['location']?.toString() ?? '',
       roomNo: json['roomNo']?.toString() ?? '',
       date: formattedDate, // Use the formatted date string
-      time: formattedTime, // Use the formatted time string
+      fromTime: formattedFromTime, // Use the formatted fromTime string
+      toTime: formattedToTime, // Use the formatted toTime string
       studentBranch: json['studentBranch']?.toString() ?? '',
       mark: json['mark'] ?? false,
-      // Add this line
     );
   }
 
@@ -75,7 +95,8 @@ class Schedule {
       'location': location,
       'roomNo': roomNo,
       'date': date,
-      'time': time,
+      'fromTime': fromTime,
+      'toTime': toTime,
       'studentBranch': studentBranch,
       'mark': mark,
     };

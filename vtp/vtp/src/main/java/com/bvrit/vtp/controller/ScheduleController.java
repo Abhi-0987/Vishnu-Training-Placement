@@ -53,15 +53,16 @@ public class ScheduleController {
         try {
             // Parse date and time to check availability
             LocalDate date = LocalDate.parse(scheduleDTO.getDate());
-            // Ensure time parsing matches the format sent from frontend (e.g., "HH:mm" or "H:mm")
-            String timeStr = scheduleDTO.getTime().split(" - ")[0]; // Adjust if format is different
-            LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm")); // Adjust pattern if needed
+            // Parse fromTime and toTime
+            LocalTime fromTime = LocalTime.parse(scheduleDTO.getFromTime(), DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime toTime = LocalTime.parse(scheduleDTO.getToTime(), DateTimeFormatter.ofPattern("H:mm"));
 
             // Check if the time slot is available
-            if (!scheduleService.isTimeSlotAvailable(scheduleDTO.getLocation(), date, time)) {
+            if (!scheduleService.isTimeSlotAvailable(scheduleDTO.getLocation(), date, fromTime, toTime)) {
                 Map<String, String> response = new HashMap<>();
                 response.put("error", "The selected time slot is already booked for this location");
-                logger.warn("Time slot unavailable: Location={}, Date={}, Time={}", scheduleDTO.getLocation(), date, time);
+                logger.warn("Time slot unavailable: Location={}, Date={}, FromTime={}, ToTime={}", 
+                    scheduleDTO.getLocation(), date, fromTime, toTime);
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -80,12 +81,13 @@ public class ScheduleController {
     public ResponseEntity<?> checkAvailability(
             @RequestParam String location,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam String timeSlot) {
+            @RequestParam String fromTimeSlot,
+            @RequestParam String toTimeSlot) {
         try {
-            String timeStr = timeSlot.split(" - ")[0];
-            LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime fromTime = LocalTime.parse(fromTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime toTime = LocalTime.parse(toTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
 
-            boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, time);
+            boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, fromTime, toTime);
 
             Map<String, Boolean> response = new HashMap<>();
             response.put("available", isAvailable);

@@ -13,7 +13,9 @@ class VenueService {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      final token =
+          prefs.getString('token') ??
+          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjIxMWExMjAwQGJ2cml0LmFjLmluIiwicm9sZSI6IlN0dWRlbnQiLCJpYXQiOjE3NTE1Njk1MzQsImV4cCI6MTc1MTY1NTkzNH0.AUXHwGlvxereCrHVmG32bJLiIz-S3z46VKK_DvapBSw';
 
       final apiUrl = '$baseUrl/api/fetch/coordinates';
 
@@ -51,7 +53,9 @@ class VenueService {
   Future<List<Venue>> fetchVenues() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      final token =
+          prefs.getString('token') ??
+          'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyMjIxMWExMjAwQGJ2cml0LmFjLmluIiwicm9sZSI6IlN0dWRlbnQiLCJpYXQiOjE3NTE1Njk1MzQsImV4cCI6MTc1MTY1NTkzNH0.AUXHwGlvxereCrHVmG32bJLiIz-S3z46VKK_DvapBSw';
 
       final apiUrl = '$baseUrl/api/venues';
 

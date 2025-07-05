@@ -28,13 +28,15 @@ public class StudentAttendance {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false)
-    private LocalTime time;
+    // Update to use fromTime instead of time
+     @Column(name = "from_time", nullable=false )
+    private LocalTime fromTime;
     
-    // Define proper relationship with Schedule using bigint
+    @Column(name = "to_time", nullable=false)
+    private LocalTime toTime;
+    
+    
     @ManyToOne
     @JoinColumn(name = "schedule_id")
     private Schedule schedule;
-    
-    // No need for separate scheduleId field as it's handled by the relationship
 }
