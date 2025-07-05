@@ -14,6 +14,7 @@ import 'package:collection/collection.dart';
 
 // ignore_for_file: depend_on_ referenced_packages
 class ScheduleDetailsScreen extends StatefulWidget {
+  
   final Map<String, dynamic> schedule;
 
   const ScheduleDetailsScreen({super.key, required this.schedule});
@@ -28,7 +29,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   bool showPostButton = false;
   bool _isUpdatingMark = false; // Add a flag to prevent rapid toggling
 
-  Map<String, double> dataMap = {"Present": 75, "Absent": 25};
+  int presentCount = 0;
+int absentCount = 0;
+int totalStudents = 0;
+
+Map<String, double> dataMap = {
+  "Present": 0,
+  "Absent": 0,
+};
+
 
   late TextEditingController dateController;
   late TextEditingController timeController;
@@ -126,7 +135,9 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     branchController = TextEditingController(text: originalBranch.join(', '));
 
     _fetchVenues();
+    _fetchAttendanceStats();
   }
+
 
   Future<void> _fetchVenues() async {
     try {
@@ -153,6 +164,32 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
       }
     }
   }
+
+    Future<void> _fetchAttendanceStats() async {
+  final scheduleId = widget.schedule['id']?.toString();
+  if (scheduleId == null) return;
+
+  final result = await ScheduleServices.getAttendanceStatistics(scheduleId);
+  if (result['success'] == true) {
+    final data = result['data'];
+    setState(() {
+      presentCount = data['presentCount'] ?? 0;
+      absentCount = data['absentCount'] ?? 0;
+      totalStudents = data['totalStudents'] ?? 0;
+
+      dataMap = {
+        "Present": presentCount.toDouble(),
+        "Absent": absentCount.toDouble(),
+      };
+    });
+  } else {
+    // fallback or error message
+    // ignore: use_build_context_synchronously
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result['message'] ?? 'Failed to load stats')),
+    );
+  }
+}
 
   @override
   void dispose() {
@@ -789,42 +826,50 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                     child: Column(
                       children: [
                         PieChart(
-                          dataMap: dataMap,
-                          animationDuration: const Duration(milliseconds: 800),
-                          chartLegendSpacing: 32,
-                          chartRadius: MediaQuery.of(context).size.width / 2.5,
-                          colorList: const [Colors.green, Colors.red],
-                          initialAngleInDegree: 0,
-                          chartType: ChartType.disc,
-                          legendOptions: const LegendOptions(
-                            showLegendsInRow: false,
-                            legendPosition: LegendPosition.right,
-                            showLegends: true,
-                            legendTextStyle: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: AppConstants.textWhite,
-                            ),
-                          ),
-                          chartValuesOptions: const ChartValuesOptions(
-                            showChartValueBackground: true,
-                            showChartValues: true,
-                            showChartValuesInPercentage: true,
-                            showChartValuesOutside: false,
-                          ),
-                        ),
+  dataMap: dataMap,
+  animationDuration: const Duration(milliseconds: 1000),
+  chartLegendSpacing: 24,
+  chartRadius: MediaQuery.of(context).size.width / 2.6,
+  colorList: const [
+    Color.fromARGB(255, 65, 188, 69), 
+    Color.fromARGB(255, 241, 64, 51), 
+  ],
+  initialAngleInDegree: -90,
+  chartType: ChartType.ring, 
+  ringStrokeWidth: 25,
+  legendOptions: const LegendOptions(
+    showLegendsInRow: false,
+    legendPosition: LegendPosition.bottom,
+    showLegends: true,
+    legendTextStyle: TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 14,
+      color: Colors.white70,
+    ),
+  ),
+  chartValuesOptions: const ChartValuesOptions(
+    showChartValueBackground: false,
+    showChartValues: true,
+    showChartValuesInPercentage: true,
+    showChartValuesOutside: false,
+    decimalPlaces: 1,
+    chartValueStyle: TextStyle(
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+  ),
+),
+
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildStatisticItem(
-                              'Total Students',
-                              '100',
-                              Colors.blue,
-                            ),
-                            const SizedBox(width: 16),
-                            _buildStatisticItem('Present', '75', Colors.green),
-                            const SizedBox(width: 16),
-                            _buildStatisticItem('Absent', '25', Colors.red),
+                            _buildStatisticItem('Total Students', totalStudents.toString(), Colors.blue),
+                            const SizedBox(width: 30),
+                            _buildStatisticItem('Present', presentCount.toString(), Colors.green),
+                            const SizedBox(width: 30),
+                            _buildStatisticItem('Absent', absentCount.toString(), Colors.red),
+
                           ],
                         ),
                       ],
@@ -959,13 +1004,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
-            onPressed: onEditPressed,
-            tooltip: 'Edit $label',
-            constraints: const BoxConstraints(),
-            padding: EdgeInsets.zero,
-          ),
+          // Only show edit icon if the label is not 'Branch'
+          if (label != 'Branch')
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
+              onPressed: onEditPressed,
+              tooltip: 'Edit $label',
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+            ),
         ],
       ),
     );

@@ -49,19 +49,21 @@ public class ScheduleController {
     public ResponseEntity<?> createSchedule(@RequestBody ScheduleDTO scheduleDTO) {
         // Log the received DTO
         logger.info("Received schedule creation request: {}", scheduleDTO);
+        logger.info("Received schedule creation request: {}", scheduleDTO);
 
         try {
             // Parse date and time to check availability
             LocalDate date = LocalDate.parse(scheduleDTO.getDate());
-            // Ensure time parsing matches the format sent from frontend (e.g., "HH:mm" or "H:mm")
-            String timeStr = scheduleDTO.getTime().split(" - ")[0]; // Adjust if format is different
-            LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm")); // Adjust pattern if needed
+            // Parse fromTime and toTime
+            LocalTime fromTime = LocalTime.parse(scheduleDTO.getFromTime(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime toTime = LocalTime.parse(scheduleDTO.getToTime(), DateTimeFormatter.ofPattern("HH:mm"));
 
             // Check if the time slot is available
-            if (!scheduleService.isTimeSlotAvailable(scheduleDTO.getLocation(), date, time)) {
+            if (!scheduleService.isTimeSlotAvailable(scheduleDTO.getLocation(), date, fromTime, toTime)) {
                 Map<String, String> response = new HashMap<>();
                 response.put("error", "The selected time slot is already booked for this location");
-                logger.warn("Time slot unavailable: Location={}, Date={}, Time={}", scheduleDTO.getLocation(), date, time);
+                logger.warn("Time slot unavailable: Location={}, Date={}, FromTime={}, ToTime={}",
+                    scheduleDTO.getLocation(), date, fromTime, toTime);
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -74,18 +76,20 @@ public class ScheduleController {
             logger.error("Error creating schedule for DTO: {}", scheduleDTO, e);
             return ResponseEntity.badRequest().body(response);
         }
+
     }
 
     @GetMapping("/check-availability") // Path relative to class level
     public ResponseEntity<?> checkAvailability(
             @RequestParam String location,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam String timeSlot) {
+            @RequestParam String fromTimeSlot,
+            @RequestParam String toTimeSlot) {
         try {
-            String timeStr = timeSlot.split(" - ")[0];
-            LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime fromTime = LocalTime.parse(fromTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime toTime = LocalTime.parse(toTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
 
-            boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, time);
+            boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, fromTime, toTime);
 
             Map<String, Boolean> response = new HashMap<>();
             response.put("available", isAvailable);
@@ -151,7 +155,7 @@ public class ScheduleController {
             return ResponseEntity.status(500).body(error);
         }
     }
-    
+
 
     // New PUT endpoint for updating mark status
     @PutMapping(value = "/{id}/mark", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -191,7 +195,7 @@ public class ScheduleController {
         logger.info("Fetching students for schedule ID: {}", scheduleId);
         try {
             List<StudentAttendance> attendances = scheduleService.getStudentAttendanceByScheduleId(scheduleId);
-            
+
             // Convert to a simplified format for the frontend
             List<Map<String, Object>> result = new ArrayList<>();
             for (StudentAttendance attendance : attendances) {
@@ -200,11 +204,11 @@ public class ScheduleController {
                 studentMap.put("present", attendance.isPresent());
                 result.add(studentMap);
             }
-            
+
             // Explicitly convert to JSON using Jackson
             ObjectMapper mapper = new ObjectMapper();
             String jsonResult = mapper.writeValueAsString(result);
-            
+
             return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonResult);
@@ -215,14 +219,14 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     // New endpoint to get present students for a schedule
     @GetMapping(value="/{scheduleId}/students/present", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getPresentStudents(@PathVariable Long scheduleId) {
         logger.info("Fetching present students for schedule ID: {}", scheduleId);
         try {
             List<StudentAttendance> attendances = scheduleService.getPresentStudentsByScheduleId(scheduleId);
-            
+
             // Convert to a simplified format for the frontend
             List<Map<String, Object>> result = new ArrayList<>();
             for (StudentAttendance attendance : attendances) {
@@ -231,11 +235,11 @@ public class ScheduleController {
                 studentMap.put("present", true);
                 result.add(studentMap);
             }
-            
+
             // Explicitly convert to JSON using Jackson
             ObjectMapper mapper = new ObjectMapper();
             String jsonResult = mapper.writeValueAsString(result);
-            
+
             return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonResult);
@@ -246,14 +250,14 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     // New endpoint to get absent students for a schedule
     @GetMapping(value="/{scheduleId}/students/absent", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getAbsentStudents(@PathVariable Long scheduleId) {
         logger.info("Fetching absent students for schedule ID: {}", scheduleId);
         try {
             List<StudentAttendance> attendances = scheduleService.getAbsentStudentsByScheduleId(scheduleId);
-            
+
             // Convert to a simplified format for the frontend
             List<Map<String, Object>> result = new ArrayList<>();
             for (StudentAttendance attendance : attendances) {
@@ -262,11 +266,11 @@ public class ScheduleController {
                 studentMap.put("present", false);
                 result.add(studentMap);
             }
-            
+
             // Explicitly convert to JSON using Jackson
             ObjectMapper mapper = new ObjectMapper();
             String jsonResult = mapper.writeValueAsString(result);
-            
+
             return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(jsonResult);
@@ -277,22 +281,22 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     // New endpoint to mark attendance for multiple students
     @PostMapping(value= "/{scheduleId}/mark-attendance", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> markAttendance(
             @PathVariable Long scheduleId,
             @RequestBody List<String> emails) {
-        
+
         logger.info("Marking attendance for {} students in schedule ID: {}", emails.size(), scheduleId);
         try {
             int markedCount = scheduleService.markAttendanceForMultipleStudents(scheduleId, emails);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("markedCount", markedCount);
             response.put("message", "Successfully marked attendance for " + markedCount + " students");
-            
+
             logger.info("Successfully marked attendance for {} students in schedule ID: {}", markedCount, scheduleId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -302,21 +306,21 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-    
+
     // New endpoint to mark attendance for a single student
     @PostMapping(value= "/{scheduleId}/mark-attendance/{email}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> markSingleAttendance(
             @PathVariable Long scheduleId,
             @PathVariable String email) {
-        
+
         logger.info("Marking attendance for student {} in schedule ID: {}", email, scheduleId);
         try {
             boolean marked = scheduleService.markAttendanceByScheduleId(scheduleId, email);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "Successfully marked attendance for " + email);
-            
+
             logger.info("Successfully marked attendance for student {} in schedule ID: {}", email, scheduleId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -324,6 +328,26 @@ public class ScheduleController {
             Map<String, String> response = new HashMap<>();
             response.put("error", "Failed to mark attendance: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+    
+    @GetMapping(value = "/{scheduleId}/attendance-stats", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getAttendanceStats(@PathVariable Long scheduleId) {
+        try {
+            List<StudentAttendance> all = scheduleService.getStudentAttendanceByScheduleId(scheduleId);
+            List<StudentAttendance> present = scheduleService.getPresentStudentsByScheduleId(scheduleId);
+            List<StudentAttendance> absent = scheduleService.getAbsentStudentsByScheduleId(scheduleId);
+    
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("totalStudents", all.size());
+            stats.put("presentCount", present.size());
+            stats.put("absentCount", absent.size());
+    
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Failed to fetch attendance stats: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 }

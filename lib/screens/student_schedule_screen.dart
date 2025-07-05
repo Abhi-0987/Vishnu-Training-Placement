@@ -84,7 +84,8 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                 scheduleDate != null &&
                 (scheduleDate.isAfter(today) ||
                     (scheduleDate.isAtSameMomentAs(today) &&
-                        _isTimeAfterNow(schedule.time, now)));
+                        _isTimeAfterNow(schedule.
+                        fromTime, now)));
             final isBranchMatch = schedule.studentBranch.contains(
               userBranch ?? '',
             );
@@ -282,7 +283,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                         ),
                                         SizedBox(width: width * 0.02),
                                         Text(
-                                          _formatTime(schedule.time),
+                                          _formatTime(schedule.fromTime),
                                           style: TextStyle(
                                             color: Colors.white70,
                                             fontSize: width * 0.035,

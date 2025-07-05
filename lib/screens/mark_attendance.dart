@@ -56,7 +56,8 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     });
     final message = AttendanceService().markAttendance(
       widget.schedule!.date,
-      widget.schedule!.time,
+      widget.schedule!.fromTime,
+      widget.schedule!.toTime,
     );
     _controller.forward(from: 0.0);
     return message;
@@ -235,7 +236,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                               ),
                             ),
                             Text(
-                              widget.schedule!.time,
+                              "${widget.schedule!.fromTime} - ${widget.schedule!.toTime}",
                               style: TextStyle(
                                 color: AppConstants.textWhite,
                                 fontSize: 16,

@@ -13,7 +13,8 @@ class VenueService {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      final token =
+          prefs.getString('token') ?? '';
 
       final apiUrl = '$baseUrl/api/fetch/coordinates';
 
@@ -51,7 +52,8 @@ class VenueService {
   Future<List<Venue>> fetchVenues() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('token') ?? '';
+      final token =
+          prefs.getString('token') ?? '';
 
       final apiUrl = '$baseUrl/api/venues';
 

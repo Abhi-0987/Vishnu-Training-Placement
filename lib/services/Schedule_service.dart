@@ -15,7 +15,7 @@ class ScheduleServices {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
 
-      //print('Sending schedule data: ${jsonEncode(scheduleData)}');
+      print('Sending schedule data: ${jsonEncode(scheduleData)}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/schedules'),
@@ -50,16 +50,17 @@ class ScheduleServices {
     }
   }
 
-  // Method to check availability
+  // Method to check availability - update to handle fromTime and toTime
   static Future<Map<String, dynamic>> checkAvailability(
     String location,
     String date,
-    String timeSlot,
+    String fromTime,
+    String toTime,
   ) async {
     try {
       final response = await http.get(
         Uri.parse(
-          '$baseUrl/api/schedules/check-availability?location=$location&date=$date&timeSlot=$timeSlot',
+          '$baseUrl/api/schedules/check-availability?location=$location&date=$date&fromTime=$fromTime&toTime=$toTime',
         ),
       );
 
@@ -305,7 +306,7 @@ class ScheduleServices {
     }
   }
 
-  // Method to get detailed schedule information
+  // Method to get detailed schedule information - update to handle fromTime and toTime
   static Future<Map<String, dynamic>> getScheduleDetails(
     String scheduleId,
   ) async {
@@ -329,7 +330,8 @@ class ScheduleServices {
           'id': data['id'],
           'title': data['title'] ?? 'Untitled Schedule',
           'date': data['date'] ?? 'Not specified',
-          'time': data['time'] ?? 'Not specified',
+          'fromTime': data['fromTime'] ?? 'Not specified',
+          'toTime': data['toTime'] ?? 'Not specified',
           'location': data['location'] ?? 'Not specified',
           'roomNo': data['roomNo'] ?? 'Not specified',
           'mark': data['mark'] ?? false,
@@ -378,4 +380,37 @@ class ScheduleServices {
 
     return ['All Branches'];
   }
+
+  static Future<Map<String, dynamic>> getStudentOverallAttendance(String email) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token') ?? '';
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/api/attendance/student/$email/statistics'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      return {'success': true, 'data': responseData['data']};
+    } else {
+      String errorMessage = 'Failed to fetch attendance statistics';
+      try {
+        final responseData = jsonDecode(response.body);
+        errorMessage = responseData['message'] ?? errorMessage;
+      } catch (_) {}
+      return {'success': false, 'message': errorMessage};
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'message': 'Network error: ${e.toString()}',
+    };
+  }
+}
+
 }

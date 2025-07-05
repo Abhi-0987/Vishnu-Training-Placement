@@ -31,7 +31,12 @@ public class Schedule {
     
     private LocalDate date;
     
-    private LocalTime time;
+    // Replace single time with fromTime and toTime
+    @Column(name = "from_time", nullable=false )
+    private LocalTime fromTime;
+    
+    @Column(name = "to_time", nullable=false)
+    private LocalTime toTime;
     
     @Column(name = "student_branch")
     private String studentBranch;

@@ -13,7 +13,14 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     List<Schedule> findByLocation(String location);
     List<Schedule> findByDate(LocalDate date);
     List<Schedule> findByLocationAndDate(String location, LocalDate date);
-    List<Schedule> findByLocationAndDateAndTime(String location, LocalDate date, LocalTime time);
+    
+    // Update to use fromTime and toTime
+    List<Schedule> findByLocationAndDateAndFromTime(String location, LocalDate date, LocalTime fromTime);
+    
+    // Add new method to check for time slot conflicts
+    List<Schedule> findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
+        String location, LocalDate date, LocalTime fromTime, LocalTime toTime);
+    
     // Updated to use studentBranch instead of branches
     List<Schedule> findByStudentBranchContaining(String branch);
 }

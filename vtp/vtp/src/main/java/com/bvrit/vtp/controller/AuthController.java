@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api")
 public class AuthController {
 
     @Autowired private AuthService authService;
@@ -31,7 +31,7 @@ public class AuthController {
     @Autowired private PasswordEncoder passwordEncoder;
 
     // Student login
-    @PostMapping(value = "/student/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/student/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> studentLogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
@@ -71,7 +71,7 @@ public class AuthController {
     }
 
     // Admin login
-    @PostMapping(value = "/admin/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/admin/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> adminLogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
@@ -98,7 +98,7 @@ public class AuthController {
     }
 
     // Coordinator login
-    @PostMapping(value = "/coordinator/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/coordinator/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> coordinatorLogin(@RequestBody Map<String, String> credentials) {
         String email = credentials.get("email");
         String password = credentials.get("password");
@@ -173,7 +173,7 @@ public class AuthController {
     }
 
     // ✅ Admin reset student password (Unified API)
-    @PostMapping("/admin/reset-student-password")
+    @PostMapping("/auth/admin/reset-student-password")
     public ResponseEntity<?> resetStudentPassword(@RequestBody Map<String, String> payload) {
         String email = payload.get("email");
 
@@ -200,7 +200,7 @@ public class AuthController {
     }
 
     // Refresh token
-    @PostMapping(value = "/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/auth/refresh", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<TokenResponse> refresh(@RequestBody Map<String, String> tokenMap) {
         return ResponseEntity.ok(authService.refresh(tokenMap.get("refreshToken")));
     }

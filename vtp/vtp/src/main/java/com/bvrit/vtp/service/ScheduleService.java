@@ -34,17 +34,18 @@ public class ScheduleService {
     @Autowired
     private StudentAttendanceRepo studentAttendanceRepository;
     // Method to mark attendance as present
-    public boolean markAttendancePresent(String email, LocalDate date, LocalTime time) {
-        Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findByEmailAndDateAndTime(email, date, time);
+    // Update this method to use fromTime instead of time
+    public boolean markAttendancePresent(String email, LocalDate date, LocalTime fromTime) {
+        Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findByEmailAndDateAndFromTime(email, date, fromTime);
 
         if (attendanceOpt.isEmpty()) {
-            throw new AttendanceRecordNotFoundException("No attendance record found for " + email + " on " + date + " at " + time);
+            throw new AttendanceRecordNotFoundException("No attendance record found for " + email + " on " + date + " at " + fromTime);
         }
 
         StudentAttendance attendance = attendanceOpt.get();
 
         if (attendance.isPresent()) {
-            throw new AttendanceAlreadyMarkedException("You have already marked your attendance for " + date + " at " + time);
+            throw new AttendanceAlreadyMarkedException("You have already marked your attendance for " + date + " at " + fromTime);
         }
 
         attendance.setPresent(true);
@@ -130,18 +131,15 @@ public class ScheduleService {
             LocalDate date = LocalDate.parse(scheduleDTO.getDate());
             schedule.setDate(date);
 
-            // Parse time from string to LocalTime
-            // Ensure time parsing handles potential variations if needed
-            String timeStr = scheduleDTO.getTime().contains(" - ") ? scheduleDTO.getTime().split(" - ")[0] : scheduleDTO.getTime();
-            LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm")); // Or "HH:mm"
-            schedule.setTime(time);
+            // Parse fromTime and toTime from strings to LocalTime
+            LocalTime fromTime = LocalTime.parse(scheduleDTO.getFromTime(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime toTime = LocalTime.parse(scheduleDTO.getToTime(), DateTimeFormatter.ofPattern("HH:mm"));
+            schedule.setFromTime(fromTime);
+            schedule.setToTime(toTime);
         } catch (DateTimeParseException e) {
-            // Handle parsing errors appropriately, e.g., throw a custom exception or log
             throw new IllegalArgumentException("Invalid date or time format provided.", e);
         }
 
-        // *Fix:* Use studentBranch directly from the updated DTO
-        // This line now correctly assigns String from DTO to String in Entity
         schedule.setStudentBranch(scheduleDTO.getStudentBranch());
 
         Schedule savedSchedule = scheduleRepository.save(schedule);
@@ -157,7 +155,6 @@ public class ScheduleService {
         if (scheduleOptional.isPresent()) {
             Schedule existingSchedule = scheduleOptional.get();
 
-            // Update fields from DTO
             existingSchedule.setLocation(scheduleDetails.getLocation());
             existingSchedule.setRoomNo(scheduleDetails.getRoomNo());
 
@@ -166,22 +163,22 @@ public class ScheduleService {
                 LocalDate date = LocalDate.parse(scheduleDetails.getDate());
                 existingSchedule.setDate(date);
 
-                // Parse and update time
-                String timeStr = scheduleDetails.getTime().contains(" - ") ? scheduleDetails.getTime().split(" - ")[0] : scheduleDetails.getTime();
-                LocalTime time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
-                existingSchedule.setTime(time);
+                // Parse and update fromTime and toTime
+                LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime(), DateTimeFormatter.ofPattern("H:mm"));
+                LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime(), DateTimeFormatter.ofPattern("H:mm"));
+                existingSchedule.setFromTime(fromTime);
+                existingSchedule.setToTime(toTime);
             } catch (DateTimeParseException e) {
                 throw new IllegalArgumentException("Invalid date or time format provided for update.", e);
             }
 
-            // Update studentBranch
-            // This line now correctly assigns String from DTO to String in Entity
             existingSchedule.setStudentBranch(scheduleDetails.getStudentBranch());
             Schedule updatedSchedule = scheduleRepository.save(existingSchedule);
             List<StudentAttendance> attendanceList = studentAttendanceRepository.findBySchedule_Id(id);
             for (StudentAttendance attendance : attendanceList) {
                 attendance.setDate(updatedSchedule.getDate());
-                attendance.setTime(updatedSchedule.getTime());
+                attendance.setFromTime(updatedSchedule.getFromTime());
+                attendance.setToTime(updatedSchedule.getToTime());
             }
 
             studentAttendanceRepository.saveAll(attendanceList);
@@ -222,9 +219,13 @@ public class ScheduleService {
             return Optional.empty(); // Schedule not found
         }
     }
-
-    public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime time) {
-        List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDateAndTime(location, date, time);
+    
+    // Update this method to check for time slot conflicts
+    public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime) {
+        // Check if there are any schedules that overlap with the requested time slot
+        List<Schedule> existingSchedules = scheduleRepository
+            .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
+                location, date, toTime, fromTime);
         return existingSchedules.isEmpty();
     }
 
@@ -245,14 +246,14 @@ public class ScheduleService {
             attendance.setEmail(student.getEmail());
             attendance.setPresent(false);
             attendance.setDate(schedule.getDate());
-            attendance.setTime(schedule.getTime());
-            // Set the schedule object directly instead of just the ID
+            attendance.setFromTime(schedule.getFromTime());
+            attendance.setToTime(schedule.getToTime());
+            // Update to use fromTime
             attendance.setSchedule(schedule);
-            System.out.println("Setting time for student " + student.getEmail() + ": " + schedule.getTime());
+            System.out.println("Setting time for student " + student.getEmail() + ": " + schedule.getFromTime());
             return attendance;
         }).toList();
 
         studentAttendanceRepository.saveAll(attendanceList);
     }
-
 }
