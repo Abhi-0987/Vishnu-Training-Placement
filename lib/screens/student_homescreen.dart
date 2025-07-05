@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
@@ -8,6 +9,7 @@ import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
 
+//home screen
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
 
@@ -37,18 +39,30 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       return;
     }
 
-    final data = await StudentService.getStudentDetails(email);
+    final box = Hive.box('infoBox'); // Use your unified box
+    final studentData = box.get('studentDetails');
 
-    if (data != null && data['name'] != null) {
+    if (studentData != null && studentData['name'] != null) {
+      // Load from Hive
       setState(() {
-        studentName = data['name'];
+        studentName = studentData['name'];
         isLoading = false;
       });
     } else {
-      setState(() {
-        studentName = "Student";
-        isLoading = false;
-      });
+      // Fallback: Fetch from server and store in Hive
+      final response = await StudentService.getStudentDetails(email);
+      if (response != null && response['name'] != null) {
+        box.put('studentDetails', response);
+        setState(() {
+          studentName = response['name'];
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          studentName = "Student";
+          isLoading = false;
+        });
+      }
     }
   }
 

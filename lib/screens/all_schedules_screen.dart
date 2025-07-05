@@ -379,7 +379,7 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                                   ),
                                         ),
                                       );
-                                      // Always refresh schedules after returning from details screen
+                                      // Always refresh schedules after returning from details    screen
                                       _fetchSchedules();
                                     },
                                     child: OpaqueContainer(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:vishnu_training_and_placements/screens/mark_attendance.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
@@ -32,14 +33,16 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
 
   Future<void> getUserBranch() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final branch = prefs.getString('studentbranch');
-
+      // final prefs =  await SharedPreferences.getInstance();
+      // final branch = prefs.getString('studentbranch');
+      final box = Hive.box('infoBox');
+      final studentDetails = box.get('studentDetails');
+      final branch = studentDetails?['branch'];
       print('Retrieved branch from SharedPreferences: $branch');
 
       if (branch == null || branch.isEmpty) {
         setState(() {
-          errorMessage = 'Branch not found in SharedPreferences';
+          errorMessage = 'Branch not found';
           isLoading = false;
         });
         return;

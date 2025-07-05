@@ -35,6 +35,7 @@ class AppRoutes {
   static const String scheduleScreen = '/schedule-screen';
   static const String studentScheduleScreen = '/student-schedule-screen';
 
+  //routes
   static final routes = {
     splash: (context) => const SplashScreen(),
     welcome: (context) => const WelcomeScreen(),

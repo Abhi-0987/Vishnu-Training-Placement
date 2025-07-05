@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:ui';
 // import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vishnu_training_and_placements/services/admin_service.dart';
 import 'package:vishnu_training_and_placements/services/auth_service.dart';
+import 'package:vishnu_training_and_placements/services/coordinator_service.dart';
 import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
@@ -27,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   // Future<String?> getAndroidDeviceId() async {
   //   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   //   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-  //   return androidInfo.id; // Unique ID (but may change on factory reset)
+  //   return androidInfo.id; // Unique ID (but may change on factory reset )
   // }
 
   Future<void> login() async {
@@ -67,8 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('studentEmail', email);
           final studentResponse = await StudentService.getStudentDetails(email);
-          if (studentResponse != null && studentResponse['branch'] != null) {
-            prefs.setString('studentbranch', studentResponse['branch']);
+          if (studentResponse != null) {
+            final box = Hive.box('infoBox');
+            box.put('studentDetails', studentResponse); // entire object
           }
           if (mounted) {
             if (data["login"] == false) {
@@ -87,6 +91,12 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('coordinatorEmail', email);
+          final coordinatorResponse =
+              await CoordinatorService.getCoordinatorDetails(email);
+          if (coordinatorResponse != null) {
+            final box = Hive.box('infoBox');
+            box.put('coordinatorDetails', coordinatorResponse);
+          }
           if (mounted) {
             Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
           }
@@ -96,6 +106,11 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('adminEmail', email);
+          final adminResponse = await AdminService.getAdminDetails(email);
+          if (adminResponse != null) {
+            final box = Hive.box('infoBox');
+            box.put('adminDetails', adminResponse);
+          }
           if (mounted) {
             Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
           }

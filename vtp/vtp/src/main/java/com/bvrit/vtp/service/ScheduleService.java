@@ -177,11 +177,17 @@ public class ScheduleService {
             // Update studentBranch
             // This line now correctly assigns String from DTO to String in Entity
             existingSchedule.setStudentBranch(scheduleDetails.getStudentBranch());
+            Schedule updatedSchedule = scheduleRepository.save(existingSchedule);
+            List<StudentAttendance> attendanceList = studentAttendanceRepository.findBySchedule_Id(id);
+            for (StudentAttendance attendance : attendanceList) {
+                attendance.setDate(updatedSchedule.getDate());
+                attendance.setTime(updatedSchedule.getTime());
+            }
 
-            return scheduleRepository.save(existingSchedule);
+            studentAttendanceRepository.saveAll(attendanceList);
+
+            return updatedSchedule;
         } else {
-            // Optionally throw an exception or return null based on desired behavior
-            // For now, returning null as indicated by the controller logic
             return null;
         }
     }
