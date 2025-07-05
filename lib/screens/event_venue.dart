@@ -271,7 +271,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     // Format the time in 24-hour format for backend
     String formatTimeTo24Hour(TimeOfDay time) {
       final now = DateTime.now();
-      final dt = DateTime(time.hour, time.minute);
+      final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
       return DateFormat('HH:mm').format(dt); // PostgreSQL compatible format
     }
 

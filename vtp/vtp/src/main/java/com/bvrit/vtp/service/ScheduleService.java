@@ -135,8 +135,8 @@ public class ScheduleService {
             schedule.setDate(date);
 
             // Parse fromTime and toTime from strings to LocalTime
-            LocalTime fromTime = LocalTime.parse(scheduleDTO.getFromTime(), DateTimeFormatter.ofPattern("H:mm"));
-            LocalTime toTime = LocalTime.parse(scheduleDTO.getToTime(), DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime fromTime = LocalTime.parse(scheduleDTO.getFromTime(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime toTime = LocalTime.parse(scheduleDTO.getToTime(), DateTimeFormatter.ofPattern("HH:mm"));
             schedule.setFromTime(fromTime);
             schedule.setToTime(toTime);
         } catch (DateTimeParseException e) {
@@ -180,7 +180,8 @@ public class ScheduleService {
             List<StudentAttendance> attendanceList = studentAttendanceRepository.findBySchedule_Id(id);
             for (StudentAttendance attendance : attendanceList) {
                 attendance.setDate(updatedSchedule.getDate());
-                attendance.setTime(updatedSchedule.getTime());
+                attendance.setFromTime(updatedSchedule.getFromTime());
+                attendance.setToTime(updatedSchedule.getToTime());
             }
 
             studentAttendanceRepository.saveAll(attendanceList);

@@ -19,7 +19,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     
     // Add new method to check for time slot conflicts
     List<Schedule> findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
-        String location, LocalDate date, LocalTime toTime, LocalTime fromTime);
+        String location, LocalDate date, LocalTime fromTime, LocalTime toTime);
     
     // Updated to use studentBranch instead of branches
     List<Schedule> findByStudentBranchContaining(String branch);

@@ -15,7 +15,7 @@ class ScheduleServices {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
 
-      //print('Sending schedule data: ${jsonEncode(scheduleData)}');
+      print('Sending schedule data: ${jsonEncode(scheduleData)}');
 
       final response = await http.post(
         Uri.parse('$baseUrl/api/schedules'),
