@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
+//student setvice
 class StudentService {
   static const String baseUrl = AppConstants.backendUrl;
 

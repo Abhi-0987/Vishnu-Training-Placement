@@ -237,7 +237,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       "studentBranch": branchesString,
     };
 
-    // Add a print statement here to verify the map before sending
+    // Add a print statement here to verify the map  before sending
     print('Constructed scheduleData: $scheduleData');
 
     try {

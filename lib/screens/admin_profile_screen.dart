@@ -33,38 +33,38 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   }
 
   Future<void> fetchAdminDetails() async {
-  final prefs = await SharedPreferences.getInstance();
-  final box = Hive.box('infoBox');
+    final prefs = await SharedPreferences.getInstance();
+    final box = Hive.box('infoBox');
+    //used hive for infobox
+    final email = prefs.getString('adminEmail');
 
-  final email = prefs.getString('adminEmail');
+    if (email == null) {
+      _showSnackBar("No admin email found");
+      return;
+    }
 
-  if (email == null) {
-    _showSnackBar("No admin email found");
-    return;
-  }
+    final adminData = box.get('adminDetails');
 
-  final adminData = box.get('adminDetails');
-
-  if (adminData != null && adminData['email'] == email) {
-    // Load from Hive cache
-    setState(() {
-      adminEmail = adminData['email'];
-      adminName = adminData['name'];
-    });
-  } else {
-    // Fallback to API
-    final data = await AdminService.getAdminDetails(email);
-    if (data != null && data['email'] != null) {
-      box.put('adminDetails', data);
+    if (adminData != null && adminData['email'] == email) {
+      // Load from Hive cache
       setState(() {
-        adminEmail = data['email'];
-        adminName = data['name'];
+        adminEmail = adminData['email'];
+        adminName = adminData['name'];
       });
     } else {
-      _showSnackBar("Failed to load admin details");
+      // Fallback to API
+      final data = await AdminService.getAdminDetails(email);
+      if (data != null && data['email'] != null) {
+        box.put('adminDetails', data);
+        setState(() {
+          adminEmail = data['email'];
+          adminName = data['name'];
+        });
+      } else {
+        _showSnackBar("Failed to load admin details");
+      }
     }
   }
-}
 
   bool isValidPassword(String password) {
     final passwordRegex = RegExp(
@@ -82,15 +82,11 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
     setState(() => _isLoading = true);
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/api/auth/admin/reset-student-password'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'email': email}),
-    );
+    final isSuccess = await AdminService.resetStudentPassword(email);
 
     setState(() => _isLoading = false);
 
-    if (response.statusCode == 200) {
+    if (isSuccess) {
       _showSnackBar("Student password reset successfully.");
       studentEmailController.clear();
     } else {
@@ -482,7 +478,7 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
-                          final box = Hive.box('infoBox'); 
+                          final box = Hive.box('infoBox');
                           await prefs.clear();
                           await box.clear();
                           if (context.mounted) {

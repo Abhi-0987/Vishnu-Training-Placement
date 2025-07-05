@@ -47,43 +47,43 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       final box = Hive.box('infoBox');
       final studentData = box.get('studentDetails');
       if (studentData != null && studentData['email'] == email) {
-      // Load from Hive cache
-      setState(() {
-        studentName = studentData['name'];
-        studentRollNo = studentData['email'].split('@')[0];
-        studentYear = studentData['year'];
-        studentBranch = studentData['branch'];
-        studentEmail = studentData['email'];
-        isLoading = false;
-      });
-    }else {
-      // Fallback to API
-      final response = await StudentService.getStudentDetails(email);
+        // Load from Hive cache
+        setState(() {
+          studentName = studentData['name'];
+          studentRollNo = studentData['email'].split('@')[0];
+          studentYear = studentData['year'];
+          studentBranch = studentData['branch'];
+          studentEmail = studentData['email'];
+          isLoading = false;
+        });
+      } else {
+        // Fallback  to API
+        final response = await StudentService.getStudentDetails(email);
 
-      if (response == null) {
-        throw Exception('No response from backend');
+        if (response == null) {
+          throw Exception('No response from backend');
+        }
+
+        // Save in Hive for future use
+        box.put('studentDetails', response);
+
+        setState(() {
+          studentName = response['name'];
+          studentRollNo = response['email'].split('@')[0];
+          studentYear = response['year'];
+          studentBranch = response['branch'];
+          studentEmail = response['email'];
+          isLoading = false;
+        });
       }
-
-      // Save in Hive for future use
-      box.put('studentDetails', response);
-
+    } catch (e) {
       setState(() {
-        studentName = response['name'];
-        studentRollNo = response['email'].split('@')[0];
-        studentYear = response['year'];
-        studentBranch = response['branch'];
-        studentEmail = response['email'];
+        errorMessage = 'Failed to load profile: ${e.toString()}';
         isLoading = false;
       });
+      _showErrorSnackbar(e.toString());
     }
-  } catch (e) {
-    setState(() {
-      errorMessage = 'Failed to load profile: ${e.toString()}';
-      isLoading = false;
-    });
-    _showErrorSnackbar(e.toString());
   }
-}
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -195,7 +195,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                         child: ElevatedButton(
                           onPressed: () async {
                             final prefs = await SharedPreferences.getInstance();
-                            final box = Hive.box('infoBox'); 
+                            final box = Hive.box('infoBox');
                             if (!mounted) return;
                             await prefs.clear();
                             await box.clear();

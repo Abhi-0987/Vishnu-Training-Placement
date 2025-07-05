@@ -7,6 +7,7 @@ import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/services/token_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
+//splash screen
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

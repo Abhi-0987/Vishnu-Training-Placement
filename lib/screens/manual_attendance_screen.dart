@@ -5,7 +5,7 @@ import '../services/manual_attendance_service.dart';
 import '../widgets/custom_appbar.dart';
 import '../widgets/screens_background.dart';
 
-// ignore_for_file: unused_field
+// ignore_for_file:  unused_field
 class ManualAttendanceScreen extends StatefulWidget {
   final int scheduleId;
 

@@ -77,7 +77,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     }
 
     LocationPermission permission = await Geolocator.checkPermission();
-    
+
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (!mounted) return false;
@@ -103,7 +103,7 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     return true;
   }
 
-  /// Fetches current location and validates distance before submitting attendance
+  /// Fetches current location and validates distance  before submitting attendance
   Future<void> submitAttendance() async {
     setState(() {
       _isLoading = true;

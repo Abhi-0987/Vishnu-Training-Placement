@@ -66,7 +66,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       ),
       body: Stack(
         children: [
-          // Gradient Background
+          // Gradient  Background
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(

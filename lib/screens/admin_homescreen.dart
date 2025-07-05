@@ -40,6 +40,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
   Future<void> _fetchUserName(String role) async {
     final prefs = await SharedPreferences.getInstance();
+    //used hivebox
     final box = Hive.box('infoBox');
     if (role == 'coordinator') {
       final email = prefs.getString('coordinatorEmail');
@@ -52,31 +53,31 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         return;
       }
 
-    final coordinatorData = box.get('coordinatorDetails');
-    
-    if (coordinatorData != null && coordinatorData['name'] != null) {
-      // Load from Hive
-      setState(() {
-        userName = coordinatorData['name'];
-        isLoading = false;
-      });
-    } else {
-      // Fallback to API
-      final data = await CoordinatorService.getCoordinatorDetails(email);
-      if (data != null && data['name'] != null) {
-        box.put('coordinatorDetails', data);
+      final coordinatorData = box.get('coordinatorDetails');
+
+      if (coordinatorData != null && coordinatorData['name'] != null) {
+        // Load from Hive
         setState(() {
-          userName = data['name'];
+          userName = coordinatorData['name'];
           isLoading = false;
         });
       } else {
-        setState(() {
-          userName = "Coordinator";
-          isLoading = false;
-        });
+        // Fallback to API
+        final data = await CoordinatorService.getCoordinatorDetails(email);
+        if (data != null && data['name'] != null) {
+          box.put('coordinatorDetails', data);
+          setState(() {
+            userName = data['name'];
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            userName = "Coordinator";
+            isLoading = false;
+          });
+        }
       }
-     }
-    }  else {
+    } else {
       final email = prefs.getString('adminEmail');
 
       if (email == null) {
@@ -89,29 +90,29 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
       final adminData = box.get('adminDetails');
 
-    if (adminData != null && adminData['name'] != null) {
-      // Load from Hive
-      setState(() {
-        userName = adminData['name'];
-        isLoading = false;
-      });
-    } else {
-      // Fallback to API
-      final data = await AdminService.getAdminDetails(email);
-      if (data != null && data['name'] != null) {
-        box.put('adminDetails', data);
+      if (adminData != null && adminData['name'] != null) {
+        // Load from Hive
         setState(() {
-          userName = data['name'];
+          userName = adminData['name'];
           isLoading = false;
         });
       } else {
-        setState(() {
-          userName = "Admin";
-          isLoading = false;
-        });
+        // Fallback to API
+        final data = await AdminService.getAdminDetails(email);
+        if (data != null && data['name'] != null) {
+          box.put('adminDetails', data);
+          setState(() {
+            userName = data['name'];
+            isLoading = false;
+          });
+        } else {
+          setState(() {
+            userName = "Admin";
+            isLoading = false;
+          });
+        }
       }
     }
-  }
   }
 
   @override

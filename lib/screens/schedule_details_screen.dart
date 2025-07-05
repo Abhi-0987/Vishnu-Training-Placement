@@ -11,7 +11,7 @@ import 'package:vishnu_training_and_placements/services/schedule_service.dart';
 import 'package:vishnu_training_and_placements/screens/all_schedules_screen.dart';
 import 'package:collection/collection.dart';
 
-// ignore_for_file: depend_on_referenced_packages
+// ignore_for_file: depend_on_ referenced_packages
 class ScheduleDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> schedule;
 

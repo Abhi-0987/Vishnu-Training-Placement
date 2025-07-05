@@ -6,6 +6,7 @@ import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 class CoordinatorService {
   static const String baseUrl = AppConstants.backendUrl;
 
+  //get coordinates
   static Future<Map<String, dynamic>?> getCoordinatorDetails(
     String email,
   ) async {

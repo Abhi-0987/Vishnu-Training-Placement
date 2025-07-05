@@ -5,7 +5,7 @@ import 'package:flutter/material.dart'; // Add this import for Colors
 class AdminAttendanceController extends GetxController {
   final RxList<String> phoneNumbers = <String>[].obs;
 
-  // Replace the single loading state with multiple states for different actions
+
   final RxBool isUploadingExcel = false.obs;
   final RxBool isFetchingContacts = false.obs;
   final RxBool isDownloadingExcel = false.obs;

@@ -25,7 +25,7 @@ class _AdminMarkAttendenceState extends State<AdminMarkAttendence> {
     super.dispose();
   }
 
-  // Simplified method that calls the service
+  // Simplifiedd method that calls the service
   Future<void> pickExcelFile() async {
     try {
       controller.isUploadingExcel.value = true;
