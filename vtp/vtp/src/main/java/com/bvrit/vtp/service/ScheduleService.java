@@ -180,24 +180,38 @@ public class ScheduleService {
             // Update studentBranch
             // This line now correctly assigns String from DTO to String in Entity
             existingSchedule.setStudentBranch(scheduleDetails.getStudentBranch());
+            Schedule updatedSchedule = scheduleRepository.save(existingSchedule);
+            List<StudentAttendance> attendanceList = studentAttendanceRepository.findBySchedule_Id(id);
+            for (StudentAttendance attendance : attendanceList) {
+                attendance.setDate(updatedSchedule.getDate());
+                attendance.setTime(updatedSchedule.getTime());
+            }
 
-            return scheduleRepository.save(existingSchedule);
+            studentAttendanceRepository.saveAll(attendanceList);
+
+            return updatedSchedule;
         } else {
-            // Optionally throw an exception or return null based on desired behavior
-            // For now, returning null as indicated by the controller logic
             return null;
         }
     }
 
-    @Transactional // Add transactional annotation for delete operation
+    @Transactional
     public boolean deleteSchedule(Long id) {
+        System.out.println(">>> deleteSchedule service called with id: " + id);
         if (scheduleRepository.existsById(id)) {
+            System.out.println("Schedule exists. Deleting related attendance records.");
+            studentAttendanceRepository.deleteBySchedule_Id(id);
+            System.out.println("Deleted related attendance records. Deleting schedule now.");
             scheduleRepository.deleteById(id);
+            System.out.println("Schedule deleted successfully.");
             return true;
         } else {
+            System.out.println("Schedule with id " + id + " does not exist.");
             return false;
         }
     }
+    
+    
 
     // New method to update only the mark status
     @Transactional

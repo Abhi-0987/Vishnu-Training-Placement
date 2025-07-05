@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
 import 'package:vishnu_training_and_placements/services/student_service.dart';
@@ -43,12 +44,29 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
       if (email == null || email.isEmpty) {
         throw Exception('Email not found in shared preferences');
       }
-
+      final box = Hive.box('infoBox');
+      final studentData = box.get('studentDetails');
+      if (studentData != null && studentData['email'] == email) {
+      // Load from Hive cache
+      setState(() {
+        studentName = studentData['name'];
+        studentRollNo = studentData['email'].split('@')[0];
+        studentYear = studentData['year'];
+        studentBranch = studentData['branch'];
+        studentEmail = studentData['email'];
+        isLoading = false;
+      });
+    }else {
+      // Fallback to API
       final response = await StudentService.getStudentDetails(email);
 
       if (response == null) {
         throw Exception('No response from backend');
       }
+
+      // Save in Hive for future use
+      box.put('studentDetails', response);
+
       setState(() {
         studentName = response['name'];
         studentRollNo = response['email'].split('@')[0];
@@ -57,14 +75,15 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
         studentEmail = response['email'];
         isLoading = false;
       });
-    } catch (e) {
-      setState(() {
-        errorMessage = 'Failed to load profile: ${e.toString()}';
-        isLoading = false;
-      });
-      _showErrorSnackbar(e.toString());
     }
+  } catch (e) {
+    setState(() {
+      errorMessage = 'Failed to load profile: ${e.toString()}';
+      isLoading = false;
+    });
+    _showErrorSnackbar(e.toString());
   }
+}
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -80,34 +99,18 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     await _loadStudentData();
   }
 
-  void _showPasswordChangeDialog() {
-    showDialog(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text("Change Password"),
-            content: const Text("Password change functionality goes here."),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text("OK"),
-              ),
-            ],
-          ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double height = screenSize.height;
     final double width = screenSize.width;
 
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
-        return false;
-      },
+    return PopScope(
+      onPopInvokedWithResult:
+          (didPop, result) => Navigator.pushReplacementNamed(
+            context,
+            AppRoutes.studentHomeScreen,
+          ),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: const CustomAppBar(isProfileScreen: true),
@@ -192,7 +195,10 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
                         child: ElevatedButton(
                           onPressed: () async {
                             final prefs = await SharedPreferences.getInstance();
-                            prefs.clear();
+                            final box = Hive.box('infoBox'); 
+                            if (!mounted) return;
+                            await prefs.clear();
+                            await box.clear();
                             Navigator.pushAndRemoveUntil(
                               context,
                               MaterialPageRoute(
@@ -383,7 +389,7 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.grey[800]?.withOpacity(0.5),
+        color: Color.fromRGBO(66, 66, 66, 0.5),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(

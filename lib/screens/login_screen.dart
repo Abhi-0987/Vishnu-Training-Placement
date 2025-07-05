@@ -2,11 +2,15 @@ import 'dart:convert';
 import 'dart:ui';
 // import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:vishnu_training_and_placements/services/admin_service.dart';
 import 'package:vishnu_training_and_placements/services/auth_service.dart';
+import 'package:vishnu_training_and_placements/services/coordinator_service.dart';
+import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -65,6 +69,11 @@ class _LoginScreenState extends State<LoginScreen> {
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('studentEmail', email);
+          final studentResponse = await StudentService.getStudentDetails(email);
+          if (studentResponse != null) {
+            final box = Hive.box('infoBox');
+            box.put('studentDetails', studentResponse); // entire object
+          }
           if (mounted) {
             if (data["login"] == false) {
               Navigator.pushNamed(
@@ -76,23 +85,31 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.pushNamed(context, AppRoutes.studentHomeScreen);
             }
           } // Navigate on success
-        } 
-        else if(data["role"]== "Coordinator"){
+        } else if (data["role"] == "Coordinator") {
           prefs.setBool('isLoggedIn', true);
           prefs.setString('role', 'coordinator');
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('coordinatorEmail', email);
+          final coordinatorResponse = await CoordinatorService.getCoordinatorDetails(email);
+          if (coordinatorResponse != null) {
+            final box = Hive.box('infoBox');
+            box.put('coordinatorDetails', coordinatorResponse);
+          }
           if (mounted) {
             Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
           }
-        }
-        else if (data["role"] == "Admin") {
+        } else if (data["role"] == "Admin") {
           prefs.setBool('isLoggedIn', true);
           prefs.setString('role', 'admin');
           prefs.setString('token', data['accessToken']);
           prefs.setString('refreshToken', data['refreshToken']);
           prefs.setString('adminEmail', email);
+          final adminResponse = await AdminService.getAdminDetails(email);
+          if (adminResponse != null) {
+            final box = Hive.box('infoBox');
+            box.put('adminDetails', adminResponse);
+          }
           if (mounted) {
             Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
           }
@@ -284,7 +301,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     sigmaY: 15,
                                   ),
                                   child: Container(
-                                    height: height * 0.36, 
+                                    height: height * 0.36,
                                     width: width * 0.96,
                                     padding: EdgeInsets.all(width * 0.05),
                                     decoration: BoxDecoration(
@@ -299,7 +316,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                     child: Column(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly, 
+                                          MainAxisAlignment.spaceEvenly,
                                       children: [
                                         TextField(
                                           controller: emailController,
@@ -321,13 +338,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                             contentPadding:
                                                 EdgeInsets.symmetric(
                                                   vertical: height * 0.023,
-                                                  horizontal: width * 0.03, 
+                                                  horizontal: width * 0.03,
                                                 ),
                                           ),
                                           inputFormatters: [
                                             LengthLimitingTextInputFormatter(
                                               40,
-                                            ), 
+                                            ),
                                           ],
                                         ),
                                         TextField(
@@ -344,7 +361,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               onPressed: () {
                                                 setState(() {
                                                   _isPasswordVisible =
-                                                      !_isPasswordVisible; 
+                                                      !_isPasswordVisible;
                                                 });
                                               },
                                             ),
@@ -384,7 +401,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                           ),
                                           padding: EdgeInsets.all(
-                                            width * 0.008, 
+                                            width * 0.008,
                                           ),
                                           child: ElevatedButton(
                                             style: ElevatedButton.styleFrom(
@@ -396,8 +413,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                                     BorderRadius.circular(100),
                                               ),
                                               padding: EdgeInsets.symmetric(
-                                                horizontal: width * 0.12, 
-                                                vertical: height * 0.016, 
+                                                horizontal: width * 0.12,
+                                                vertical: height * 0.016,
                                               ),
                                             ),
                                             onPressed:
@@ -406,7 +423,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                               'Login',
                                               style: TextStyle(
                                                 color: AppConstants.textWhite,
-                                                fontSize: width * 0.045, 
+                                                fontSize: width * 0.045,
                                                 fontFamily: 'Alata',
                                               ),
                                             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:vishnu_training_and_placements/screens/mark_attendance.dart';
-import 'package:vishnu_training_and_placements/services/student_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/screens_background.dart';
 import 'package:vishnu_training_and_placements/widgets/opaque_container.dart';
@@ -31,16 +31,18 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
     getUserBranch();
   }
 
-Future<void> getUserBranch() async {
+  Future<void> getUserBranch() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final branch = prefs.getString('branch');
-
+      // final prefs = await SharedPreferences.getInstance();
+      // final branch = prefs.getString('studentbranch');
+      final box = Hive.box('infoBox');
+      final studentDetails = box.get('studentDetails');
+      final branch = studentDetails?['branch'];
       print('Retrieved branch from SharedPreferences: $branch');
 
       if (branch == null || branch.isEmpty) {
         setState(() {
-          errorMessage = 'Branch not found in SharedPreferences';
+          errorMessage = 'Branch not found';
           isLoading = false;
         });
         return;
@@ -58,7 +60,6 @@ Future<void> getUserBranch() async {
       });
     }
   }
-
 
   Future<void> _fetchSchedules() async {
     try {
@@ -171,7 +172,7 @@ Future<void> getUserBranch() async {
                     child: Text(
                       'Your Schedules',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppConstants.textWhite,
                         fontSize: width * 0.06,
                         fontWeight: FontWeight.bold,
                       ),
@@ -181,7 +182,9 @@ Future<void> getUserBranch() async {
                   if (isLoading)
                     Expanded(
                       child: Center(
-                        child: CircularProgressIndicator(color: Colors.purple),
+                        child: CircularProgressIndicator(
+                          color: AppConstants.primaryColor,
+                        ),
                       ),
                     )
                   else if (errorMessage.isNotEmpty)
@@ -198,7 +201,7 @@ Future<void> getUserBranch() async {
                             ElevatedButton(
                               onPressed: _fetchSchedules,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple,
+                                backgroundColor: AppConstants.primaryColor,
                               ),
                               child: Text('Retry'),
                             ),
@@ -217,7 +220,7 @@ Future<void> getUserBranch() async {
                                 ? 'There is no Attendance to mark'
                                 : 'No schedules found for your branch.',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppConstants.textWhite,
                               fontSize: width * 0.04,
                             ),
                           ),
@@ -228,7 +231,7 @@ Future<void> getUserBranch() async {
                     Expanded(
                       child: RefreshIndicator(
                         onRefresh: _fetchSchedules,
-                        color: Colors.purple,
+                        color: AppConstants.primaryColor,
                         child: ListView.builder(
                           padding: EdgeInsets.symmetric(
                             vertical: height * 0.01,
@@ -246,7 +249,7 @@ Future<void> getUserBranch() async {
                                     Text(
                                       '${schedule.location} - Room ${schedule.roomNo}',
                                       style: TextStyle(
-                                        color: Colors.white,
+                                        color: AppConstants.textWhite,
                                         fontSize: width * 0.045,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -335,7 +338,7 @@ Future<void> getUserBranch() async {
                                             child: Text(
                                               'Mark Attendance',
                                               style: TextStyle(
-                                                color: Colors.white,
+                                                color: AppConstants.textWhite,
                                                 fontSize: width * 0.035,
                                               ),
                                             ),

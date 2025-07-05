@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/student_schedule_screen.dart';
@@ -18,17 +19,17 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   String? studentName;
   bool isLoading = true;
-  
+
   @override
   void initState() {
     super.initState();
     _fetchStudentName();
   }
-  
+
   Future<void> _fetchStudentName() async {
     final prefs = await SharedPreferences.getInstance();
     final email = prefs.getString('studentEmail');
-    
+
     if (email == null) {
       setState(() {
         studentName = "Student";
@@ -37,11 +38,22 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       return;
     }
 
-    final data = await StudentService.getStudentDetails(email);
-    
-    if (data != null && data['name'] != null) {
+  final box = Hive.box('infoBox'); // Use your unified box
+  final studentData = box.get('studentDetails');
+
+  if (studentData != null && studentData['name'] != null) {
+    // Load from Hive
+    setState(() {
+      studentName = studentData['name'];
+      isLoading = false;
+    });
+  } else {
+    // Fallback: Fetch from server and store in Hive
+    final response = await StudentService.getStudentDetails(email);
+    if (response != null && response['name'] != null) {
+      box.put('studentDetails', response);
       setState(() {
-        studentName = data['name'];
+        studentName = response['name'];
         isLoading = false;
       });
     } else {
@@ -51,6 +63,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       });
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +74,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     return Scaffold(
       backgroundColor: AppConstants.textBlack,
       extendBodyBehindAppBar: true,
-      appBar: CustomAppBar(), 
+      appBar: CustomAppBar(),
       body: Stack(
         children: [
           ScreensBackground(height: height, width: width),
@@ -82,11 +96,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                             fontFamily: 'Alata',
                           ),
                         ),
-                        isLoading 
-                          ? const CircularProgressIndicator(
+                        isLoading
+                            ? const CircularProgressIndicator(
                               color: AppConstants.textWhite,
                             )
-                          : Text(
+                            : Text(
                               studentName ?? 'Student',
                               style: const TextStyle(
                                 fontSize: 28,
@@ -161,15 +175,14 @@ class CustomCard extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
     return Align(
-      alignment: Alignment.center, 
+      alignment: Alignment.center,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10), 
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.9, 
-            height:
-                MediaQuery.of(context).size.height * 0.22,
+            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height * 0.22,
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.13),
@@ -193,7 +206,7 @@ class CustomCard extends StatelessWidget {
                     image!,
                     height: screenHeight * 0.30,
                     width: screenWidth * 0.3,
-                  ), 
+                  ),
               ],
             ),
           ),
