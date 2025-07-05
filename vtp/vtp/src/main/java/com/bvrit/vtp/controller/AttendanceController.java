@@ -33,15 +33,15 @@ public class AttendanceController {
     public ResponseEntity<?> markAttendancePresent(@RequestBody Map<String,String> Data) {
         try {
             String date = Data.get("date");
-            String time = Data.get("time");
+            String fromTime = Data.get("fromTime");
+            String toTime = Data.get("toTime");
             String email = Data.get("email");
             // Call service to mark attendance present
             LocalDate Date = LocalDate.parse(date);
 
-            String timeStr = time.split(" - ")[0];// Assuming format like "9:30 - 11:15"
-            LocalTime Time = LocalTime.parse(timeStr, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime FromTime = LocalTime.parse(fromTime, DateTimeFormatter.ofPattern("H:mm"));
 
-            boolean success = scheduleService.markAttendancePresent(email, Date, Time);
+            boolean success = scheduleService.markAttendancePresent(email, Date, FromTime);
             if (success) {
                 return ResponseEntity.ok("Attendance marked as present successfully.");
             } else {

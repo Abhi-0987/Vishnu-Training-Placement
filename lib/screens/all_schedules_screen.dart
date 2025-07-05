@@ -424,7 +424,7 @@ class _AllSchedulesScreenState extends State<AllSchedulesScreen> {
                                               ),
                                               SizedBox(width: width * 0.02),
                                               Text(
-                                                _formatTime(schedule.time),
+                                                _formatTime(schedule.fromTime),
                                                 style: TextStyle(
                                                   color: Colors.white70,
                                                   fontSize: width * 0.035,

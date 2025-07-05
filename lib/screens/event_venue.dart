@@ -21,7 +21,8 @@ class EventVenueScreen extends StatefulWidget {
 class _EventVenueScreenState extends State<EventVenueScreen> {
   final VenueService _venueService = VenueService();
   List<Venue> venues = [];
-  bool isLoading = false;
+  bool isLoadingVenues = false;
+  bool isLoadingSchedule = false;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   Future<void> fetchVenues() async {
     try {
       setState(() {
-        isLoading = true;
+        isLoadingVenues = true;
       });
 
       final fetchedVenues = await _venueService.fetchVenues();
@@ -40,7 +41,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       if (mounted) {
         setState(() {
           venues = fetchedVenues;
-          isLoading = false;
+          isLoadingVenues = false;
 
           print('Venues fetched from database: ${venues.length} venues found');
           for (var venue in venues) {
@@ -54,7 +55,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       print('Error in fetchVenues: $e');
       if (mounted) {
         setState(() {
-          isLoading = false;
+          isLoadingVenues = false;
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -105,7 +106,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
 
   DateTime selectedDate = DateTime.now();
   DateTime focusedDate = DateTime.now();
-  String selectedTime = "9:30 - 11:15";
+  // Replace selectedTime with fromTime and toTime
+  TimeOfDay fromTime = TimeOfDay(hour: 9, minute: 30);
+  TimeOfDay toTime = TimeOfDay(hour: 11, minute: 15);
   String selectedLocation = '';
 
   // Add this method to show section selection dialog
@@ -125,54 +128,79 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
-            return AlertDialog(
-              title: Text('Select Sections for $branch'),
-              content: SizedBox(
-                width: double.maxFinite,
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: sections.length,
-                  itemBuilder: (context, index) {
-                    final section = sections[index];
-                    return CheckboxListTile(
-                      title: Text(section),
-                      value: tempSelectedSections.contains(section),
-                      onChanged: (bool? value) {
-                        setState(() {
-                          if (value == true) {
-                            tempSelectedSections.add(section);
-                          } else {
-                            tempSelectedSections.remove(section);
-                          }
-                        });
-                      },
-                    );
-                  },
+            return Theme(
+              data: ThemeData.dark().copyWith(
+                dialogBackgroundColor: Colors.grey[900],
+                colorScheme: ColorScheme.dark(
+                  primary: Colors.purple,
+                  onPrimary: Colors.white,
+                  surface: Colors.grey[800]!,
+                  onSurface: Colors.white,
                 ),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text('Cancel'),
+              child: AlertDialog(
+                title: Text(
+                  'Select Sections for $branch',
+                  style: TextStyle(color: Colors.white),
                 ),
-                TextButton(
-                  onPressed: () {
-                    // Remove any previously selected sections for this branch
-                    selectedSections.removeWhere(
-                      (section) => section.startsWith('$branch-'),
-                    );
-
-                    // Add newly selected sections
-                    selectedSections.addAll(tempSelectedSections);
-
-                    Navigator.pop(context);
-
-                    // Update the state to reflect changes
-                    this.setState(() {});
-                  },
-                  child: Text('Confirm'),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: sections.length,
+                    itemBuilder: (context, index) {
+                      final section = sections[index];
+                      return CheckboxListTile(
+                        title: Text(
+                          section,
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        value: tempSelectedSections.contains(section),
+                        checkColor: Colors.white,
+                        activeColor: Colors.purple,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value == true) {
+                              tempSelectedSections.add(section);
+                            } else {
+                              tempSelectedSections.remove(section);
+                            }
+                          });
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ],
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.purple),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      // Remove any previously selected sections for this branch
+                      selectedSections.removeWhere(
+                        (section) => section.startsWith('$branch-'),
+                      );
+
+                      // Add newly selected sections
+                      selectedSections.addAll(tempSelectedSections);
+
+                      Navigator.pop(context);
+
+                      // Update the state to reflect changes
+                      this.setState(() {});
+                    },
+                    child: Text(
+                      'Confirm',
+                      style: TextStyle(color: Colors.purple),
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );
@@ -183,10 +211,13 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   // Modify the _scheduleClass method to include sections
   Future<void> _scheduleClass() async {
     setState(() {
-      isLoading = true;
+      isLoadingSchedule = true;
     });
     // --- Validation Checks ---
     if (selectedLocation.isEmpty) {
+      setState(() {
+        isLoadingSchedule = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a location.'),
@@ -196,19 +227,27 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       return; // Stop execution if location is not selected
     }
 
+    // Check if from time is before to time
+    // In the _scheduleClass method, replace the validation check for selectedTime
     // Check if a time slot is selected (it has a default, but good to check)
-    if (selectedTime.isEmpty) {
-      // Or check against a specific "not selected" value if applicable
+    if (fromTime.hour > toTime.hour ||
+        (fromTime.hour == toTime.hour && fromTime.minute >= toTime.minute)) {
+      setState(() {
+        isLoadingSchedule = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please select a time slot.'),
+          content: Text('From time must be before To time.'),
           backgroundColor: Colors.red,
         ),
       );
-      return; // Stop execution if time is not selected
+      return;
     }
 
     if (selectedBranches.isEmpty) {
+      setState(() {
+        isLoadingSchedule = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select at least one branch.'),
@@ -229,11 +268,23 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             ? selectedBranches.join(',')
             : selectedSections.join(',');
 
+    // Format the time in 24-hour format for backend
+    String formatTimeTo24Hour(TimeOfDay time) {
+      final now = DateTime.now();
+      final dt = DateTime(now.year, now.month, now.day, time.hour, time.minute);
+      return DateFormat('HH:mm').format(dt); // PostgreSQL compatible format
+    }
+
+    String formattedTime =
+        "${formatTimeTo24Hour(fromTime)} - ${formatTimeTo24Hour(toTime)}";
+
+    // In the _scheduleClass method, update the scheduleData map
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
       "date": selectedDate.toIso8601String().split('T')[0],
-      "time": selectedTime,
+      "fromTime": formatTimeTo24Hour(fromTime),
+      "toTime": formatTimeTo24Hour(toTime),
       "studentBranch": branchesString,
     };
 
@@ -264,11 +315,11 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         );
       }
       setState(() {
-        isLoading = false;
+        isLoadingSchedule = false;
       });
     } catch (e) {
       setState(() {
-        isLoading = false;
+        isLoadingSchedule = false;
       });
       print('Schedule error: $e');
       // Check context before showing SnackBar
@@ -280,9 +331,6 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
         ),
       );
     }
-    setState(() {
-      isLoading = false;
-    });
   }
 
   @override
@@ -363,7 +411,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                         children: [
                           _buildInfoCard(width),
                           SizedBox(height: height * 0.02),
-                          isLoading
+                          isLoadingSchedule
                               ? CircularProgressIndicator(
                                 color: AppConstants.primaryColor,
                               )
@@ -400,7 +448,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   }
 
   Widget _buildLocationDropdown(Function(String?) onChanged) {
-    if (isLoading) {
+    if (isLoadingVenues) {
       return Center(child: CircularProgressIndicator(color: Colors.purple));
     }
 
@@ -529,52 +577,126 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   }
 
   Widget _buildTimeSelection() {
-    return Column(
+    return Row(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            _buildTimeButton("9:30 - 11:15"),
-            SizedBox(width: 10),
-            _buildTimeButton("11:30 - 1:15"),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "From",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Alata',
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 8),
+              InkWell(
+                onTap: () async {
+                  final TimeOfDay? picked = await showTimePicker(
+                    context: context,
+                    initialTime: fromTime,
+                    builder: (BuildContext context, Widget? child) {
+                      return Theme(
+                        data: ThemeData.dark().copyWith(
+                          colorScheme: ColorScheme.dark(
+                            primary: Colors.purple,
+                            onPrimary: Colors.white,
+                            surface: Colors.grey[900]!,
+                            onSurface: Colors.white,
+                          ),
+                          dialogBackgroundColor: Colors.grey[800],
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null && picked != fromTime) {
+                    setState(() {
+                      fromTime = picked;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    fromTime.format(context),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        SizedBox(height: 10),
-        Row(
-          children: [
-            _buildTimeButton("2:20 - 3:40"),
-            Expanded(child: Container()),
-          ],
+        SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "To",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Alata',
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 8),
+              InkWell(
+                onTap: () async {
+                  final TimeOfDay? picked = await showTimePicker(
+                    context: context,
+                    initialTime: toTime,
+                    builder: (BuildContext context, Widget? child) {
+                      return Theme(
+                        data: ThemeData.dark().copyWith(
+                          colorScheme: ColorScheme.dark(
+                            primary: Colors.purple,
+                            onPrimary: Colors.white,
+                            surface: Colors.grey[900]!,
+                            onSurface: Colors.white,
+                          ),
+                          dialogBackgroundColor: Colors.grey[800],
+                        ),
+                        child: child!,
+                      );
+                    },
+                  );
+                  if (picked != null && picked != toTime) {
+                    setState(() {
+                      toTime = picked;
+                    });
+                  }
+                },
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[800],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    toTime.format(context),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTimeButton(String time) {
-    bool isSelected = selectedTime == time;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            selectedTime = time;
-          });
-        },
-        child: Container(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected ? Colors.purple : Colors.grey[800],
-            borderRadius: BorderRadius.circular(8.0),
-          ),
-          alignment: Alignment.center,
-          child: Text(
-            time,
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ),
-      ),
     );
   }
 
@@ -634,6 +756,10 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       branchesText = selectedSections.join(', ');
     }
 
+    // Format the time as "fromTime - toTime"
+    String FormattedFromTime = "${fromTime.format(context)}";
+    String FormattedToTime = "${toTime.format(context)}";
+
     return OpaqueContainer(
       width: width,
       child: Padding(
@@ -658,9 +784,19 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                 fontSize: 18,
               ),
             ),
-            Divider(color: AppConstants.textWhite),
+            Divider(color: Colors.white),
+            // In the _buildInfoCard method, update the time display
             Text(
-              "Time: $selectedTime",
+              "FromTime: $FormattedFromTime",
+              style: TextStyle(
+                color: Colors.white,
+                fontFamily: 'Alata',
+                fontSize: 18,
+              ),
+            ),
+            Divider(color: Colors.white),
+            Text(
+              "ToTime: $FormattedToTime",
               style: TextStyle(
                 color: AppConstants.textWhite,
                 fontFamily: 'Alata',

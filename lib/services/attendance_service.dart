@@ -6,7 +6,7 @@ import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 class AttendanceService {
   String baseUrl = AppConstants.backendUrl;
 
-  Future<String> markAttendance(String date, String time) async {
+  Future<String> markAttendance(String date, String fromTime, String toTime) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
@@ -20,7 +20,12 @@ class AttendanceService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({"date": date, "time": time, "email": email}),
+        body: jsonEncode({
+          "date": date, 
+          "fromTime": fromTime, 
+          "toTime": toTime, 
+          "email": email
+        }),
       );
 
       return response.body.toString();

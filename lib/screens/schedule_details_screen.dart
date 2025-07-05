@@ -929,13 +929,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
-            onPressed: onEditPressed,
-            tooltip: 'Edit $label',
-            constraints: const BoxConstraints(),
-            padding: EdgeInsets.zero,
-          ),
+          // Only show edit icon if the label is not 'Branch'
+          if (label != 'Branch')
+            IconButton(
+              icon: const Icon(Icons.edit, color: Colors.blueAccent, size: 20),
+              onPressed: onEditPressed,
+              tooltip: 'Edit $label',
+              constraints: const BoxConstraints(),
+              padding: EdgeInsets.zero,
+            ),
         ],
       ),
     );
