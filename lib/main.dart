@@ -9,13 +9,22 @@ void main() async{
    WidgetsFlutterBinding.ensureInitialized();
 
   // // Initialize Hive & get storage directory
-  final appDocDir = await getApplicationDocumentsDirectory();
-  await Hive.initFlutter(appDocDir.path);
-  // Open a common box for all roles
-  await Hive.openBox('infoBox');
+  // final appDocDir = await getApplicationDocumentsDirectory();
+  // await Hive.initFlutter(appDocDir.path);
+  // // Open a common box for all roles
+  // await Hive.openBox('infoBox');
+  if (!kIsWeb) {
+    // Only run this on mobile/desktop platforms
+    final appDocDir = await getApplicationDocumentsDirectory();
+    await Hive.initFlutter(appDocDir.path);
+  } else {
+    // On web, Hive.initFlutter() uses default values
+    await Hive.initFlutter();
+}
 
   runApp(const MainApp());
 }
+
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
