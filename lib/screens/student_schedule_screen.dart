@@ -283,7 +283,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                         ),
                                         SizedBox(width: width * 0.02),
                                         Text(
-                                          _formatTime(schedule.fromTime),
+                                          '${_formatTime(schedule.fromTime)} - ${_formatTime(schedule.toTime)}',
                                           style: TextStyle(
                                             color: Colors.white70,
                                             fontSize: width * 0.035,
