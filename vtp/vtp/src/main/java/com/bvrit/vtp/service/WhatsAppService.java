@@ -52,7 +52,7 @@ public class WhatsAppService {
                 // Assuming phone numbers are in the first column
                 String phoneNumber = row.getCell(0).getStringCellValue();
                 // Skip header row if it exists
-                if (!phoneNumber.equals("Phone Number") && !phoneNumber.isEmpty()) {
+                if (!phoneNumber.equals("Parents Phone Number") && !phoneNumber.isEmpty()) {
                     phoneNumbers.add(phoneNumber);
                 }
             }

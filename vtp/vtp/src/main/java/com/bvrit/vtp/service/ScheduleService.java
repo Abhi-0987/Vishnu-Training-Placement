@@ -18,6 +18,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException; // Import for exception handling
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,10 +109,6 @@ public class ScheduleService {
 
     public List<Schedule> getAllSchedules() {
         return scheduleRepository.findAll();
-    }
-
-    public Optional<Schedule> getScheduleById(Long id) {
-        return scheduleRepository.findById(id);
     }
 
     public List<Schedule> getSchedulesByLocation(String location) {
