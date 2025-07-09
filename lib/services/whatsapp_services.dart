@@ -1,6 +1,9 @@
+import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'dart:io';
@@ -368,19 +371,39 @@ class WhatsappServices {
             'absentees-${parsedDate.day.toString().padLeft(2, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.year}.xlsx';
 
         if (kIsWeb) {
+          // ✅ Web Download
           final blob = html.Blob([bytes]);
           final url = html.Url.createObjectUrlFromBlob(blob);
           html.AnchorElement(href: url)
             ..setAttribute("download", fileName)
             ..click();
           html.Url.revokeObjectUrl(url);
-          return "Excel file downloaded successfully";
-        } else {
-          final directory = await getApplicationDocumentsDirectory();
-          final filePath = '${directory.path}/$fileName';
+          return "Excel file downloaded successfully in browser";
+        } else if (Platform.isAndroid || Platform.isIOS) {
+          // ✅ Ask permission (Android only)
+          final permissionStatus = await Permission.storage.request();
+          if (!permissionStatus.isGranted) {
+            return "Storage permission not granted";
+          }
+
+          // ✅ Get Downloads folder
+          Directory? directory;
+          if (Platform.isAndroid) {
+            directory = await DownloadsPathProvider.downloadsDirectory;
+          } else {
+            directory = await getApplicationDocumentsDirectory();
+          }
+
+          final filePath = '${directory!.path}/$fileName';
           final file = File(filePath);
           await file.writeAsBytes(bytes);
-          return "Excel file saved to: $filePath";
+
+          // ✅ Optionally open file
+          await OpenFile.open(filePath);
+
+          return "File saved to: $filePath";
+        } else {
+          return "Platform not supported";
         }
       } else {
         throw Exception(
@@ -388,7 +411,7 @@ class WhatsappServices {
         );
       }
     } catch (e) {
-      throw Exception("Error downloading Excel file: ${e.toString()}");
+      throw Exception("Error downloading Excel: ${e.toString()}");
     }
   }
 
@@ -467,19 +490,39 @@ class WhatsappServices {
         final fileName = 'absentees-schedule-$scheduleId.xlsx';
 
         if (kIsWeb) {
+          // ✅ Web Download
           final blob = html.Blob([bytes]);
           final url = html.Url.createObjectUrlFromBlob(blob);
           html.AnchorElement(href: url)
             ..setAttribute("download", fileName)
             ..click();
           html.Url.revokeObjectUrl(url);
-          return "Excel file downloaded successfully";
-        } else {
-          final directory = await getApplicationDocumentsDirectory();
-          final filePath = '${directory.path}/$fileName';
+          return "Excel file downloaded successfully in browser";
+        } else if (Platform.isAndroid || Platform.isIOS) {
+          // ✅ Ask permission (Android only)
+          final permissionStatus = await Permission.storage.request();
+          if (!permissionStatus.isGranted) {
+            return "Storage permission not granted";
+          }
+
+          // ✅ Get Downloads folder
+          Directory? directory;
+          if (Platform.isAndroid) {
+            directory = await DownloadsPathProvider.downloadsDirectory;
+          } else {
+            directory = await getApplicationDocumentsDirectory();
+          }
+
+          final filePath = '${directory!.path}/$fileName';
           final file = File(filePath);
           await file.writeAsBytes(bytes);
-          return "Excel file saved to: $filePath";
+
+          // ✅ Optionally open file
+          await OpenFile.open(filePath);
+
+          return "File saved to: $filePath";
+        } else {
+          return "Platform not supported";
         }
       } else {
         throw Exception(
@@ -487,9 +530,7 @@ class WhatsappServices {
         );
       }
     } catch (e) {
-      throw Exception(
-        "Error downloading Excel file by schedule ID: ${e.toString()}",
-      );
+      throw Exception("Error downloading Excel: ${e.toString()}");
     }
   }
 
@@ -561,19 +602,39 @@ class WhatsappServices {
             label != null ? 'contacts_$label.xlsx' : 'contacts_$timestamp.xlsx';
 
         if (kIsWeb) {
-          final blob = html.Blob([Uint8List.fromList(bytes)]);
+          // ✅ Web Download
+          final blob = html.Blob([bytes]);
           final url = html.Url.createObjectUrlFromBlob(blob);
           html.AnchorElement(href: url)
             ..setAttribute("download", fileName)
             ..click();
           html.Url.revokeObjectUrl(url);
-          return "Excel file downloaded successfully";
-        } else {
-          final directory = await getApplicationDocumentsDirectory();
-          final filePath = '${directory.path}/$fileName';
+          return "Excel file downloaded successfully in browser";
+        } else if (Platform.isAndroid || Platform.isIOS) {
+          // ✅ Ask permission (Android only)
+          final permissionStatus = await Permission.storage.request();
+          if (!permissionStatus.isGranted) {
+            return "Storage permission not granted";
+          }
+
+          // ✅ Get Downloads folder
+          Directory? directory;
+          if (Platform.isAndroid) {
+            directory = await DownloadsPathProvider.downloadsDirectory;
+          } else {
+            directory = await getApplicationDocumentsDirectory();
+          }
+
+          final filePath = '${directory!.path}/$fileName';
           final file = File(filePath);
           await file.writeAsBytes(bytes);
-          return "Excel file saved to: $filePath";
+
+          // ✅ Optionally open file
+          await OpenFile.open(filePath);
+
+          return "File saved to: $filePath";
+        } else {
+          return "Platform not supported";
         }
       } else {
         throw Exception('Failed to generate Excel file bytes');
