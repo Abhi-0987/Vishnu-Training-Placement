@@ -164,8 +164,8 @@ public class ScheduleService {
                 existingSchedule.setDate(date);
 
                 // Parse and update fromTime and toTime
-                LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime(), DateTimeFormatter.ofPattern("H:mm"));
-                LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime(), DateTimeFormatter.ofPattern("H:mm"));
+                LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime(), DateTimeFormatter.ofPattern("HH:mm"));
+                LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime(), DateTimeFormatter.ofPattern("HH:mm"));
                 existingSchedule.setFromTime(fromTime);
                 existingSchedule.setToTime(toTime);
             } catch (DateTimeParseException e) {
@@ -227,6 +227,21 @@ public class ScheduleService {
             .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
                 location, date, toTime, fromTime);
         return existingSchedules.isEmpty();
+    }
+
+    public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
+        List<Schedule> existingSchedules = scheduleRepository
+                .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
+                        location, date, toTime, fromTime);
+
+        // Exclude the current schedule being updated
+        for (Schedule schedule : existingSchedules) {
+            if (!schedule.getId().equals(excludeId)) {
+                return false; // There's a conflict with another schedule
+            }
+        }
+
+        return true; // No conflicting schedules (or only conflict is with itself)
     }
 
     private void insertAttendanceForAllStudents(Schedule schedule) {
