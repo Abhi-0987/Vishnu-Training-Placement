@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:pie_chart/pie_chart.dart';
+import 'package:vishnu_training_and_placements/models/schedule_model.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
 import 'package:vishnu_training_and_placements/screens/admin_attendance_screen.dart';
 import 'package:vishnu_training_and_placements/screens/manual_attendance_screen.dart';
@@ -14,7 +15,6 @@ import 'package:collection/collection.dart';
 
 // ignore_for_file: depend_on_ referenced_packages
 class ScheduleDetailsScreen extends StatefulWidget {
-  
   final Map<String, dynamic> schedule;
 
   const ScheduleDetailsScreen({super.key, required this.schedule});
@@ -30,14 +30,10 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   bool _isUpdatingMark = false; // Add a flag to prevent rapid toggling
 
   int presentCount = 0;
-int absentCount = 0;
-int totalStudents = 0;
+  int absentCount = 0;
+  int totalStudents = 0;
 
-Map<String, double> dataMap = {
-  "Present": 0,
-  "Absent": 0,
-};
-
+  Map<String, double> dataMap = {"Present": 0, "Absent": 0};
 
   late TextEditingController dateController;
   late TextEditingController timeController;
@@ -138,7 +134,6 @@ Map<String, double> dataMap = {
     _fetchAttendanceStats();
   }
 
-
   Future<void> _fetchVenues() async {
     try {
       setState(() {
@@ -165,31 +160,31 @@ Map<String, double> dataMap = {
     }
   }
 
-    Future<void> _fetchAttendanceStats() async {
-  final scheduleId = widget.schedule['id']?.toString();
-  if (scheduleId == null) return;
+  Future<void> _fetchAttendanceStats() async {
+    final scheduleId = widget.schedule['id']?.toString();
+    if (scheduleId == null) return;
 
-  final result = await ScheduleServices.getAttendanceStatistics(scheduleId);
-  if (result['success'] == true) {
-    final data = result['data'];
-    setState(() {
-      presentCount = data['presentCount'] ?? 0;
-      absentCount = data['absentCount'] ?? 0;
-      totalStudents = data['totalStudents'] ?? 0;
+    final result = await ScheduleServices.getAttendanceStatistics(scheduleId);
+    if (result['success'] == true) {
+      final data = result['data'];
+      setState(() {
+        presentCount = data['presentCount'] ?? 0;
+        absentCount = data['absentCount'] ?? 0;
+        totalStudents = data['totalStudents'] ?? 0;
 
-      dataMap = {
-        "Present": presentCount.toDouble(),
-        "Absent": absentCount.toDouble(),
-      };
-    });
-  } else {
-    // fallback or error message
-    // ignore: use_build_context_synchronously
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result['message'] ?? 'Failed to load stats')),
-    );
+        dataMap = {
+          "Present": presentCount.toDouble(),
+          "Absent": absentCount.toDouble(),
+        };
+      });
+    } else {
+      // fallback or error message
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Failed to load stats')),
+      );
+    }
   }
-}
 
   @override
   void dispose() {
@@ -706,6 +701,7 @@ Map<String, double> dataMap = {
     String displayBranch =
         _editedBranch.isEmpty ? 'Not specified' : _editedBranch.join(', ');
     String displayTitle = widget.schedule['title'] ?? 'Schedule Details';
+    final Schedule schedule = Schedule.fromJson(widget.schedule);
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -826,50 +822,61 @@ Map<String, double> dataMap = {
                     child: Column(
                       children: [
                         PieChart(
-  dataMap: dataMap,
-  animationDuration: const Duration(milliseconds: 1000),
-  chartLegendSpacing: 24,
-  chartRadius: MediaQuery.of(context).size.width / 2.6,
-  colorList: const [
-    Color.fromARGB(255, 65, 188, 69), 
-    Color.fromARGB(255, 241, 64, 51), 
-  ],
-  initialAngleInDegree: -90,
-  chartType: ChartType.ring, 
-  ringStrokeWidth: 25,
-  legendOptions: const LegendOptions(
-    showLegendsInRow: false,
-    legendPosition: LegendPosition.bottom,
-    showLegends: true,
-    legendTextStyle: TextStyle(
-      fontWeight: FontWeight.w600,
-      fontSize: 14,
-      color: Colors.white70,
-    ),
-  ),
-  chartValuesOptions: const ChartValuesOptions(
-    showChartValueBackground: false,
-    showChartValues: true,
-    showChartValuesInPercentage: true,
-    showChartValuesOutside: false,
-    decimalPlaces: 1,
-    chartValueStyle: TextStyle(
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    ),
-  ),
-),
+                          dataMap: dataMap,
+                          animationDuration: const Duration(milliseconds: 1000),
+                          chartLegendSpacing: 24,
+                          chartRadius: MediaQuery.of(context).size.width / 2.6,
+                          colorList: const [
+                            Color.fromARGB(255, 65, 188, 69),
+                            Color.fromARGB(255, 241, 64, 51),
+                          ],
+                          initialAngleInDegree: -90,
+                          chartType: ChartType.ring,
+                          ringStrokeWidth: 25,
+                          legendOptions: const LegendOptions(
+                            showLegendsInRow: false,
+                            legendPosition: LegendPosition.bottom,
+                            showLegends: true,
+                            legendTextStyle: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              color: Colors.white70,
+                            ),
+                          ),
+                          chartValuesOptions: const ChartValuesOptions(
+                            showChartValueBackground: false,
+                            showChartValues: true,
+                            showChartValuesInPercentage: true,
+                            showChartValuesOutside: false,
+                            decimalPlaces: 1,
+                            chartValueStyle: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
 
                         const SizedBox(height: 16),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            _buildStatisticItem('Total Students', totalStudents.toString(), Colors.blue),
+                            _buildStatisticItem(
+                              'Total Students',
+                              totalStudents.toString(),
+                              Colors.blue,
+                            ),
                             const SizedBox(width: 30),
-                            _buildStatisticItem('Present', presentCount.toString(), Colors.green),
+                            _buildStatisticItem(
+                              'Present',
+                              presentCount.toString(),
+                              Colors.green,
+                            ),
                             const SizedBox(width: 30),
-                            _buildStatisticItem('Absent', absentCount.toString(), Colors.red),
-
+                            _buildStatisticItem(
+                              'Absent',
+                              absentCount.toString(),
+                              Colors.red,
+                            ),
                           ],
                         ),
                       ],
@@ -926,34 +933,33 @@ Map<String, double> dataMap = {
 
                   const SizedBox(height: 16), // Spacing before the new button
 
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) => AdminMarkAttendence(
-                                  scheduleId: int.parse(
-                                    widget.schedule['id'].toString(),
+                  if (schedule.isOver())
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => AdminMarkAttendence(
+                                    scheduleId: int.parse(schedule.id),
                                   ),
-                                ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.assignment_turned_in),
-                      label: const Text(
-                        'Message Sending',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.assignment_turned_in),
+                        label: const Text(
+                          'Message Sending',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),

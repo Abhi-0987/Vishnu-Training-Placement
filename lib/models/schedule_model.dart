@@ -56,9 +56,10 @@ class Schedule {
         formattedFromTime = json['fromTime'].toString(); // Fallback
       }
     } else {
-      formattedFromTime = json['fromTime']?.toString() ?? ''; // Fallback if not a list
+      formattedFromTime =
+          json['fromTime']?.toString() ?? ''; // Fallback if not a list
     }
-    
+
     // Parse toTime array [H, M]
     if (json['toTime'] is List && (json['toTime'] as List).length == 2) {
       try {
@@ -73,7 +74,8 @@ class Schedule {
         formattedToTime = json['toTime'].toString(); // Fallback
       }
     } else {
-      formattedToTime = json['toTime']?.toString() ?? ''; // Fallback if not a list
+      formattedToTime =
+          json['toTime']?.toString() ?? ''; // Fallback if not a list
     }
 
     return Schedule(
@@ -100,5 +102,26 @@ class Schedule {
       'studentBranch': studentBranch,
       'mark': mark,
     };
+  }
+
+  bool isOver() {
+    try {
+      final dateParts = date.split('-');
+      final timeParts = toTime.split(':');
+
+      if (dateParts.length == 3 && timeParts.length == 2) {
+        final year = int.parse(dateParts[0]);
+        final month = int.parse(dateParts[1]);
+        final day = int.parse(dateParts[2]);
+        final hour = int.parse(timeParts[0]);
+        final minute = int.parse(timeParts[1]);
+
+        final scheduleEnd = DateTime(year, month, day, hour, minute);
+        return DateTime.now().isAfter(scheduleEnd);
+      }
+    } catch (e) {
+      print('Error checking schedule end time: $e');
+    }
+    return false; // fallback
   }
 }

@@ -102,9 +102,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
   };
   String? selectedYear;
 
-List<String> years = ['I', 'II', 'III', 'IV'];
-
-
+  List<String> years = ['I', 'II', 'III', 'IV'];
 
   List<String> selectedBranches = [];
   List<String> selectedSections = []; // Add this to track selected sections
@@ -112,8 +110,11 @@ List<String> years = ['I', 'II', 'III', 'IV'];
   DateTime selectedDate = DateTime.now();
   DateTime focusedDate = DateTime.now();
   // Replace selectedTime with fromTime and toTime
-  TimeOfDay fromTime = TimeOfDay(hour: 9, minute: 30);
-  TimeOfDay toTime = TimeOfDay(hour: 11, minute: 15);
+  //TimeOfDay fromTime = TimeOfDay(hour: 9, minute: 30);
+  //TimeOfDay toTime = TimeOfDay(hour: 11, minute: 15);
+  TimeOfDay? fromTime;
+  TimeOfDay? toTime;
+
   String selectedLocation = '';
 
   // Add this method to show section selection dialog
@@ -140,7 +141,8 @@ List<String> years = ['I', 'II', 'III', 'IV'];
                   onPrimary: Colors.white,
                   surface: Colors.grey[800]!,
                   onSurface: Colors.white,
-                ), dialogTheme: DialogThemeData(backgroundColor: Colors.grey[900]),
+                ),
+                dialogTheme: DialogThemeData(backgroundColor: Colors.grey[900]),
               ),
               child: AlertDialog(
                 title: Text(
@@ -231,28 +233,82 @@ List<String> years = ['I', 'II', 'III', 'IV'];
       return; // Stop execution if location is not selected
     }
     if (selectedYear == null) {
-  setState(() => isLoadingSchedule = false);
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text('Please select the year.'), backgroundColor: Colors.red),
-  );
-  return;
-}
+      setState(() => isLoadingSchedule = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select the year.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
 
-    // Check if from time is before to time
-    // In the _scheduleClass method, replace the validation check for selectedTime
-    // Check if a time slot is selected (it has a default, but good to check)
-    if (fromTime.hour > toTime.hour ||
-        (fromTime.hour == toTime.hour && fromTime.minute >= toTime.minute)) {
+    if (fromTime == null || toTime == null) {
       setState(() {
         isLoadingSchedule = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('From time must be before To time.'),
+          content: Text('Please select both From and To times.'),
           backgroundColor: Colors.red,
         ),
       );
       return;
+    }
+
+    if (fromTime!.hour < 9 ||
+        fromTime!.hour > 16 ||
+        (fromTime!.hour == 16 && fromTime!.minute > 0)) {
+      setState(() {
+        isLoadingSchedule = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('From time must be between 9:00 AM and 4:00 PM.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (toTime!.hour < 9 ||
+        toTime!.hour > 16 ||
+        (toTime!.hour == 16 && toTime!.minute > 0)) {
+      setState(() {
+        isLoadingSchedule = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('To time must be between 9:00 AM and 4:00 PM.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final now = DateTime.now();
+
+    if (isSameDay(selectedDate, now)) {
+      final fromDateTime = DateTime(
+        selectedDate.year,
+        selectedDate.month,
+        selectedDate.day,
+        fromTime!.hour,
+        fromTime!.minute,
+      );
+
+      if (fromDateTime.isBefore(now)) {
+        setState(() {
+          isLoadingSchedule = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cannot schedule a class in the past.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
     }
 
     if (selectedBranches.isEmpty) {
@@ -287,18 +343,17 @@ List<String> years = ['I', 'II', 'III', 'IV'];
     }
 
     String formattedTime =
-        "${formatTimeTo24Hour(fromTime)} - ${formatTimeTo24Hour(toTime)}";
+        "${formatTimeTo24Hour(fromTime!)} - ${formatTimeTo24Hour(toTime!)}";
 
     // In the _scheduleClass method, update the scheduleData map
     final scheduleData = {
       "location": blockName,
       "roomNo": roomNo,
       "date": selectedDate.toIso8601String().split('T')[0],
-      "fromTime": formatTimeTo24Hour(fromTime),
-      "toTime": formatTimeTo24Hour(toTime),
+      "fromTime": formatTimeTo24Hour(fromTime!),
+      "toTime": formatTimeTo24Hour(toTime!),
       "year": selectedYear,
       "studentBranch": branchesString,
-
     };
 
     // Add a print statement here to verify the map  before sending
@@ -408,18 +463,18 @@ List<String> years = ['I', 'II', 'III', 'IV'];
                     SizedBox(height: height * 0.03),
                     // Add heading for branch selection
                     // Add this after _buildTimeSelection() and before _buildBranchSelector() in the build method:
-Text(
-  "Select Year",
-  style: TextStyle(
-    fontSize: height * 0.025,
-    fontWeight: FontWeight.bold,
-    fontFamily: 'Alata',
-    color: Colors.white,
-  ),
-),
-SizedBox(height: height * 0.02),
-_buildYearDropdown(),
-SizedBox(height: height * 0.03),
+                    Text(
+                      "Select Year",
+                      style: TextStyle(
+                        fontSize: height * 0.025,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Alata',
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(height: height * 0.02),
+                    _buildYearDropdown(),
+                    SizedBox(height: height * 0.03),
                     Text(
                       "Select Branches",
                       style: TextStyle(
@@ -622,7 +677,7 @@ SizedBox(height: height * 0.03),
                 onTap: () async {
                   final TimeOfDay? picked = await showTimePicker(
                     context: context,
-                    initialTime: fromTime,
+                    initialTime: fromTime ?? TimeOfDay(hour: 9, minute: 20),
                     builder: (BuildContext context, Widget? child) {
                       return Theme(
                         data: ThemeData.dark().copyWith(
@@ -631,13 +686,31 @@ SizedBox(height: height * 0.03),
                             onPrimary: Colors.white,
                             surface: Colors.grey[900]!,
                             onSurface: Colors.white,
-                          ), dialogTheme: DialogThemeData(backgroundColor: Colors.grey[800]),
+                          ),
+                          dialogTheme: DialogThemeData(
+                            backgroundColor: Colors.grey[800],
+                          ),
                         ),
                         child: child!,
                       );
                     },
                   );
-                  if (picked != null && picked != fromTime) {
+                  if (picked != null) {
+                    if (picked.hour < 9 ||
+                        (picked.hour == 9 && picked.minute < 20) ||
+                        picked.hour > 16 ||
+                        (picked.hour == 16 && picked.minute > 0)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Select time between 9:20 AM and 4:00 PM.',
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
                     setState(() {
                       fromTime = picked;
                     });
@@ -651,7 +724,7 @@ SizedBox(height: height * 0.03),
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    fromTime.format(context),
+                    fromTime != null ? fromTime!.format(context) : "--:--",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -680,7 +753,7 @@ SizedBox(height: height * 0.03),
                 onTap: () async {
                   final TimeOfDay? picked = await showTimePicker(
                     context: context,
-                    initialTime: toTime,
+                    initialTime: toTime ?? TimeOfDay(hour: 16, minute: 0),
                     builder: (BuildContext context, Widget? child) {
                       return Theme(
                         data: ThemeData.dark().copyWith(
@@ -689,13 +762,31 @@ SizedBox(height: height * 0.03),
                             onPrimary: Colors.white,
                             surface: Colors.grey[900]!,
                             onSurface: Colors.white,
-                          ), dialogTheme: DialogThemeData(backgroundColor: Colors.grey[800]),
+                          ),
+                          dialogTheme: DialogThemeData(
+                            backgroundColor: Colors.grey[800],
+                          ),
                         ),
                         child: child!,
                       );
                     },
                   );
-                  if (picked != null && picked != toTime) {
+                  if (picked != null) {
+                    if (picked.hour < 9 ||
+                        (picked.hour == 9 && picked.minute < 20) ||
+                        picked.hour > 16 ||
+                        (picked.hour == 16 && picked.minute > 0)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Select time between 9:20 AM and 4:00 PM.',
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      return;
+                    }
+
                     setState(() {
                       toTime = picked;
                     });
@@ -709,7 +800,7 @@ SizedBox(height: height * 0.03),
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    toTime.format(context),
+                    toTime != null ? toTime!.format(context) : "--:--",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -723,33 +814,35 @@ SizedBox(height: height * 0.03),
       ],
     );
   }
+
   Widget _buildYearDropdown() {
-  return DropdownButtonFormField<String>(
-    decoration: InputDecoration(
-      filled: true,
-      fillColor: Colors.grey[900],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8.0),
-        borderSide: BorderSide.none,
+    return DropdownButtonFormField<String>(
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.grey[900],
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+          borderSide: BorderSide.none,
+        ),
       ),
-    ),
-    hint: Text("Choose Year", style: TextStyle(color: Colors.white)),
-    value: selectedYear,
-    onChanged: (String? newValue) {
-      setState(() {
-        selectedYear = newValue;
-      });
-    },
-    dropdownColor: Colors.black,
-    style: const TextStyle(color: Colors.white),
-    items: years.map((String year) {
-      return DropdownMenuItem<String>(
-        value: year,
-        child: Text(year, style: TextStyle(color: Colors.white)),
-      );
-    }).toList(),
-  );
-}
+      hint: Text("Choose Year", style: TextStyle(color: Colors.white)),
+      value: selectedYear,
+      onChanged: (String? newValue) {
+        setState(() {
+          selectedYear = newValue;
+        });
+      },
+      dropdownColor: Colors.black,
+      style: const TextStyle(color: Colors.white),
+      items:
+          years.map((String year) {
+            return DropdownMenuItem<String>(
+              value: year,
+              child: Text(year, style: TextStyle(color: Colors.white)),
+            );
+          }).toList(),
+    );
+  }
 
   Widget _buildBranchSelector() {
     return Wrap(
@@ -808,8 +901,9 @@ SizedBox(height: height * 0.03),
     }
 
     // Format the time as "fromTime - toTime"
-    String FormattedFromTime = fromTime.format(context);
-    String FormattedToTime = toTime.format(context);
+    String FormattedFromTime =
+        fromTime != null ? fromTime!.format(context) : "--:--";
+    String FormattedToTime = toTime != null ? toTime!.format(context) : "--:--";
 
     return OpaqueContainer(
       width: width,
@@ -854,7 +948,7 @@ SizedBox(height: height * 0.03),
                 fontSize: 18,
               ),
             ),
-             Divider(color: Colors.white),
+            Divider(color: Colors.white),
             Text(
               "Year: $selectedYear",
               style: TextStyle(
