@@ -33,6 +33,7 @@ public class ScheduleService {
 
     @Autowired
     private StudentAttendanceRepo studentAttendanceRepository;
+
     // Method to mark attendance as present
     // Update this method to use fromTime instead of time
     public boolean markAttendancePresent(String email, LocalDate date, LocalTime fromTime) {
@@ -52,32 +53,32 @@ public class ScheduleService {
         studentAttendanceRepository.save(attendance);
         return true;
     }
-    
+
     // New method to mark attendance based on schedule ID and email
     @Transactional
     public boolean markAttendanceByScheduleId(Long scheduleId, String email) {
         Optional<StudentAttendance> attendanceOpt = studentAttendanceRepository.findBySchedule_IdAndEmail(scheduleId, email);
-        
+
         if (attendanceOpt.isEmpty()) {
             throw new AttendanceRecordNotFoundException("No attendance record found for " + email + " in schedule " + scheduleId);
         }
-        
+
         StudentAttendance attendance = attendanceOpt.get();
-        
+
         if (attendance.isPresent()) {
             throw new AttendanceAlreadyMarkedException("Attendance already marked for " + email + " in this schedule");
         }
-        
+
         attendance.setPresent(true);
         studentAttendanceRepository.save(attendance);
         return true;
     }
-    
+
     // New method to mark attendance for multiple students in a schedule
     @Transactional
     public int markAttendanceForMultipleStudents(Long scheduleId, List<String> emails) {
         int markedCount = 0;
-        
+
         for (String email : emails) {
             try {
                 if (markAttendanceByScheduleId(scheduleId, email)) {
@@ -88,20 +89,20 @@ public class ScheduleService {
                 System.out.println("Error marking attendance for " + email + ": " + e.getMessage());
             }
         }
-        
+
         return markedCount;
     }
-    
+
     // New method to get all students for a schedule
     public List<StudentAttendance> getStudentAttendanceByScheduleId(Long scheduleId) {
         return studentAttendanceRepository.findBySchedule_Id(scheduleId);
     }
-    
+
     // New method to get present students for a schedule
     public List<StudentAttendance> getPresentStudentsByScheduleId(Long scheduleId) {
         return studentAttendanceRepository.findBySchedule_IdAndPresentTrue(scheduleId);
     }
-    
+
     // New method to get absent students for a schedule
     public List<StudentAttendance> getAbsentStudentsByScheduleId(Long scheduleId) {
         return studentAttendanceRepository.findBySchedule_IdAndPresentFalse(scheduleId);
@@ -204,8 +205,6 @@ public class ScheduleService {
             return false;
         }
     }
-    
-    
 
     // New method to update only the mark status
     @Transactional
@@ -219,26 +218,24 @@ public class ScheduleService {
             return Optional.empty(); // Schedule not found
         }
     }
-    
+
     // Update this method to check for time slot conflicts
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime) {
         // Check if there are any schedules that overlap with the requested time slot
         List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDate(location, date);
 
-    for (Schedule existing : existingSchedules) {
-        LocalTime existingFrom = existing.getFromTime();
-        LocalTime existingTo = existing.getToTime();
+        for (Schedule existing : existingSchedules) {
+            LocalTime existingFrom = existing.getFromTime();
+            LocalTime existingTo = existing.getToTime();
 
-        if (!(toTime.compareTo(existingFrom) <= 0 || fromTime.compareTo(existingTo) >= 0)) {
-            return false; // Conflict
+            if (!(toTime.compareTo(existingFrom) <= 0 || fromTime.compareTo(existingTo) >= 0)) {
+                return false; // Conflict
+            }
         }
+
+        return true; // No conflict
     }
 
-<<<<<<< HEAD
-    return true; // No conflict
-}
-    
-=======
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
         List<Schedule> existingSchedules = scheduleRepository
                 .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
@@ -253,7 +250,7 @@ public class ScheduleService {
 
         return true; // No conflicting schedules (or only conflict is with itself)
     }
->>>>>>> d5998d6 (from time,to time is updated)
+// (from time,to time is updated)
 
     private void insertAttendanceForAllStudents(Schedule schedule) {
         //  Split branches
