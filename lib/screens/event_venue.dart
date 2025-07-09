@@ -100,6 +100,11 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     'CSD': ['CSD-A', 'CSD-B'],
     'CSBS': ['CSBS'],
   };
+  String? selectedYear;
+
+List<String> years = ['I', 'II', 'III', 'IV'];
+
+
 
   List<String> selectedBranches = [];
   List<String> selectedSections = []; // Add this to track selected sections
@@ -130,13 +135,12 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
           builder: (context, setState) {
             return Theme(
               data: ThemeData.dark().copyWith(
-                dialogBackgroundColor: Colors.grey[900],
                 colorScheme: ColorScheme.dark(
                   primary: Colors.purple,
                   onPrimary: Colors.white,
                   surface: Colors.grey[800]!,
                   onSurface: Colors.white,
-                ),
+                ), dialogTheme: DialogThemeData(backgroundColor: Colors.grey[900]),
               ),
               child: AlertDialog(
                 title: Text(
@@ -226,6 +230,13 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       );
       return; // Stop execution if location is not selected
     }
+    if (selectedYear == null) {
+  setState(() => isLoadingSchedule = false);
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text('Please select the year.'), backgroundColor: Colors.red),
+  );
+  return;
+}
 
     // Check if from time is before to time
     // In the _scheduleClass method, replace the validation check for selectedTime
@@ -285,7 +296,9 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       "date": selectedDate.toIso8601String().split('T')[0],
       "fromTime": formatTimeTo24Hour(fromTime),
       "toTime": formatTimeTo24Hour(toTime),
+      "year": selectedYear,
       "studentBranch": branchesString,
+
     };
 
     // Add a print statement here to verify the map  before sending
@@ -394,6 +407,19 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                     _buildTimeSelection(),
                     SizedBox(height: height * 0.03),
                     // Add heading for branch selection
+                    // Add this after _buildTimeSelection() and before _buildBranchSelector() in the build method:
+Text(
+  "Select Year",
+  style: TextStyle(
+    fontSize: height * 0.025,
+    fontWeight: FontWeight.bold,
+    fontFamily: 'Alata',
+    color: Colors.white,
+  ),
+),
+SizedBox(height: height * 0.02),
+_buildYearDropdown(),
+SizedBox(height: height * 0.03),
                     Text(
                       "Select Branches",
                       style: TextStyle(
@@ -605,8 +631,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                             onPrimary: Colors.white,
                             surface: Colors.grey[900]!,
                             onSurface: Colors.white,
-                          ),
-                          dialogBackgroundColor: Colors.grey[800],
+                          ), dialogTheme: DialogThemeData(backgroundColor: Colors.grey[800]),
                         ),
                         child: child!,
                       );
@@ -664,8 +689,7 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
                             onPrimary: Colors.white,
                             surface: Colors.grey[900]!,
                             onSurface: Colors.white,
-                          ),
-                          dialogBackgroundColor: Colors.grey[800],
+                          ), dialogTheme: DialogThemeData(backgroundColor: Colors.grey[800]),
                         ),
                         child: child!,
                       );
@@ -699,6 +723,33 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       ],
     );
   }
+  Widget _buildYearDropdown() {
+  return DropdownButtonFormField<String>(
+    decoration: InputDecoration(
+      filled: true,
+      fillColor: Colors.grey[900],
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8.0),
+        borderSide: BorderSide.none,
+      ),
+    ),
+    hint: Text("Choose Year", style: TextStyle(color: Colors.white)),
+    value: selectedYear,
+    onChanged: (String? newValue) {
+      setState(() {
+        selectedYear = newValue;
+      });
+    },
+    dropdownColor: Colors.black,
+    style: const TextStyle(color: Colors.white),
+    items: years.map((String year) {
+      return DropdownMenuItem<String>(
+        value: year,
+        child: Text(year, style: TextStyle(color: Colors.white)),
+      );
+    }).toList(),
+  );
+}
 
   Widget _buildBranchSelector() {
     return Wrap(
@@ -757,8 +808,8 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
     }
 
     // Format the time as "fromTime - toTime"
-    String FormattedFromTime = "${fromTime.format(context)}";
-    String FormattedToTime = "${toTime.format(context)}";
+    String FormattedFromTime = fromTime.format(context);
+    String FormattedToTime = toTime.format(context);
 
     return OpaqueContainer(
       width: width,
@@ -797,6 +848,15 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             Divider(color: Colors.white),
             Text(
               "ToTime: $FormattedToTime",
+              style: TextStyle(
+                color: AppConstants.textWhite,
+                fontFamily: 'Alata',
+                fontSize: 18,
+              ),
+            ),
+             Divider(color: Colors.white),
+            Text(
+              "Year: $selectedYear",
               style: TextStyle(
                 color: AppConstants.textWhite,
                 fontFamily: 'Alata',
