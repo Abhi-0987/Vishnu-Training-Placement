@@ -223,11 +223,20 @@ public class ScheduleService {
     // Update this method to check for time slot conflicts
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime) {
         // Check if there are any schedules that overlap with the requested time slot
-        List<Schedule> existingSchedules = scheduleRepository
-            .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
-                location, date, toTime, fromTime);
-        return existingSchedules.isEmpty();
+        List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDate(location, date);
+
+    for (Schedule existing : existingSchedules) {
+        LocalTime existingFrom = existing.getFromTime();
+        LocalTime existingTo = existing.getToTime();
+
+        if (!(toTime.compareTo(existingFrom) <= 0 || fromTime.compareTo(existingTo) >= 0)) {
+            return false; // Conflict
+        }
     }
+
+    return true; // No conflict
+}
+    
 
     private void insertAttendanceForAllStudents(Schedule schedule) {
         //  Split branches
