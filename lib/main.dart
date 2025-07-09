@@ -5,18 +5,18 @@ import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/admin_profile_screen.dart';
 import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
-void main() async{
-   WidgetsFlutterBinding.ensureInitialized();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Hive & get storage directory
   final appDocDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocDir.path);
   // Open a common box for all roles
   await Hive.openBox('infoBox');
-  
+
   runApp(const MainApp());
 }
-
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
