@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 void main() async{
    WidgetsFlutterBinding.ensureInitialized();
 
-  final appDocDir = await getApplicationDocumentsDirectory();
+ final appDocDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDocDir.path);
   // Open a common box for all roles
   await Hive.openBox('infoBox');
