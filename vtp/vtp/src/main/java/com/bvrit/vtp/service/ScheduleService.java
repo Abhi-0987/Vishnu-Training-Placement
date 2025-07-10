@@ -221,7 +221,7 @@ public class ScheduleService {
         }
     }
 
-    // Update this method to check for time slot conflicts
+    // Update this method to check for time slot conflicts(create schedule)
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime) {
         // Check if there are any schedules that overlap with the requested time slot
         List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDate(location, date);
@@ -236,6 +236,13 @@ public class ScheduleService {
         }
 
         return true; // No conflict
+    }
+    // Update this method to check for time slot conflicts(update schedule)
+    public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
+
+        List<Schedule> existingSchedules = scheduleRepository.findOverlappingSchedules(location, date, fromTime, toTime, excludeId);
+
+        return existingSchedules.isEmpty();
     }
 
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {

@@ -2,6 +2,7 @@ package com.bvrit.vtp.dao;
 
 import com.bvrit.vtp.model.Schedule;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import java.time.LocalDate;
@@ -23,4 +24,11 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     
     // Updated to use studentBranch instead of branches
     List<Schedule> findByStudentBranchContaining(String branch);
+
+    @Query("SELECT s FROM Schedule s WHERE s.location = :location AND s.date = :date AND :fromTime < s.toTime AND :toTime > s.fromTime AND s.id <> :excludeId")
+    List<Schedule> findOverlappingSchedules(@Param("location") String location,
+                                            @Param("date") LocalDate date,
+                                            @Param("fromTime") LocalTime fromTime,
+                                            @Param("toTime") LocalTime toTime,
+                                            @Param("excludeId") Long excludeId);
 }
