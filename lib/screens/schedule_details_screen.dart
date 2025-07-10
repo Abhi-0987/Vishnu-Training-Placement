@@ -36,16 +36,21 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   Map<String, double> dataMap = {"Present": 0, "Absent": 0};
 
   late TextEditingController dateController;
-  late TextEditingController timeController;
+  late TextEditingController fromtimeController;
+  late TextEditingController totimecontroller;
   late TextEditingController locationController;
   late TextEditingController roomNoController;
   late TextEditingController branchController;
 
   late String originalDate;
-  late String originalTime;
+  late String originalFromTime;
+  late String originalToTime;
   late String originalLocation;
   late String originalRoomNo;
   late List<String> originalBranch;
+
+  TimeOfDay? fromTime;
+  TimeOfDay? toTime;
 
   final VenueService _venueService = VenueService();
   List<Venue> _venues = [];
@@ -65,14 +70,10 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     'CSD',
     'CSBS',
   ];
-  final List<String> _timeSlots = [
-    "9:30 - 11:15",
-    "11:30 - 1:15",
-    "2:20 - 3:40",
-  ];
 
   late String _editedDate;
-  late String _editedTime;
+  late String _editedFromTime;
+  late String _editedToTime;
   late String _editedLocation;
   late String _editedRoomNo;
   late List<String> _editedBranch;
@@ -98,9 +99,10 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
 
     // Initialize original values and controllers as before
     originalDate = widget.schedule['date'] ?? 'Not specified';
-    originalTime = widget.schedule['time'] ?? 'Not specified';
+    originalFromTime = widget.schedule['fromTime'] ?? 'Not specified';
+    originalToTime = widget.schedule['toTime'] ?? 'Not specified';
     originalLocation = widget.schedule['location'] ?? 'Not specified';
-    originalRoomNo = widget.schedule['roomNo'] ?? 'Not specified';
+    originalRoomNo = widget.schedule['roomNo'] ?? 'Not Specified';
 
     final branchData = widget.schedule['studentBranch'];
     if (branchData is String) {
@@ -119,13 +121,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     }
 
     _editedDate = originalDate;
-    _editedTime = originalTime;
+    _editedFromTime = originalFromTime;
+    _editedToTime = originalToTime;
     _editedLocation = originalLocation;
     _editedRoomNo = originalRoomNo;
     _editedBranch = List<String>.from(originalBranch);
 
     dateController = TextEditingController(text: originalDate);
-    timeController = TextEditingController(text: originalTime);
+    fromtimeController = TextEditingController(text: originalFromTime);
+    totimecontroller = TextEditingController(text: originalToTime);
     locationController = TextEditingController(text: originalLocation);
     roomNoController = TextEditingController(text: originalRoomNo);
     branchController = TextEditingController(text: originalBranch.join(', '));
@@ -189,7 +193,8 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   @override
   void dispose() {
     dateController.dispose();
-    timeController.dispose();
+    fromtimeController.dispose();
+    totimecontroller.dispose();
     locationController.dispose();
     roomNoController.dispose();
     branchController.dispose();
@@ -197,11 +202,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   }
 
   bool _isDataChanged() {
+    // Compare time strings directly (ensure they're in same format)
+    bool timeChanged =
+        _editedFromTime != originalFromTime || _editedToTime != originalToTime;
+
     bool branchesChanged =
         !const ListEquality().equals(originalBranch, _editedBranch);
 
     return _editedDate != originalDate ||
-        _editedTime != originalTime ||
+        timeChanged ||
         _editedLocation != originalLocation ||
         _editedRoomNo != originalRoomNo ||
         branchesChanged;
@@ -249,54 +258,113 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     }
   }
 
-  Future<void> _editTime() async {
-    String? selectedTime = await showDialog<String>(
+  Future<void> _editFromTime() async {
+    // Always parse the current time first
+    TimeOfDay initialTime;
+    try {
+      final currentTime = DateFormat('HH:mm').parse(_editedFromTime);
+      initialTime = TimeOfDay(
+        hour: currentTime.hour,
+        minute: currentTime.minute,
+      );
+    } catch (e) {
+      initialTime = TimeOfDay.now();
+    }
+
+    final TimeOfDay? picked = await showTimePicker(
       context: context,
-      builder: (BuildContext context) {
-        String? tempSelectedTime = _editedTime;
-        return AlertDialog(
-          title: const Text('Select Time Slot'),
-          content: StatefulBuilder(
-            builder: (BuildContext context, StateSetter setDialogState) {
-              return Column(
-                mainAxisSize: MainAxisSize.min,
-                children:
-                    _timeSlots.map((time) {
-                      return RadioListTile<String>(
-                        title: Text(time),
-                        value: time,
-                        groupValue: tempSelectedTime,
-                        onChanged: (String? value) {
-                          setDialogState(() {
-                            tempSelectedTime = value;
-                          });
-                        },
-                      );
-                    }).toList(),
-              );
-            },
+      initialTime: initialTime, // Use the parsed time as initial value
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: Colors.purple,
+              onPrimary: Colors.white,
+              surface: Colors.grey[900]!,
+              onSurface: Colors.white,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.grey[800]),
           ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop(null);
-              },
-            ),
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                Navigator.of(context).pop(tempSelectedTime);
-              },
-            ),
-          ],
+          child: child!,
         );
       },
     );
 
-    if (selectedTime != null && selectedTime != _editedTime) {
+    if (picked != null) {
+      if (picked.hour < 9 ||
+          (picked.hour == 9 && picked.minute < 20) ||
+          picked.hour > 16 ||
+          (picked.hour == 16 && picked.minute > 0)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Select time between 9:20 AM and 4:00 PM.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
       setState(() {
-        _editedTime = selectedTime;
+        // Update both the TimeOfDay and the string representation
+        fromTime = picked;
+        _editedFromTime =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+        showPostButton = _isDataChanged();
+      });
+    }
+  }
+
+  Future<void> _editToTime() async {
+    // Always parse the current time first
+    TimeOfDay initialTime;
+    try {
+      final currentTime = DateFormat('HH:mm').parse(_editedToTime);
+      initialTime = TimeOfDay(
+        hour: currentTime.hour,
+        minute: currentTime.minute,
+      );
+    } catch (e) {
+      initialTime = TimeOfDay.now();
+    }
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: initialTime, // Use the parsed time as initial value
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: Colors.purple,
+              onPrimary: Colors.white,
+              surface: Colors.grey[900]!,
+              onSurface: Colors.white,
+            ),
+            dialogTheme: DialogThemeData(backgroundColor: Colors.grey[800]),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      if (picked.hour < 9 ||
+          (picked.hour == 9 && picked.minute < 20) ||
+          picked.hour > 16 ||
+          (picked.hour == 16 && picked.minute > 0)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Select time between 9:20 AM and 4:00 PM.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        // Update both the TimeOfDay and the string representation
+        toTime = picked;
+        _editedToTime =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
         showPostButton = _isDataChanged();
       });
     }
@@ -596,9 +664,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
       'location': _editedLocation,
       'roomNo': _editedRoomNo,
       'date': _editedDate,
-      'time': _editedTime,
+      'fromTime': _editedFromTime,
+      'toTime': _editedToTime,
       'studentBranch': branchesString,
     };
+
+    print("Updated Data:");
+    updatedData.forEach((key, value) {
+      print("$key: $value");
+    });
 
     print("Showing loading dialog..."); // Log: Before showing dialog
     // Show loading indicator
@@ -695,7 +769,8 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     final double width = screenSize.width;
 
     String displayDate = _editedDate;
-    String displayTime = _editedTime;
+    String displayFromTime = _editedFromTime;
+    String displayToTime = _editedToTime;
     String displayLocation = _editedLocation;
     String displayRoomNo = _editedRoomNo;
     String displayBranch =
@@ -728,7 +803,8 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
                   const SizedBox(height: 16),
 
                   _buildDetailItem('Date', displayDate, _editDate),
-                  _buildDetailItem('Time', displayTime, _editTime),
+                  _buildDetailItem('From', displayFromTime, _editFromTime),
+                  _buildDetailItem('To', displayToTime, _editToTime),
                   _buildDetailItem('Location', displayLocation, _editLocation),
                   _buildDetailItem('Room No', displayRoomNo, _editLocation),
                   _buildDetailItem('Branch', displayBranch, _editBranch),

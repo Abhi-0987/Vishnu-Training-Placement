@@ -236,7 +236,15 @@ public class ScheduleService {
 
     return true; // No conflict
 }
-    
+
+public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
+
+    List<Schedule> existingSchedules = scheduleRepository.findOverlappingSchedules(location, date, fromTime, toTime, excludeId);
+
+    return existingSchedules.isEmpty(); 
+}
+
+
 
     private void insertAttendanceForAllStudents(Schedule schedule) {
         //  Split branches

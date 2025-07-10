@@ -86,8 +86,8 @@ public class ScheduleController {
             @RequestParam String fromTimeSlot,
             @RequestParam String toTimeSlot) {
         try {
-            LocalTime fromTime = LocalTime.parse(fromTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
-            LocalTime toTime = LocalTime.parse(toTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime fromTime = LocalTime.parse(fromTimeSlot, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime toTime = LocalTime.parse(toTimeSlot, DateTimeFormatter.ofPattern("HH:mm"));
 
             boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, fromTime, toTime);
 
@@ -105,29 +105,38 @@ public class ScheduleController {
     // Added PUT endpoint for updating schedules
     @PutMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> updateSchedule(@PathVariable Long id, @RequestBody ScheduleDTO scheduleDetails) {
-         logger.info("Received schedule update request for ID {}: {}", id, scheduleDetails);
-         try {
-             // TODO: Implement the actual update logic in ScheduleService
-             // Example: Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDetails);
-             // For now, just returning OK if the service call would succeed
-             // Replace this placeholder logic with your actual service call
-             Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDetails); // Assuming this method exists and returns the updated schedule or throws an exception
-             if (updatedSchedule != null) {
-                 logger.info("Successfully updated schedule with ID: {}", id);
-                 return ResponseEntity.ok(updatedSchedule);
-             } else {
-                 // Handle case where schedule is not found or update fails
-                 logger.warn("Schedule with ID {} not found for update.", id);
-                 Map<String, String> response = new HashMap<>();
-                 response.put("error", "Schedule not found with id: " + id);
-                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-             }
-         } catch (Exception e) {
-             Map<String, String> response = new HashMap<>();
-             response.put("error", "Failed to update schedule: " + e.getMessage());
-             logger.error("Error updating schedule with ID {}: {}", id, scheduleDetails, e);
-             return ResponseEntity.badRequest().body(response);
-         }
+        logger.info("Received schedule update request for ID {}: {}", id, scheduleDetails);
+        try {
+            LocalDate date = LocalDate.parse(scheduleDetails.getDate()); // Assuming getter exists
+            LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime());
+            LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime());
+            String location = scheduleDetails.getLocation();
+
+            // Check if the new time slot is available for update (excluding current schedule ID)
+            if (!scheduleService.isTimeSlotAvailable(location, date, fromTime, toTime,id)) {
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "The selected time slot is already booked for this location");
+                logger.warn("Time slot unavailable for update: Location={}, Date={}, FromTime={}, ToTime={}, ScheduleID={}",
+                        location, date, fromTime, toTime, id);
+                return ResponseEntity.badRequest().body(response);
+            }
+            Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDetails); // Assuming this method exists and returns the updated schedule or throws an exception
+            if (updatedSchedule != null) {
+                logger.info("Successfully updated schedule with ID: {}", id);
+                return ResponseEntity.ok(updatedSchedule);
+            } else {
+                // Handle case where schedule is not found or update fails
+                logger.warn("Schedule with ID {} not found for update.", id);
+                Map<String, String> response = new HashMap<>();
+                response.put("error", "Schedule not found with id: " + id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("error", "Failed to update schedule: " + e.getMessage());
+            logger.error("Error updating schedule with ID {}: {}", id, scheduleDetails, e);
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     // Added DELETE endpoint for deleting schedules
