@@ -86,8 +86,8 @@ public class ScheduleController {
             @RequestParam String fromTimeSlot,
             @RequestParam String toTimeSlot) {
         try {
-            LocalTime fromTime = LocalTime.parse(fromTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
-            LocalTime toTime = LocalTime.parse(toTimeSlot, DateTimeFormatter.ofPattern("H:mm"));
+            LocalTime fromTime = LocalTime.parse(fromTimeSlot, DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime toTime = LocalTime.parse(toTimeSlot, DateTimeFormatter.ofPattern("HH:mm"));
 
             boolean isAvailable = scheduleService.isTimeSlotAvailable(location, date, fromTime, toTime);
 
@@ -107,6 +107,20 @@ public class ScheduleController {
     public ResponseEntity<?> updateSchedule(@PathVariable Long id, @RequestBody ScheduleDTO scheduleDetails) {
          logger.info("Received schedule update request for ID {}: {}", id, scheduleDetails);
          try {
+             // Extract date and time details from DTO
+             LocalDate date = LocalDate.parse(scheduleDetails.getDate()); // Assuming getter exists
+             LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime());
+             LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime());
+             String location = scheduleDetails.getLocation();
+
+             // Check if the new time slot is available for update (excluding current schedule ID)
+             if (!scheduleService.isTimeSlotAvailable(location, date, fromTime, toTime)) {
+                 Map<String, String> response = new HashMap<>();
+                 response.put("error", "The selected time slot is already booked for this location");
+                 logger.warn("Time slot unavailable for update: Location={}, Date={}, FromTime={}, ToTime={}, ScheduleID={}",
+                         location, date, fromTime, toTime, id);
+                 return ResponseEntity.badRequest().body(response);
+             }
              // TODO: Implement the actual update logic in ScheduleService
              // Example: Schedule updatedSchedule = scheduleService.updateSchedule(id, scheduleDetails);
              // For now, just returning OK if the service call would succeed
