@@ -245,22 +245,6 @@ public class ScheduleService {
         return existingSchedules.isEmpty();
     }
 
-    public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
-        List<Schedule> existingSchedules = scheduleRepository
-                .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
-                        location, date, toTime, fromTime);
-
-        // Exclude the current schedule being updated
-        for (Schedule schedule : existingSchedules) {
-            if (!schedule.getId().equals(excludeId)) {
-                return false; // There's a conflict with another schedule
-            }
-        }
-
-        return true; // No conflicting schedules (or only conflict is with itself)
-    }
-// (from time,to time is updated)
-
     private void insertAttendanceForAllStudents(Schedule schedule) {
         //  Split branches
         List<String> branches = Arrays.stream(schedule.getStudentBranch().split(","))
