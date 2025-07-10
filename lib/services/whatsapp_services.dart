@@ -1,4 +1,6 @@
-import 'package:downloads_path_provider_28/downloads_path_provider_28.dart';
+import 'dart:io';
+import 'dart:math';
+import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -6,7 +8,6 @@ import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
@@ -293,125 +294,129 @@ class WhatsappServices {
 
   static Future<String> downloadExcelFile(String selectedDate) async {
     try {
+      // 1. Get auth token
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token') ?? '';
 
-      Map<String, String> headers = {'Authorization': 'Bearer $token'};
-
+      // 2. API request
       final response = await http.get(
         Uri.parse('$baseUrl/api/excel/absentees/by-date/$selectedDate'),
-        headers: headers,
+        headers: {'Authorization': 'Bearer $token'},
       );
 
-      if (response.statusCode == 200) {
-        final bytes = response.bodyBytes;
+      if (response.statusCode != 200) {
+        throw Exception("Failed to download file: ${response.statusCode}");
+      }
 
-        // ✅ Parse Excel bytes
-        final excel = xl.Excel.decodeBytes(bytes);
-        List<Map<String, String>> studentData = [];
+      final bytes = response.bodyBytes;
+      if (bytes.isEmpty) return "Downloaded file is empty";
 
-        for (var table in excel.tables.keys) {
-          var sheet = excel.tables[table]!;
-          if (sheet.rows.isEmpty) continue;
+      // 3. Optional: Parse Excel
+      final excel = xl.Excel.decodeBytes(bytes);
+      List<Map<String, String>> studentData = [];
 
-          List<String> headersRow =
-              sheet.rows[0].map((cell) {
-                return cell?.value?.toString().toLowerCase().trim() ?? '';
-              }).toList();
+      for (var table in excel.tables.keys) {
+        final sheet = excel.tables[table]!;
+        if (sheet.rows.isEmpty) continue;
 
-          int? nameIndex = headersRow.indexWhere(
-            (h) => h.contains('name') && !h.contains('phone'),
-          );
-          int? emailIndex = headersRow.indexWhere((h) => h.contains('email'));
-          int? phoneIndex = headersRow.indexWhere(
-            (h) =>
-                h.contains('phone') ||
-                h.contains('contact') ||
-                h.contains('mobile') ||
-                h.contains('Phone number'),
-          );
+        final headersRow =
+            sheet.rows[0]
+                .map(
+                  (cell) => cell?.value?.toString().toLowerCase().trim() ?? '',
+                )
+                .toList();
 
-          for (int i = 1; i < sheet.rows.length; i++) {
-            var row = sheet.rows[i];
+        final nameIndex = headersRow.indexWhere(
+          (h) => h.contains('name') && !h.contains('phone'),
+        );
+        final emailIndex = headersRow.indexWhere((h) => h.contains('email'));
+        final phoneIndex = headersRow.indexWhere(
+          (h) =>
+              h.contains('phone') ||
+              h.contains('contact') ||
+              h.contains('mobile') ||
+              h.contains('phone number'),
+        );
 
-            String name =
+        for (int i = 1; i < sheet.rows.length; i++) {
+          final row = sheet.rows[i];
+          studentData.add({
+            'name':
                 (nameIndex < row.length)
                     ? row[nameIndex]?.value?.toString() ?? ''
-                    : '';
-
-            String email =
+                    : '',
+            'email':
                 (emailIndex < row.length)
                     ? row[emailIndex]?.value?.toString() ?? ''
-                    : '';
-
-            String phone =
+                    : '',
+            'phoneNumber':
                 (phoneIndex < row.length)
                     ? row[phoneIndex]?.value?.toString() ?? ''
-                    : '';
-
-            studentData.add({
-              'name': name,
-              'email': email,
-              'phoneNumber': phone,
-            });
-          }
+                    : '',
+          });
         }
-
-        // ✅ Print for verification (optional)
-        for (var student in studentData) {
-          print(
-            "Name: ${student['name']}, Email: ${student['email']}, Phone: ${student['phoneNumber']}",
-          );
-        }
-
-        // ✅ Save file (same as before)
-        // ✅ Generate file name based on selectedDate
-        final parsedDate = DateTime.parse(selectedDate);
-        final fileName =
-            'absentees-${parsedDate.day.toString().padLeft(2, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.year}.xlsx';
-
-        if (kIsWeb) {
-          // ✅ Web Download
-          final blob = html.Blob([bytes]);
-          final url = html.Url.createObjectUrlFromBlob(blob);
-          html.AnchorElement(href: url)
-            ..setAttribute("download", fileName)
-            ..click();
-          html.Url.revokeObjectUrl(url);
-          return "Excel file downloaded successfully in browser";
-        } else if (Platform.isAndroid || Platform.isIOS) {
-          // ✅ Ask permission (Android only)
-          final permissionStatus = await Permission.storage.request();
-          if (!permissionStatus.isGranted) {
-            return "Storage permission not granted";
-          }
-
-          // ✅ Get Downloads folder
-          Directory? directory;
-          if (Platform.isAndroid) {
-            directory = await DownloadsPathProvider.downloadsDirectory;
-          } else {
-            directory = await getApplicationDocumentsDirectory();
-          }
-
-          final filePath = '${directory!.path}/$fileName';
-          final file = File(filePath);
-          await file.writeAsBytes(bytes);
-
-          // ✅ Optionally open file
-          await OpenFile.open(filePath);
-
-          return "File saved to: $filePath";
-        } else {
-          return "Platform not supported";
-        }
-      } else {
-        throw Exception(
-          'Failed to fetch Excel: ${response.statusCode} - ${response.body}',
-        );
       }
+
+      // 4. File name
+      final parsedDate = DateTime.parse(selectedDate);
+      final fileName =
+          'absentees-${parsedDate.day.toString().padLeft(2, '0')}-${parsedDate.month.toString().padLeft(2, '0')}-${parsedDate.year}.xlsx';
+
+      // 5. Web platform
+      if (kIsWeb) {
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor =
+            html.AnchorElement(href: url)
+              ..setAttribute("download", fileName)
+              ..click();
+        html.Url.revokeObjectUrl(url);
+        return "File downloaded in browser";
+      }
+
+      // 6. Android / iOS path selection
+      String? path;
+
+      if (Platform.isAndroid) {
+        final permission = await Permission.manageExternalStorage.request();
+        if (!permission.isGranted) return "Storage permission not granted";
+
+        path = await FilePicker.platform.saveFile(
+          dialogTitle: 'Save Excel File',
+          fileName: fileName,
+          bytes: bytes,
+          type: FileType.custom,
+          allowedExtensions: ['xlsx'],
+        );
+        final directory = await getExternalStorageDirectory();
+        if (directory == null) return "Could not access external storage";
+
+        path = '${directory.path}/$fileName';
+        final file = File(path);
+        await file.writeAsBytes(bytes); // Save the file
+
+        // Open the file
+        final result = await OpenFile.open(path);
+        if (result.type != ResultType.done) {
+          return "Error opening file: ${result.message}";
+        }
+        return "File saved to: $path";
+      } else if (Platform.isIOS) {
+        final directory = await getApplicationDocumentsDirectory();
+        path = '${directory.path}/$fileName';
+        final file = File(path);
+        await file.writeAsBytes(bytes); // Save the file
+
+        // Open the file
+        final result = await OpenFile.open(path);
+        if (result.type != ResultType.done) {
+          return "Error opening file: ${result.message}";
+        }
+        return "File saved to: $path";
+      }
+      return "Platform not supported";
     } catch (e) {
-      throw Exception("Error downloading Excel: ${e.toString()}");
+      return "Error saving file: ${e.toString()}";
     }
   }
 
@@ -461,12 +466,10 @@ class WhatsappServices {
                 (nameIndex < row.length)
                     ? row[nameIndex]?.value?.toString() ?? ''
                     : '';
-
             String email =
                 (emailIndex < row.length)
                     ? row[emailIndex]?.value?.toString() ?? ''
                     : '';
-
             String phone =
                 (phoneIndex < row.length)
                     ? row[phoneIndex]?.value?.toString() ?? ''
@@ -480,6 +483,7 @@ class WhatsappServices {
           }
         }
 
+        // ✅ Print for verification (optional)
         for (var student in studentData) {
           print(
             "Name: ${student['name']}, Email: ${student['email']}, Phone: ${student['phoneNumber']}",
@@ -489,48 +493,64 @@ class WhatsappServices {
         // ✅ File name based on schedule ID
         final fileName = 'absentees-schedule-$scheduleId.xlsx';
 
+        // ✅ Web download
         if (kIsWeb) {
-          // ✅ Web Download
           final blob = html.Blob([bytes]);
           final url = html.Url.createObjectUrlFromBlob(blob);
-          html.AnchorElement(href: url)
-            ..setAttribute("download", fileName)
-            ..click();
+          final anchor =
+              html.AnchorElement(href: url)
+                ..setAttribute("download", fileName)
+                ..click();
           html.Url.revokeObjectUrl(url);
-          return "Excel file downloaded successfully in browser";
-        } else if (Platform.isAndroid || Platform.isIOS) {
-          // ✅ Ask permission (Android only)
-          final permissionStatus = await Permission.storage.request();
-          if (!permissionStatus.isGranted) {
-            return "Storage permission not granted";
-          }
-
-          // ✅ Get Downloads folder
-          Directory? directory;
-          if (Platform.isAndroid) {
-            directory = await DownloadsPathProvider.downloadsDirectory;
-          } else {
-            directory = await getApplicationDocumentsDirectory();
-          }
-
-          final filePath = '${directory!.path}/$fileName';
-          final file = File(filePath);
-          await file.writeAsBytes(bytes);
-
-          // ✅ Optionally open file
-          await OpenFile.open(filePath);
-
-          return "File saved to: $filePath";
-        } else {
-          return "Platform not supported";
+          return "File downloaded in browser";
         }
+
+        String? path;
+
+        if (Platform.isAndroid) {
+          final permission = await Permission.manageExternalStorage.request();
+          if (!permission.isGranted) return "Storage permission not granted";
+
+          path = await FilePicker.platform.saveFile(
+            dialogTitle: 'Save Excel File',
+            fileName: fileName,
+            bytes: bytes,
+            type: FileType.custom,
+            allowedExtensions: ['xlsx'],
+          );
+          final directory = await getExternalStorageDirectory();
+          if (directory == null) return "Could not access external storage";
+
+          path = '${directory.path}/$fileName';
+          final file = File(path);
+          await file.writeAsBytes(bytes); // Save the file
+
+          // Open the file
+          final result = await OpenFile.open(path);
+          if (result.type != ResultType.done) {
+            return "Error opening file: ${result.message}";
+          }
+          return "File saved to: $path";
+        } else if (Platform.isIOS) {
+          final directory = await getApplicationDocumentsDirectory();
+          path = '${directory.path}/$fileName';
+          final file = File(path);
+          await file.writeAsBytes(bytes); // Save the file
+
+          // Open the file
+          final result = await OpenFile.open(path);
+          if (result.type != ResultType.done) {
+            return "Error opening file: ${result.message}";
+          }
+          return "File saved to: $path";
+        }
+
+        return "Platform not supported";
       } else {
-        throw Exception(
-          'Failed to fetch Excel: ${response.statusCode} - ${response.body}',
-        );
+        throw Exception("Failed to download file: ${response.statusCode}");
       }
     } catch (e) {
-      throw Exception("Error downloading Excel: ${e.toString()}");
+      return "Error saving file: ${e.toString()}";
     }
   }
 
@@ -543,10 +563,11 @@ class WhatsappServices {
         throw Exception('No phone numbers available to export');
       }
 
+      // 1. Create Excel file
       final excel = xl.Excel.createExcel();
       final sheet = excel.sheets[excel.getDefaultSheet()!]!;
 
-      // Add headers: Name | Email | Phone Number
+      // 2. Add headers: Name | Email | Phone Number
       sheet.cell(xl.CellIndex.indexByString("A1")).value = xl.TextCellValue(
         'Name',
       );
@@ -557,7 +578,7 @@ class WhatsappServices {
         'Phone Number',
       );
 
-      // Apply header style
+      // 3. Apply header style to all three columns
       for (var col = 0; col < 3; col++) {
         sheet
             .cell(xl.CellIndex.indexByColumnRow(columnIndex: col, rowIndex: 0))
@@ -567,9 +588,8 @@ class WhatsappServices {
         );
       }
 
-      // Add rows
+      // 4. Add rows
       for (int i = 0; i < phoneNumbers.length; i++) {
-        // Split the string into parts (assuming "name - email - phone")
         List<String> parts = phoneNumbers[i].split(' - ');
         String name = parts.isNotEmpty ? parts[0] : '';
         String email = parts.length > 1 ? parts[1] : '';
@@ -592,55 +612,80 @@ class WhatsappServices {
             .value = xl.TextCellValue(phone);
       }
 
-      // Save the Excel file
+      // 5. Save Excel bytes
       final bytes = excel.save();
-      if (bytes != null) {
-        final String timestamp = DateFormat(
-          'yyyy-MM-dd_HHmmss',
-        ).format(DateTime.now());
-        String fileName =
-            label != null ? 'contacts_$label.xlsx' : 'contacts_$timestamp.xlsx';
+      if (bytes == null) throw Exception("Failed to generate Excel bytes");
 
-        if (kIsWeb) {
-          // ✅ Web Download
-          final blob = html.Blob([bytes]);
-          final url = html.Url.createObjectUrlFromBlob(blob);
-          html.AnchorElement(href: url)
-            ..setAttribute("download", fileName)
-            ..click();
-          html.Url.revokeObjectUrl(url);
-          return "Excel file downloaded successfully in browser";
-        } else if (Platform.isAndroid || Platform.isIOS) {
-          // ✅ Ask permission (Android only)
-          final permissionStatus = await Permission.storage.request();
-          if (!permissionStatus.isGranted) {
-            return "Storage permission not granted";
-          }
+      // 6. Generate file name
+      final timestamp = DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now());
+      final fileName =
+          label != null ? 'contacts_$label.xlsx' : 'contacts_$timestamp.xlsx';
 
-          // ✅ Get Downloads folder
-          Directory? directory;
-          if (Platform.isAndroid) {
-            directory = await DownloadsPathProvider.downloadsDirectory;
-          } else {
-            directory = await getApplicationDocumentsDirectory();
-          }
-
-          final filePath = '${directory!.path}/$fileName';
-          final file = File(filePath);
-          await file.writeAsBytes(bytes);
-
-          // ✅ Optionally open file
-          await OpenFile.open(filePath);
-
-          return "File saved to: $filePath";
-        } else {
-          return "Platform not supported";
+      // 7. Handle platform-specific saving
+      if (kIsWeb) {
+        // Web: Trigger browser download
+        final blob = html.Blob([bytes]);
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..setAttribute("download", fileName)
+          ..click();
+        html.Url.revokeObjectUrl(url);
+        return "Excel file downloaded in browser";
+      } else if (Platform.isAndroid) {
+        // Request storage permission
+        final status = await Permission.storage.request();
+        if (!status.isGranted) {
+          return "Storage permission not granted";
         }
+
+        // Prefer Downloads directory, fallback to app-specific external storage
+        Directory? directory = Directory('/storage/emulated/0/Download');
+        if (!await directory.exists()) {
+          directory = await getExternalStorageDirectory();
+          if (directory == null) {
+            return "Could not access storage directory";
+          }
+        }
+
+        final filePath = '${directory.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+
+        // Verify file exists
+        if (!await file.exists()) {
+          return "Error: File was not saved at $filePath";
+        }
+
+        // Attempt to open file
+        final result = await OpenFile.open(filePath);
+        if (result.type != ResultType.done) {
+          return "File saved to: $filePath, but failed to open: ${result.message}";
+        }
+
+        return "File saved to: $filePath";
+      } else if (Platform.isIOS) {
+        final directory = await getApplicationDocumentsDirectory();
+        final filePath = '${directory.path}/$fileName';
+        final file = File(filePath);
+        await file.writeAsBytes(bytes);
+
+        // Verify file exists
+        if (!await file.exists()) {
+          return "Error: File was not saved at $filePath";
+        }
+
+        // Attempt to open file
+        final result = await OpenFile.open(filePath);
+        if (result.type != ResultType.done) {
+          return "File saved to: $filePath, but failed to open: ${result.message}";
+        }
+
+        return "File saved to: $filePath";
       } else {
-        throw Exception('Failed to generate Excel file bytes');
+        return "Unsupported platform";
       }
     } catch (e) {
-      throw Exception("Error generating Excel file: ${e.toString()}");
+      return "Error saving Excel: ${e.toString()}";
     }
   }
 }
