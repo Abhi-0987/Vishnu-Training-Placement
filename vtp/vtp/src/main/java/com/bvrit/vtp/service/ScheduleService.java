@@ -164,8 +164,8 @@ public class ScheduleService {
                 existingSchedule.setDate(date);
 
                 // Parse and update fromTime and toTime
-                LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime(), DateTimeFormatter.ofPattern("HH:mm"));
-                LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime(), DateTimeFormatter.ofPattern("HH:mm"));
+                LocalTime fromTime = LocalTime.parse(scheduleDetails.getFromTime(), DateTimeFormatter.ofPattern("H:mm"));
+                LocalTime toTime = LocalTime.parse(scheduleDetails.getToTime(), DateTimeFormatter.ofPattern("H:mm"));
                 existingSchedule.setFromTime(fromTime);
                 existingSchedule.setToTime(toTime);
             } catch (DateTimeParseException e) {
@@ -223,26 +223,28 @@ public class ScheduleService {
     // Update this method to check for time slot conflicts
     public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime) {
         // Check if there are any schedules that overlap with the requested time slot
-        List<Schedule> existingSchedules = scheduleRepository
-            .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
-                location, date, toTime, fromTime);
-        return existingSchedules.isEmpty();
-    }
+        List<Schedule> existingSchedules = scheduleRepository.findByLocationAndDate(location, date);
 
-    public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
-        List<Schedule> existingSchedules = scheduleRepository
-                .findByLocationAndDateAndFromTimeLessThanEqualAndToTimeGreaterThanEqual(
-                        location, date, toTime, fromTime);
+    for (Schedule existing : existingSchedules) {
+        LocalTime existingFrom = existing.getFromTime();
+        LocalTime existingTo = existing.getToTime();
 
-        // Exclude the current schedule being updated
-        for (Schedule schedule : existingSchedules) {
-            if (!schedule.getId().equals(excludeId)) {
-                return false; // There's a conflict with another schedule
-            }
+        if (!(toTime.compareTo(existingFrom) <= 0 || fromTime.compareTo(existingTo) >= 0)) {
+            return false; // Conflict
         }
-
-        return true; // No conflicting schedules (or only conflict is with itself)
     }
+
+    return true; // No conflict
+}
+
+public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fromTime, LocalTime toTime, Long excludeId) {
+
+    List<Schedule> existingSchedules = scheduleRepository.findOverlappingSchedules(location, date, fromTime, toTime, excludeId);
+
+    return existingSchedules.isEmpty(); 
+}
+
+
 
     private void insertAttendanceForAllStudents(Schedule schedule) {
         //  Split branches

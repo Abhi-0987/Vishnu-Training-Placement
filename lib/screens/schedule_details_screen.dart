@@ -42,15 +42,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   late TextEditingController roomNoController;
   late TextEditingController branchController;
 
-  TimeOfDay fromTime = TimeOfDay(hour: 9, minute: 30);
-  TimeOfDay toTime = TimeOfDay(hour: 11, minute: 15);
-
   late String originalDate;
   late String originalFromTime;
   late String originalToTime;
   late String originalLocation;
   late String originalRoomNo;
   late List<String> originalBranch;
+
+  TimeOfDay? fromTime;
+  TimeOfDay? toTime;
 
   final VenueService _venueService = VenueService();
   List<Venue> _venues = [];
@@ -202,12 +202,15 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   }
 
   bool _isDataChanged() {
+    // Compare time strings directly (ensure they're in same format)
+    bool timeChanged =
+        _editedFromTime != originalFromTime || _editedToTime != originalToTime;
+
     bool branchesChanged =
         !const ListEquality().equals(originalBranch, _editedBranch);
 
     return _editedDate != originalDate ||
-        _editedFromTime != originalFromTime ||
-        _editedToTime != originalToTime ||
+        timeChanged ||
         _editedLocation != originalLocation ||
         _editedRoomNo != originalRoomNo ||
         branchesChanged;
@@ -256,17 +259,21 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
   }
 
   Future<void> _editFromTime() async {
-    // Parse current time from the string
+    // Always parse the current time first
+    TimeOfDay initialTime;
     try {
       final currentTime = DateFormat('HH:mm').parse(_editedFromTime);
-      fromTime = TimeOfDay(hour: currentTime.hour, minute: currentTime.minute);
+      initialTime = TimeOfDay(
+        hour: currentTime.hour,
+        minute: currentTime.minute,
+      );
     } catch (e) {
-      fromTime = TimeOfDay.now();
+      initialTime = TimeOfDay.now();
     }
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: fromTime,
+      initialTime: initialTime, // Use the parsed time as initial value
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.dark().copyWith(
@@ -284,29 +291,45 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     );
 
     if (picked != null) {
-      final formattedTime =
-          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-      if (formattedTime != _editedFromTime) {
-        setState(() {
-          _editedFromTime = formattedTime;
-          showPostButton = _isDataChanged();
-        });
+      if (picked.hour < 9 ||
+          (picked.hour == 9 && picked.minute < 20) ||
+          picked.hour > 16 ||
+          (picked.hour == 16 && picked.minute > 0)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Select time between 9:20 AM and 4:00 PM.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
       }
+
+      setState(() {
+        // Update both the TimeOfDay and the string representation
+        fromTime = picked;
+        _editedFromTime =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+        showPostButton = _isDataChanged();
+      });
     }
   }
 
   Future<void> _editToTime() async {
-    // Parse current time from the string
+    // Always parse the current time first
+    TimeOfDay initialTime;
     try {
       final currentTime = DateFormat('HH:mm').parse(_editedToTime);
-      toTime = TimeOfDay(hour: currentTime.hour, minute: currentTime.minute);
+      initialTime = TimeOfDay(
+        hour: currentTime.hour,
+        minute: currentTime.minute,
+      );
     } catch (e) {
-      toTime = TimeOfDay.now();
+      initialTime = TimeOfDay.now();
     }
 
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: toTime,
+      initialTime: initialTime, // Use the parsed time as initial value
       builder: (BuildContext context, Widget? child) {
         return Theme(
           data: ThemeData.dark().copyWith(
@@ -324,14 +347,26 @@ class _ScheduleDetailsScreenState extends State<ScheduleDetailsScreen> {
     );
 
     if (picked != null) {
-      final formattedTime =
-          '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-      if (formattedTime != _editedToTime) {
-        setState(() {
-          _editedToTime = formattedTime;
-          showPostButton = _isDataChanged();
-        });
+      if (picked.hour < 9 ||
+          (picked.hour == 9 && picked.minute < 20) ||
+          picked.hour > 16 ||
+          (picked.hour == 16 && picked.minute > 0)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Select time between 9:20 AM and 4:00 PM.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
       }
+
+      setState(() {
+        // Update both the TimeOfDay and the string representation
+        toTime = picked;
+        _editedToTime =
+            '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+        showPostButton = _isDataChanged();
+      });
     }
   }
 
