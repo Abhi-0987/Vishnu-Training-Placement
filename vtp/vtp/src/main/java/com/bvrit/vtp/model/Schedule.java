@@ -41,6 +41,9 @@ public class Schedule {
     @Column(name = "student_branch")
     private String studentBranch;
 
+    @Column(nullable = false)
+    private String year;
+
     @Column(name = "mark")
     private boolean mark=false;
 }

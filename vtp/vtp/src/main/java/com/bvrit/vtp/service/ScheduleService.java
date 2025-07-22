@@ -17,10 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException; // Import for exception handling
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ScheduleService {
@@ -33,6 +30,13 @@ public class ScheduleService {
 
     @Autowired
     private StudentAttendanceRepo studentAttendanceRepository;
+
+    Map<String,String> studentYear = Map.of(
+            "I", "first",
+            "II", "second",
+            "III", "third",
+            "IV", "fourth"
+    );
     // Method to mark attendance as present
     // Update this method to use fromTime instead of time
     public boolean markAttendancePresent(String email, LocalDate date, LocalTime fromTime) {
@@ -141,6 +145,7 @@ public class ScheduleService {
         }
 
         schedule.setStudentBranch(scheduleDTO.getStudentBranch());
+        schedule.setYear(studentYear.get(scheduleDTO.getYear()));
 
         Schedule savedSchedule = scheduleRepository.save(schedule);
 
@@ -253,7 +258,7 @@ public boolean isTimeSlotAvailable(String location, LocalDate date, LocalTime fr
                 .filter(b -> !b.isEmpty())
                 .toList();
 
-        List<StudentDetails> students = studentDetailsRepository.findByBranchIn(branches);
+        List<StudentDetails> students = studentDetailsRepository.findByBranchInAndYear(branches,schedule.getYear());
 
         if (students.isEmpty()) {
             System.out.println("⚠ No students found for these branches.");

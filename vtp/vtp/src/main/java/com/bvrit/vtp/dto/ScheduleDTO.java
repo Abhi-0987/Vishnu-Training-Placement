@@ -11,5 +11,6 @@ public class ScheduleDTO {
     private String fromTime; // Format: HH:mm
     private String toTime; // Format: HH:mm
     private String studentBranch;
+    private String year;
     private boolean mark;
 }

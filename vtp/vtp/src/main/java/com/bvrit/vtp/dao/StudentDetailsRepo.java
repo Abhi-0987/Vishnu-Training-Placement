@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface StudentDetailsRepo extends JpaRepository<StudentDetails, Long> {
-    List<StudentDetails> findByBranchIn(List<String> branches);
+    List<StudentDetails> findByBranchInAndYear(List<String> branches,String year);
     Optional<StudentDetails> findByEmail(String email);
 }

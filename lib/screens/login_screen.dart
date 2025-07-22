@@ -37,15 +37,21 @@ class _LoginScreenState extends State<LoginScreen> {
     final password = passwordController.text.trim();
     final email = emailController.text.trim();
     // final deviceId = await getAndroidDeviceId();
-
-    if (email.isEmpty || password.isEmpty) {
-      showError("Email and password cannot be empty.");
-      return;
-    }
     if (mounted) {
       setState(() {
-        _isLoading = false;
+        _isLoading = true;
       });
+    }
+    print('started');
+
+    if (email.isEmpty || password.isEmpty) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      showError("Email and password cannot be empty.");
+      return;
     }
     try {
       final response = await AuthService().login(

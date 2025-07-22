@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:vishnu_training_and_placements/models/venue_model.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/services/schedule_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
 import 'package:vishnu_training_and_placements/widgets/custom_appbar.dart';
@@ -352,8 +353,8 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
       "date": selectedDate.toIso8601String().split('T')[0],
       "fromTime": formatTimeTo24Hour(fromTime!),
       "toTime": formatTimeTo24Hour(toTime!),
-      "year": selectedYear,
       "studentBranch": branchesString,
+      "year": selectedYear,
     };
 
     // Add a print statement here to verify the map  before sending
@@ -373,7 +374,11 @@ class _EventVenueScreenState extends State<EventVenueScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        // });
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          AppRoutes.adminHomeScreen,
+          (route) => false,
+        ); 
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
