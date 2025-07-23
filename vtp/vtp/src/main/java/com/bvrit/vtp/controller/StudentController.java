@@ -29,16 +29,18 @@ public class StudentController {
             return ResponseEntity.badRequest().body(Map.of("error", "Email is required"));
         }
 
-        Optional<StudentDetails> studentOptional = studentDetailsRepo.findByEmail(email);
-        return studentOptional.<ResponseEntity<?>>map(
-                studentDetails -> ResponseEntity.ok(Map.of(
+        Optional<StudentDetails> studentOptional = studentDetailsRepo.findByEmailIgnoreCase(email);
+
+        return studentOptional
+                .<ResponseEntity<?>>map(studentDetails -> ResponseEntity.ok(Map.of(
                         "name", studentDetails.getName(),
                         "branch", studentDetails.getBranch(),
                         "year", studentDetails.getYear(),
                         "email", studentDetails.getEmail()
-                ))).orElseGet(() ->
-                ResponseEntity.status(404).body(Map.of("error", "Student not found")));
+                )))
+                .orElseGet(() -> ResponseEntity.status(404).body(Map.of("error", "Student not found")));
     }
+
 
     @GetMapping(value = "/dates", produces = "application/json")
     public ResponseEntity<List<String>> getAvailableDates() {

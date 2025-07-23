@@ -88,7 +88,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 arguments: {"email": email},
               );
             } else {
-              Navigator.pushNamed(context, AppRoutes.studentHomeScreen);
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AppRoutes.studentHomeScreen,
+                (route) => false,
+              );
             }
           } // Navigate on success
         } else if (data["role"] == "Coordinator") {
@@ -104,7 +108,11 @@ class _LoginScreenState extends State<LoginScreen> {
             box.put('coordinatorDetails', coordinatorResponse);
           }
           if (mounted) {
-            Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.adminHomeScreen,
+              (route) => false,
+            );
           }
         } else if (data["role"] == "Admin") {
           prefs.setBool('isLoggedIn', true);
@@ -118,7 +126,11 @@ class _LoginScreenState extends State<LoginScreen> {
             box.put('adminDetails', adminResponse);
           }
           if (mounted) {
-            Navigator.pushNamed(context, AppRoutes.adminHomeScreen);
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              AppRoutes.adminHomeScreen,
+              (route) => false,
+            );
           }
           // else {
           //   Navigator.pushNamed(context, AppRoutes.adminHomeScreen);

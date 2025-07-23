@@ -13,7 +13,7 @@ import 'package:vishnu_training_and_placements/services/Schedule_service.dart';
 
 class StudentProfileScreen extends StatefulWidget {
   final Map<String, dynamic> schedule;
-  const StudentProfileScreen({super.key,required this.schedule});
+  const StudentProfileScreen({super.key, required this.schedule});
 
   @override
   State<StudentProfileScreen> createState() => _StudentProfileScreenState();
@@ -34,15 +34,15 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
   // String longestStreak = '1 day';
 
   @override
- void initState() {
-  super.initState();
-  _initializeData();
-}
+  void initState() {
+    super.initState();
+    _initializeData();
+  }
 
-Future<void> _initializeData() async {
-  await _loadStudentData();
-  await _fetchAttendanceStats();
-}
+  Future<void> _initializeData() async {
+    await _loadStudentData();
+    await _fetchAttendanceStats();
+  }
 
   Future<void> _loadStudentData() async {
     try {
@@ -93,27 +93,30 @@ Future<void> _initializeData() async {
     }
   }
 
-Future<void> _fetchAttendanceStats() async {
-  final email = studentEmail;
-  if (email == null) return;
+  Future<void> _fetchAttendanceStats() async {
+    final email = studentEmail;
+    if (email == null) return;
 
-  final result = await ScheduleServices.getStudentOverallAttendance(email);
-  if (result['success']) {
-    final data = result['data'];
-    setState(() {
-      totalSessions = data['totalSessions'] ?? 0;
-      int present = data['presentCount'] ?? 0;
-      int absent = data['absentCount'] ?? 0;
-      presentCount = data['presentCount'] ?? 0;
+    final result = await ScheduleServices.getStudentOverallAttendance(email);
+    if (result['success']) {
+      final data = result['data'];
+      setState(() {
+        totalSessions = data['totalSessions'] ?? 0;
+        int present = data['presentCount'] ?? 0;
+        int absent = data['absentCount'] ?? 0;
+        presentCount = data['presentCount'] ?? 0;
 
-      presentPercentage = totalSessions > 0 ? ((present / totalSessions) * 100).round() : 0;
-      absentPercentage = totalSessions > 0 ? ((absent / totalSessions) * 100).round() : 0;
-    });
-  } else {
-    _showErrorSnackbar(result['message'] ?? 'Failed to load attendance stats');
+        presentPercentage =
+            totalSessions > 0 ? ((present / totalSessions) * 100).round() : 0;
+        absentPercentage =
+            totalSessions > 0 ? ((absent / totalSessions) * 100).round() : 0;
+      });
+    } else {
+      _showErrorSnackbar(
+        result['message'] ?? 'Failed to load attendance stats',
+      );
+    }
   }
-}
-
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -136,6 +139,7 @@ Future<void> _fetchAttendanceStats() async {
     final double width = screenSize.width;
 
     return PopScope(
+      canPop: false,
       onPopInvokedWithResult:
           (didPop, result) => Navigator.pushReplacementNamed(
             context,
@@ -229,11 +233,9 @@ Future<void> _fetchAttendanceStats() async {
                             if (!mounted) return;
                             await prefs.clear();
                             await box.clear();
-                            Navigator.pushAndRemoveUntil(
+                            Navigator.pushNamedAndRemoveUntil(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => SplashScreen(),
-                              ),
+                              AppRoutes.splash,
                               (routes) => false,
                             );
                           },
@@ -365,10 +367,10 @@ Future<void> _fetchAttendanceStats() async {
             SizedBox(width: width * 0.03),
             _buildInfoCard(
               "Sessions Attended",
-  presentCount.toString(), 
-  AppConstants.textWhite,
-  width,
-  height,
+              presentCount.toString(),
+              AppConstants.textWhite,
+              width,
+              height,
             ),
           ],
         ),
@@ -490,6 +492,3 @@ Future<void> _fetchAttendanceStats() async {
     );
   }
 }
-
-
-

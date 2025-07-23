@@ -85,14 +85,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ],
           ),
-          if (showProfileIcon)
+          if (showProfileIcon && !isProfileScreen)
             IconButton(
               icon: CircleAvatar(
                 backgroundColor: Colors.white24,
-                child: Icon(
-                  isProfileScreen ? Icons.settings : Icons.person,
-                  color: Colors.white,
-                ),
+                child: Icon(Icons.person, color: Colors.white),
               ),
               onPressed: () => _handleProfileIconTap(context),
             ),

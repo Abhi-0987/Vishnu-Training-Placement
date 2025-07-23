@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vishnu_training_and_placements/routes/app_routes.dart';
 import 'package:vishnu_training_and_placements/screens/splash_screen.dart';
 import 'package:vishnu_training_and_placements/services/admin_service.dart';
 import 'package:vishnu_training_and_placements/utils/app_constants.dart';
@@ -482,11 +483,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                           await prefs.clear();
                           await box.clear();
                           if (context.mounted) {
-                            Navigator.pushAndRemoveUntil(
+                            Navigator.pushNamedAndRemoveUntil(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => SplashScreen(),
-                              ),
+                              AppRoutes.splash,
                               (routes) => false,
                             );
                           }

@@ -58,7 +58,9 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     if (success) {
       _showSnackBar("Password changed successfully");
       if (!mounted) return;
-      Navigator.pushReplacementNamed(context, AppRoutes.studentHomeScreen);
+      Navigator.pushNamedAndRemoveUntil(context, AppRoutes.studentHomeScreen,
+        (route) => false,
+      );
       newPasswordController.clear();
       confirmPasswordController.clear();
     } else {
