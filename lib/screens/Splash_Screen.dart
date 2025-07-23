@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'package:vishnu_training_and_placements/routes/app_routes.dart';
@@ -16,6 +17,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
+  static const platform = MethodChannel('dev_options_channel');
   bool _showText = false;
   late bool isLoggedIn;
   late String role;
@@ -29,27 +31,66 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    _findLogin();
+    _startAppFlow();
+  }
+  Future<void> _startAppFlow() async {
     Timer(const Duration(milliseconds: 1500), () {
       setState(() => _showText = true);
 
       Future.delayed(const Duration(seconds: 3), () async {
         if (!mounted) return;
+        bool shouldProceed = await _checkDevOptions();
+        if (!shouldProceed) return;
+        await _findLogin();
         if (!mounted) return;
-        if (isLoggedIn) {
-          if (role == 'student') {
-            Navigator.pushReplacementNamed(
-              context,
-              AppRoutes.studentHomeScreen,
-            );
+          if (isLoggedIn) {
+            if (role == 'student') {
+              Navigator.pushReplacementNamed(
+                context,
+                AppRoutes.studentHomeScreen,
+              );
+            } else {
+              Navigator.pushReplacementNamed(context, AppRoutes.adminHomeScreen);
+            }
           } else {
-            Navigator.pushReplacementNamed(context, AppRoutes.adminHomeScreen);
+            Navigator.pushReplacementNamed(context, AppRoutes.welcome);
           }
-        } else {
-          Navigator.pushReplacementNamed(context, AppRoutes.welcome);
-        }
       });
     });
+  }
+  Future<bool> _checkDevOptions() async {
+    try {
+      final bool isDevOptionsEnabled =
+          await platform.invokeMethod("isDevOptionsEnabled");
+
+      if (isDevOptionsEnabled) {
+        _showBlockDialog();
+        return false;
+      }
+      return true;
+    } on PlatformException catch (e) {
+      debugPrint("Failed to get Developer Options: '${e.message}'.");
+      // Proceed anyway if error
+      return true;
+    }
+  }
+
+  void _showBlockDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text("Developer Options Enabled"),
+        content: const Text(
+            "Please disable Developer Options to continue using this app."),
+        actions: [
+          TextButton(
+            onPressed: () => SystemNavigator.pop(), // Exit app
+            child: const Text("Exit"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
