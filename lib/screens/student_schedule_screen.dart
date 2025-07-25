@@ -84,8 +84,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                 scheduleDate != null &&
                 (scheduleDate.isAfter(today) ||
                     (scheduleDate.isAtSameMomentAs(today) &&
-                        _isTimeAfterNow(schedule.
-                        fromTime, now)));
+                        _isTimeAfterNow(schedule.fromTime, now)));
             final isBranchMatch = schedule.studentBranch.contains(
               userBranch ?? '',
             );
@@ -310,7 +309,7 @@ class _StudentSchedulesScreenState extends State<StudentSchedulesScreen> {
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
-                                        if (schedule.mark)
+                                        if (widget.enabled && schedule.mark)
                                           ElevatedButton(
                                             onPressed: () async {
                                               Navigator.push(
