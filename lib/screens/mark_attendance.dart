@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:vishnu_training_and_placements/models/schedule_model.dart';
@@ -19,6 +20,7 @@ class MarkAttendancePage extends StatefulWidget {
 
 class _MarkAttendancePageState extends State<MarkAttendancePage>
     with SingleTickerProviderStateMixin {
+  static const platform = MethodChannel('dev_options_channel');
   late AnimationController _controller;
   double targetLatitude = 0;
   double targetLongitude = 0;
@@ -51,9 +53,6 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
   }
 
   Future<String> _markAttendance() async {
-    setState(() {
-      isMarked = true;
-    });
     final message = AttendanceService().markAttendance(
       widget.schedule!.date,
       widget.schedule!.fromTime,
@@ -104,6 +103,44 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     return true;
   }
 
+  Future<bool> _checkDevOptions() async {
+    try {
+      final bool isDevOptionsEnabled = await platform.invokeMethod(
+        "isDevOptionsEnabled",
+      );
+
+      if (isDevOptionsEnabled) {
+        _showBlockDialog();
+        return false;
+      }
+      return true;
+    } on PlatformException catch (e) {
+      debugPrint("Failed to get Developer Options: '${e.message}'.");
+      // Proceed anyway if error
+      return true;
+    }
+  }
+
+  void _showBlockDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder:
+          (_) => AlertDialog(
+            title: const Text("Developer Options Enabled"),
+            content: const Text(
+              "Please disable Developer Options to continue using this app.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => SystemNavigator.pop(), // Exit app
+                child: const Text("Exit"),
+              ),
+            ],
+          ),
+    );
+  }
+
   /// Fetches current location and validates distance  before submitting attendance
   Future<void> submitAttendance() async {
     setState(() {
@@ -111,52 +148,61 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
     });
 
     try {
-      bool hasPermission = await _handleLocationPermission();
-      if (!hasPermission) {
-        setState(() {
-          _isLoading = false;
-        });
-        return;
-      }
+      bool shouldProceed = await _checkDevOptions();
 
-      Position position = await Geolocator.getCurrentPosition();
+      if (shouldProceed) {
+        bool hasPermission = await _handleLocationPermission();
+        if (!hasPermission) {
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
 
-      double distance = Geolocator.distanceBetween(
-        position.latitude,
-        position.longitude,
-        targetLatitude,
-        targetLongitude,
-      );
+        Position position = await Geolocator.getCurrentPosition();
 
-      if (distance <= radiusInMeters) {
-        final message = await _markAttendance();
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-            backgroundColor:
-                message == 'Attendance marked as present successfully.'
-                    ? Colors.green
-                    : Colors.red,
-          ),
+        double distance = Geolocator.distanceBetween(
+          position.latitude,
+          position.longitude,
+          targetLatitude,
+          targetLongitude,
         );
-      } else {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'You are not in the designated area to submit attendance.\n'
-              'Your location: (${position.latitude.toStringAsFixed(6)}, '
-              '${position.longitude.toStringAsFixed(6)})',
+
+        if (distance <= radiusInMeters) {
+          final message = await _markAttendance();
+          if (message == 'Attendance marked as present successfully.') {
+            setState(() {
+              isMarked = true;
+            });
+          }
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor:
+                  message == 'Attendance marked as present successfully.'
+                      ? Colors.green
+                      : Colors.red,
             ),
-            backgroundColor: Colors.red,
-          ),
-        );
+          );
+        } else {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'You are not in the designated area to submit attendance.\n'
+                'Your location: (${position.latitude.toStringAsFixed(6)}, '
+                '${position.longitude.toStringAsFixed(6)})',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to get location: $e'),
+          content: Text('Failed to mark attendance: $e'),
           backgroundColor: Colors.red,
         ),
       );
