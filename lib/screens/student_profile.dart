@@ -140,11 +140,11 @@ class _StudentProfileScreenState extends State<StudentProfileScreen> {
 
     return PopScope(
       canPop: false,
-      onPopInvokedWithResult:
-          (didPop, result) => Navigator.pushReplacementNamed(
-            context,
-            AppRoutes.studentHomeScreen,
-          ),
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          Navigator.pop(context);
+        }
+      },
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: const CustomAppBar(isProfileScreen: true),
