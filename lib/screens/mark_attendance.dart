@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:pie_chart/pie_chart.dart';
+import 'package:lottie/lottie.dart';
 import 'package:vishnu_training_and_placements/models/schedule_model.dart';
 import 'package:vishnu_training_and_placements/services/attendance_service.dart';
 import 'package:vishnu_training_and_placements/services/venue_service.dart';
@@ -367,6 +367,32 @@ class _MarkAttendancePageState extends State<MarkAttendancePage>
                             ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: SizedBox(
+                      height: height * 0.35,
+                      child: Transform.scale(
+                        scale: 1.5,
+                        child: Lottie.asset(
+                          isMarked
+                              ? 'assets/marked1.json' //marked
+                              : 'assets/unmarked.json', //default
+                          frameRate: FrameRate(100),
+                        ), 
+                      ),
+                    ),
+                  ),
+                  Text(
+                    isMarked
+                        ? "Your Attendance is marked successfully" //marked
+                        : "Please be in your designated area before marking Attendance", //default
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: AppConstants.textWhite,
+                      fontFamily: 'Alata',
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
